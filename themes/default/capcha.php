@@ -1,0 +1,1 @@
+<img src="<?php print SITE_PATH. $file; ?>.png" alt="Captcha Image" />

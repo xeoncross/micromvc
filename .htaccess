@@ -1,0 +1,84 @@
+##############################
+# MicroMVC Apache settings
+# .htaccess v1.0.0 9/29/2007
+##############################
+
+# 1and1.com users un-comment this line
+# AddType x-mapp-php5 .php
+
+# Hide the following from the world
+<FilesMatch "\.(htaccess|htpasswd|ini|php|log|sh|sql)$">
+ Order Allow,Deny
+ Deny from all
+</FilesMatch>
+
+# Allow the index file though..
+<filesMatch "index\.php$">
+allow from All
+</filesMatch>
+
+# Deny Folder Indexes.
+Options -Indexes
+Options +FollowSymLinks
+
+# Set the default file for indexes
+DirectoryIndex index.php index.html 
+
+<IfModule mod_rewrite.c>
+    # mod_rewrite rules
+    RewriteEngine on
+
+    # The RewriteBase of the system (change if you are using this sytem in a sub-folder).
+    RewriteBase /MicroMVC/
+
+    #Error messages (via the "request_error" method of the core)
+    # ErrorDocument 400 /index.php?method=request_error&data=400
+    # ErrorDocument 401 /index.php?method=request_error&data=401
+    # ErrorDocument 403 /index.php?method=request_error&data=403
+    # ErrorDocument 404 /index.php?method=request_error&data=404
+    # ErrorDocument 500 /index.php?method=request_error&data=500
+
+    # This will make the site only accessible without the "www." 
+	# (which will keep the subdomain-sensive config file happy)
+    # (NOTE: If you want the site to be accessed WITH the "www." 
+	# - comment-out the following two lines)
+    # RewriteCond %{HTTP_HOST} ^www\.xeoncross\.com$ [NC]
+    # RewriteRule .* http://xeoncross.com/ [L,R=301]
+
+	# If the file is NOT the index.php file
+    # RewriteCond %{REQUEST_FILENAME} !index.php
+    # Hide all PHP files so none can be accessed by HTTP
+    # RewriteRule (.*)\.php$ index.php/$1
+	
+	# If the file/dir is not real
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    ####only allow requests that match the following
+    ####RewriteCond $1 !^(images|themes|favicon\.ico|robots\.txt|index\.php) [NC]
+    
+	RewriteRule ^(.*)$ index.php/$1 [QSA,L]
+	
+	
+    # Rewrite for everything else
+    #RewriteRule ^(([A-Za-z\-]+)/)?(([A-Za-z_]+)/)?(.+/)?$ index.php?controller=$2&method=$4&data=$5 [QSA,NC,L]
+    
+	
+    # Deny any people (or bots) from the following sites: (to stop spam comments)
+    #RewriteCond %{HTTP_REFERER} nienschanz\.ru [NC,OR]
+    #RewriteCond %{HTTP_REFERER} porn\.com
+    #RewriteRule .* - [F]
+
+    # You can also uncomment this if you know the IP:
+    # Deny from 192.168.1.1
+
+</IfModule>
+
+
+
+# implement minimal caching during site development
+<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|js|css|pdf|swf|html|htm|txt)$">
+ExpiresActive Off
+Header set Cache-Control "max-age=0"
+#Header unset Cache-Control
+</FilesMatch>

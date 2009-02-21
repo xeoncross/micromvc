@@ -1,130 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+Welcome to Micro Model-View-Controller
 
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>MicroMVC Read Me</title>
+A tiny MVC framework crammed into less than 150kb - including documentation!
 
-<style type="text/css">
-body {
-border-top: 20px solid #eee;
-background: #fff;
-font: 13px/19px verdana;
-text-align: left;
-margin: 0;
-padding:0;
-color: #777;
-}
+It offers Model, Library, Controller, Function, and View management. Plus other features like URI Routing, hooks/plugins, file uploads, database abstraction, captcha creation, and more! If you are new the Model/View/Controller world of OOP - then this system is for you. Every line is documented and it is as simple of a system to tear-apart as you can get.
 
-a { text-decoration: none; color: #1f6397; }
-a:hover { text-decoration: underline; }
-b { color: #000; }
-h2 {font: 28px/36px times new roman; color: #881a3c;}
-em {background: #fffdde; }
-#main {
-margin: 0 auto 100px auto;
-padding: 0;
-width: 600px;
-}
+MicroMVC is *not* a replacement for a full MCV framework. Do not plan on building the next Facebook with it! However, It is built for several reasons.
 
-code {
-white-space:pre;
-border: 1px solid #ddd;
-margin: 20px;
-display: block;
-padding: 10px;
-}
-</style>
+* Teach How MVC Works with a simple-to-understand code structure.
+* Provide a base speed for comparing frameworks</li>
+* Run small scripts and systems (like blogs) that need MVC without a lot of overhead.
 
-</head>
-<body>
+MicroMVC is licenced under the http://www.gnu.org/licenses/gpl-3.0.html so you can use it for any personal or corporate projects free of charge.</p>
 
-<div id="main">
+** Rquirements **
 
-<h2>Welcome to Micro Model-View-Controller</h2>
-<b>A tiny MVC framework crammed into less than 150kb - 
-including documentation!</b>
+* PHP 5
+* mod_rewrite (apache module)
+* PDO if using the Database
 
-<p> I built this to have a base to compare 
-the speed of other frameworks like CodeIgniter, Zend, Solar, and CakePHP.</p>
-
-<p>It offers Model, Library, Controller, Function, and View management. 
-Plus other features like URI Routing, hooks/plugins, file uploads, database abstraction, 
-captcha creation, and more! If you are new the Model/View/Controller world 
-of OOP - then this system is for you. Every line is documented and it 
-is as simple of a system to tear-apart as you can get.</p>
-
-<p>MicroMVC is <i>not</i> a replacement for a full MCV framework. Do not plan on building
-the next Facebook with it! However, It is built for several reasons.</p>
-
-<ul>
-<li>Teach How MVC Works with a simple-to-understand code structure.</li>
-<li>Provide a base speed for comparing frameworks</li>
-<li>Run small scripts and systems (like blogs) that need MVC without a lot of overhead.</li>
-</ul>
-
-<p>MicroMVC is licenced under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPL v3</a>
-so you can use it for any personal or corporate projects free of charge.</p>
-
-
-<h2>Rquirements</h2>
-
-<ul>
-<li>PHP 5</li>
-<li>mod_rewrite (apache module)</li>
-<li>PDO if using the Database</li>
-</ul>
-
-<h2>Setup</h2>
-
-<b>1) Edit the system path</b>
-<p>If you are using MicroMVC in a subdirectory like <em>http://localhost/MicroMVC/</em> then you need to change
-the folder settings. Open up the <em>.htaccess</em> file and change <em>RewriteBase /</em> to <em>RewriteBase /MicroMVC</em>. 
-Then open the <em>localhost</em> folder and open <em>sites/localhost/server.php</em> and change the following line:</p>
-<code>
-define('SITE_PATH', '/');
-<b>to</b>
-define('SITE_PATH', '/MicroMVC/');
-
-</code>
-
-
-<b>2) Rename the "localhost" folder to whatevery your site name is.</b>
-<p>If your site is <em>http://mysite.com</em> then you need to rename the folder to <em>mysite.com</em>.
-If you are using a subdomain like <em>http://mysite.somesite.com</em> then you need to name the folder 
-<em>mysite.somesite.com</em>.</p>
-
-<b>3) Edit the config file.</b>
-<p>Make sure to set the values in the config file to suite you.</p>
-
-<h2>How the System Works</h2>
-
-When a request is sent to the folder where MicroMVC resides, the .htaccess file will send the request to 
-<em>index.php</em>. The index will load the config files in "localhost" (or whatever you name it) and
-then checks to see if a "cached" version of the page already exists. If not, then it will continue to 
-load the core system files. </p>
-
-<p>After this, it will check with routes.php to figure out what controller 
-and method to call. </p>
-
-<ol>
-<li>If a controller mattching the URL is found in <em>contollers/</em>, then the method given 
-(either in the URL or config) is run and the output is returned.</li>
-
-<li>If a controller is <i>not</i> found, then it will trigger a 404 error as the output.
-</ol>
-
-<p>The output (wither an error or not) is then placed in the current theme and the final content is
-sent to the users browser</p>
-
-<p>One note about the theme, this system detects AJAX calls and loads a <em>different</em> file than
-<em>layout.php</em> when one occures. You can override this feature from your controllers.</p>
-
-
-
-<br /><br />
-<center><b>Thank you for trying out MicroMVC</b><br /><a href="http://xeoncross.com">David Pennington</a>
-<a href="http://micromvc.com">MicroMVC</a></center>
-</div>
-</body>
-</html>
+David Pennington - http://xeoncross.com
+MicroMVC - http://micromvc.com

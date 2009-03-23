@@ -1,22 +1,21 @@
-Welcome to Micro Model-View-Controller
+** Introduction **
 
-A tiny MVC framework crammed into less than 150kb - including documentation!
+Micro Model-View-Controller (or MicroMVC) is a tiny MVC framework for building websites with PHP 5. It offers Model, Library, Controller, Function, and View management. Plus other features like URI Routing, hooks/plugins, file uploads, database ORM, captcha creation, and more! If you are new the Model/View/Controller world of OOP - then this system is for you. Every line is documented making it simple to tear-apart and learn from.
 
-It offers Model, Library, Controller, Function, and View management. Plus other features like URI Routing, hooks/plugins, file uploads, database abstraction, captcha creation, and more! If you are new the Model/View/Controller world of OOP - then this system is for you. Every line is documented and it is as simple of a system to tear-apart as you can get.
+MicroMVC is not a replacement for a full MCV framework. Do not plan on building the next Facebook with it! This system is built for small teams that need the power of Object Oriented Design without the "multiple server cost" of large bloated systems. MicroMVC has three goals:
 
-MicroMVC is *not* a replacement for a full MCV framework. Do not plan on building the next Facebook with it! However, It is built for several reasons.
+* Teach new programers how MVC works with a simple-to-understand code structure.
+* Show how fast a PHP system can be to encourage other projects to increase performace.
+* Run small systems (like blogs and article sites) that need MVC without a lot of overhead.
 
-* Teach How MVC Works with a simple-to-understand code structure.
-* Provide a base speed for comparing frameworks</li>
-* Run small scripts and systems (like blogs) that need MVC without a lot of overhead.
+MicroMVC is licensed under the http://www.gnu.org/licenses/gpl-3.0.html so you can use it for any personal or corporate projects free of charge. We believe in open source, so if you see something that is being done inefficiently - let us know so we can fix it.
 
-MicroMVC is licenced under the http://www.gnu.org/licenses/gpl-3.0.html so you can use it for any personal or corporate projects free of charge.</p>
-
-** Rquirements **
+** Requirements **
 
 * PHP 5
-* mod_rewrite (apache module)
-* PDO if using the Database
+* mod_rewrite (Apache module)
+* PDO if using the Database ORM
+* cURL if using some of the extra libraries
 
 David Pennington - http://xeoncross.com
 MicroMVC - http://micromvc.com

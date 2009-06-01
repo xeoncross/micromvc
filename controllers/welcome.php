@@ -36,10 +36,10 @@ class welcome extends core {
 	function hooks() {
 	
 		//Call a function from a hook
-		$this->data['content'] = $this->call_hook('my_first_hook', true);
+		$this->data['content'] = $this->hooks->call('my_first_hook', true);
 		
 		//Call two class methods from a hook
-		$this->data['content'] .= $this->call_hook('my_second_hook', 'MY_WORD');
+		$this->data['content'] .= $this->hooks->call('my_second_hook', 'MY_WORD');
 		
 	}
 	
@@ -72,7 +72,7 @@ class welcome extends core {
 		);
 		
 		//Load the twitter model and create object
-		$this->load('twitter_api', null, $options, 'models');
+		$this->load('twitter_api', null, $options, 'libraries');
 		
 		
 		//Get current user_timeline

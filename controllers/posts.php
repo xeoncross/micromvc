@@ -2,10 +2,8 @@
 /**
  * Posts
  *
- * Example of a "post" system that creates a simple SQLite table and fills
- * it with several rows useing a model. Then it prints out those rows with
- * a view. Each time this controller is called it deletes the sqlite file
- * and re-creates a new.
+ * Example of a "post" system that fills a table with several rows useing a 
+ * model. Then it prints out those rows with a view. Also see "posts_model.php"
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -22,38 +20,37 @@ class posts extends core {
 		//Load the core constructor
 		parent::__construct($config);
 
-		//Load the Model for this controller
-		$this->load('posts_model', 'posts', null, 'models');
-
-		//Delete the database if it is found
-		$this->posts->delete_table('sqlite2');
-
 		//Load the database
 		$this->load_database();
-
-		//Create a new table
-		$this->posts->create_table();
-
-		//Add three rows
-		$this->posts->insert();
+		
+		//Load the Model for this controller
+		$this->load('posts_model', 'posts', null, 'models');
 
 	}
 
 	//Show the lastest posts
 	function index() {
 
-		//Set config
-		$data = array('tables' => 'posts');
-
 		//Count the total posts
-		$count = $this->db->count($data);
+		$count = $this->db->count('posts');
+		
+		//If there are no rows 
+		if($count < 1) {
+			//Add three rows
+			$this->posts->insert();
+		}
+		
+		//Fetch every row
+		$result = $this->posts->fetch();
 
-		//Select each row
-		$result = $this->db->select($data);
-
+		//Setup dat for the view
+		$view_data = array(
+			'result' => $result, 
+			'count' => $count
+		);
+		
 		//Place in a view file
-		$this->data['content'] = $this->view('posts/posts',
-		array('result' => $result, 'count' => $count), true);
+		$this->data['content'] = $this->view('posts/posts', $view_data);
 
 	}
 

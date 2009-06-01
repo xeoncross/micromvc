@@ -1,7 +1,3 @@
-<p>Page rendered in <?php print round((microtime(true) - START_TIME), 5); ?> seconds
-taking <?php print round((memory_get_usage() - START_MEMORY_USAGE) / 1024, 2); ?> KB 
-(<?php print (memory_get_usage() - START_MEMORY_USAGE); ?> Bytes).</p>
-
 <b>Files Included:</b>
 <ul>
 <li><?php print implode("</li>\n<li>", get_included_files()); ?>

@@ -1,14 +1,10 @@
-html {
-border-top: 20px solid #eee;
-}
-
 body {
 background: #fff;
 font: 13px/19px verdana;
 text-align: left;
 margin: 0;
 padding:0;
-color: #777;
+color: #555;
 }
 
 
@@ -23,35 +19,48 @@ color: #881a3c;
 }
 
 
-#main {
+.wrapper {
 margin: 0 auto;
 padding: 0;
 width: 500px;
 }
 
 
-ul#menu {
+#menu {background: #CDE3F2; }
+
+#menu ul {
 list-style: none;
-margin: 0;
+margin: 0 auto;
 padding: 0;
-width: 100%;
+width: 500px;
 height: 35px;
 clear: both;
 }
 
-ul#menu li {}
-
-ul#menu li a{
+#menu ul li {
 float: left;
-padding: 0 20px;
-display: block;
-line-height: 35px;
-border-right: 1px solid #eee;
+height: 35px;
 }
 
-ul#menu li:first-child a {
-border-left: 1px solid #eee;
+
+#menu ul li a{
+padding: 5px 10px;
+margin: 0 10px;
+line-height: 35px;
+-moz-border-radius: 4px;
+border: 1px solid #CDE3F2;
 }
+
+#menu ul li.selected a,
+#menu ul li a:hover {
+background: #fff;
+text-decoration: none;
+border: 1px solid #AECCE1;
+}
+
+
+#main{ padding: 20px 0;border-top: 1px solid #AECCE1;}
+
 
 .tweet {
 margin: 0;
@@ -59,3 +68,10 @@ padding: 2em;
 border-top: 1px solid #ddd;
 }
 
+
+#footer { 
+border-top: 1px solid #eee; 
+margin: 20px 0 0 0;
+padding: 0;
+font-size: 11px;
+}

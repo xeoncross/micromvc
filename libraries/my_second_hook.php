@@ -47,4 +47,3 @@ class my_second_hook {
 	}
 
 }
-?>

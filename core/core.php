@@ -1,0 +1,273 @@
+<?php
+/**
+ * Core
+ *
+ * This is the base class for all controllers.
+ *
+ * @package		MicroMVC
+ * @author		David Pennington
+ * @copyright	Copyright (c) 2009 MicroMVC
+ * @license		http://www.gnu.org/licenses/gpl-3.0.html
+ * @link		http://micromvc.com
+ * @version		1.0.0 <2/20/2009>
+ ********************************** 80 Columns *********************************
+ */
+class core {
+
+	//Data for final site Layout
+	public $data = null;
+	//Name of final site layout file
+	public $layout = 'layout';
+	//Singleton instance object
+	private static $instance;
+	//Site Config
+	public $config = array();
+	
+	
+	/**
+	 * Load the config values for this system
+	 *
+	 * @param array $config
+	 */
+	public function __construct($config=null) {
+
+		//Set singleton instance
+		self::$instance =& $this;
+
+		//Set the core site config
+		$this->config['config'] = $config;
+
+		//load other config files
+		foreach(array('hooks', 'cache', 'routes') as $name) {
+			//Load it
+			$this->$name = load_class($name);
+		}
+
+	}
+
+
+	/**
+	 * Load a config file
+	 * @param string $config
+	 */
+	public function config($name=null) {
+
+		//Only load once
+		if(!empty($this->config[$name])) { 
+			return $this->config[$name];
+		}
+
+		//Path to the config file
+		$path = SITE_DIR. 'sites/'. SITE_NAME. '/'. $name. '.php';
+
+		//Check to see if it exists
+		if(file_exists($path)) {
+
+			//include the config
+			include($path);
+
+			//Set the values in our object
+			$this->config[$name] = $$name;
+
+		}
+		
+		//Return the config array
+		return $this->config[$name];
+	}
+
+
+	/**
+	 * Load and initialize the database connection
+	 * @param array $config
+	 */
+	public function load_database() {
+
+		//Don't load the DB object twice!!!
+		if(!empty($this->db)) { return; }
+		
+		//Load the DB class (but don't create it)
+		load_class('db', NULL, 'models', FALSE);
+		
+		//Load the config for this database
+		$config = $this->config('database');
+		
+		//Create a new instance of the database child class "mysql"
+		$this->db = load_class($config['type'], $config);
+
+	}
+
+
+	/**
+	 * Loads and instantiates models, libraries, and other classes
+	 *
+	 * @param	string	the name of the class
+	 * @param	string	name for the class
+	 * @param	array	params to pass to the model constructor
+	 * @param	string	folder name of the class
+	 * @return	void
+	 */
+	public function load($class=null, $name=null, $params=null, $path='models', $assign_libraries = TRUE) {
+
+		//If a model is NOT given
+		if (!$class) { return; }
+
+		//If a name is not given
+		if(!$name) { $name = $class; }
+
+		//Load the class
+		$this->$name = load_class($class, $params, $path);
+		
+		return true;
+	}
+
+	
+
+	/**
+	 * This function is used to load views files.
+	 *
+	 * @access	private
+	 * @param	String	file path/name
+	 * @param	array	values to pass to the view
+	 * @param	boolean	return the output or print it?
+	 * @return	void
+	 */
+	public function view($__file = NULL, $__variables = NULL, $__return = TRUE) {
+
+		//If no file is given - just return false
+		if(!$__file) { return; }
+
+		if(is_array($__variables)) {
+			//Make each value passed to this view available for use
+			foreach($__variables as $key => $variable) {
+				$$key = $variable;
+			}
+		}
+
+		// Delete them now
+		$__variables = null;
+
+		if (!file_exists(THEME_DIR. $__file. '.php')) {
+			trigger_error('Unable to load the requested file: <b>'. $__file. '.php</b>');
+			return;
+		}
+
+		// We just want to print to the screen
+		if( ! $__return) {
+			include(THEME_DIR. $__file. '.php');
+		}
+		
+		
+		/*
+		 * Buffer the output so we can return it
+		 */
+		ob_start();
+
+		// include() vs include_once() allows for multiple views with the same name
+		include(THEME_DIR. $__file. '.php');
+
+		//Get the output
+		$buffer = ob_get_contents();
+		@ob_end_clean();
+
+		//Return the view
+		return $buffer;
+
+	}
+	
+	
+
+	/**
+	 * Show a 400-500 Header error within the site theme
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	void
+	 */
+	public function request_error($type='404') {
+
+		//Clean the type of error from XSS stuff
+		//$type = preg_replace('/[^a-z0-9]+/i', '', $type);
+		
+		//Check the type of error
+		if ($type == '400') {
+			header("HTTP/1.0 400 Bad Request");
+		} elseif ($type == '401') {
+			header("HTTP/1.0 401 Unauthorized");
+		} elseif ($type == '403') {
+			header("HTTP/1.0 403 Forbidden");
+		} elseif ($type == '500') {
+			header("HTTP/1.0 500 Internal Server Error");
+		} else {
+			$type = '404';
+			header("HTTP/1.0 404 Not Found");
+		}
+
+		$this->data['content'] = $this->view('errors/'. $type);
+
+	}
+
+
+
+	/**
+	 * On close, show the output inside our layout template
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	void
+	 */
+	public function render() {
+
+		//If the user has NOT overriden this value
+		if($this->layout == 'layout') {
+			//Check to see if it is an ajax request
+			if(AJAX_REQUEST) {
+				$this->layout = 'ajax';
+			}
+		}
+
+		// Load the template
+		$output = $this->view($this->layout, $this->data);
+		
+		// Cache the file
+		$this->cache->create(md5(PAGE_NAME. AJAX_REQUEST), $output);
+		
+		// Show the output
+		print $output;
+
+	}
+
+
+	/**
+	 * Return this classes instance
+	 * @return singleton
+	 */
+	public static function &get_instance() {
+		return self::$instance;
+	}
+
+	
+	
+	/*
+	 * Make all loaded libraries available to the given object
+	 * @author	http://CodeIgniter.com
+	 *
+	public function assign_libraries($name = NULL) {
+		
+		//Get all variable keys
+		$object_vars = array_keys(get_object_vars($this));
+		
+		foreach ($object_vars as $key) {
+			
+			//Only pass objects (other libraries) to this class
+			if(is_object($this->$key)) {
+			
+				//If a propery by this name doesn't already exist -and it is not this classe
+				if (!isset($this->$name->$key) AND $key != $name) {
+					$this->$name->$key = $this->$key;
+				}
+				
+			}
+		}
+	}*/
+	
+}

@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>MicroMVC Read Me</title>
+<title>MicroMVC Framework - Read Me</title>
 
 <style type="text/css">
 body {
@@ -42,37 +42,37 @@ padding: 10px;
 <div id="main">
 
 <h2>Welcome to Micro Model-View-Controller</h2>
-<b>A tiny MVC framework crammed into less than 150kb - 
-including documentation!</b>
 
-<p> I built this to have a base to compare 
-the speed of other frameworks like CodeIgniter, Zend, Solar, and CakePHP.</p>
+<p>Micro Model-View-Controller (or MicroMVC) is a tiny MVC framework for 
+building websites with PHP 5. It offers Model, Library, Controller, Function, 
+and View management. Plus other features like URI Routing, hooks/plugins, 
+file uploads, database ORM, captcha creation, and more! If you are new 
+the Model/View/Controller world of OOP - then this system is for you. 
+Every line is documented making it simple to tear-apart and learn from.</p>
 
-<p>It offers Model, Library, Controller, Function, and View management. 
-Plus other features like URI Routing, hooks/plugins, file uploads, database abstraction, 
-captcha creation, and more! If you are new the Model/View/Controller world 
-of OOP - then this system is for you. Every line is documented and it 
-is as simple of a system to tear-apart as you can get.</p>
-
-<p>MicroMVC is <i>not</i> a replacement for a full MCV framework. Do not plan on building
-the next Facebook with it! However, It is built for several reasons.</p>
+<p>MicroMVC is not a replacement for a full MCV framework. Do not plan on
+building the next Facebook with it! This system is built for small teams
+ that need the power of Object Oriented Design without the "multiple 
+ server cost" of large bloated systems. MicroMVC has three goals:</p>
 
 <ul>
-<li>Teach How MVC Works with a simple-to-understand code structure.</li>
-<li>Provide a base speed for comparing frameworks</li>
-<li>Run small scripts and systems (like blogs) that need MVC without a lot of overhead.</li>
+<li>Teach new programers how MVC works with a simple-to-understand code structure.</li>
+<li>Show how fast a PHP system can be to encourage other projects to increase performace.</li>
+<li>Run small systems (like blogs and article sites) that need MVC without a lot of overhead.</li>
 </ul>
 
-<p>MicroMVC is licenced under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPL v3</a>
-so you can use it for any personal or corporate projects free of charge.</p>
+<p>MicroMVC is licensed under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPL v3.0</a>
+so you can use it for any personal or corporate projects free of charge. 
+We believe in open source, so if you see something that is being done 
+inefficiently - let us know so we can fix it.</p>
 
-
-<h2>Rquirements</h2>
+<h2>Requirements</h2>
 
 <ul>
 <li>PHP 5</li>
-<li>mod_rewrite (apache module)</li>
-<li>PDO if using the Database</li>
+<li>mod_rewrite (Apache module)</li>
+<li>PDO if using the Database ORM</li>
+<li>cURL if using some of the extra libraries</li>
 </ul>
 
 <h2>Setup</h2>
@@ -99,7 +99,7 @@ If you are using a subdomain like <em>http://mysite.somesite.com</em> then you n
 
 <h2>How the System Works</h2>
 
-When a request is sent to the folder where MicroMVC resides, the .htaccess file will send the request to 
+<p>When a request is sent to the folder where MicroMVC resides, the .htaccess file will send the request to 
 <em>index.php</em>. The index will load the config files in "localhost" (or whatever you name it) and
 then checks to see if a "cached" version of the page already exists. If not, then it will continue to 
 load the core system files. </p>
@@ -111,7 +111,7 @@ and method to call. </p>
 <li>If a controller mattching the URL is found in <em>contollers/</em>, then the method given 
 (either in the URL or config) is run and the output is returned.</li>
 
-<li>If a controller is <i>not</i> found, then it will trigger a 404 error as the output.
+<li>If a controller is <i>not</i> found, then it will trigger a 404 error as the output.</li>
 </ol>
 
 <p>The output (wither an error or not) is then placed in the current theme and the final content is

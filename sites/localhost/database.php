@@ -1,21 +1,13 @@
 <?php
-/* MySQL Database Config
-$database['user'] = 'root';
-$database['pass'] = '';
-$database['name'] = 'database';
-$database['host'] = 'localhost';
-$database['type'] = 'mysql';
-$database['port'] = null;
-$database['persistent'] = false;
-*/
 
-/* SQLite Database Config */
-$database['user'] = null;
-$database['pass'] = null;
-$database['name'] = 'sqlite2';
-$database['host'] = null;
-$database['type'] = 'sqlite2';
-$database['port'] = null;
-$database['persistent'] = false;
+/* PDO MySQL Database Config */
+$database= array(
+	'type'	=> 'mysql',
+	'dns'	=> 'host=127.0.0.1;dbname=pdo_test',
+	'port'	=> '3306',
+	'name'	=> '',
+	'user'	=> 'root',
+	'pass'	=> '',
+	'options'	=> null,//PDO::ATTR_PERSISTENT, PDO::ATTR_STATEMENT_CLASS, etc
+);
 
-?>

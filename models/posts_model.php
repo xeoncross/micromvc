@@ -12,11 +12,11 @@
  * @version		1.0.0 <2/20/2009>
  ********************************** 80 Columns *********************************
  */
-class posts_model {
+class posts_model extends base {
 
 
 	/**
-	 * Add some sample rows to the sample database
+	 * Add some sample rows to the database
 	 * @return	void
 	 */
 	function insert() {
@@ -47,34 +47,14 @@ class posts_model {
 
 	}
 
-	/**
-	 * Create a new SQLite table
-	 * @return	void
+	
+	/*
+	 * Get all the posts
 	 */
-	function create_table() {
-
-		$query = '
-		CREATE TABLE posts ( 
-		id INTEGER PRIMARY KEY,
-		title varchar(100),
-		text text,
-		author INTEGER
-		);';
-
-		//Create the new table
-		$this->db->query($query);
+	function fetch() {
+		return $this->db->get('posts');
 	}
 
-	/**
-	 * Delete the SQLite DB file if it exists
-	 * @param	string	$name = table name
-	 * @return	void
-	 */
-	function delete_table($name=null) {
-		if(file_exists($name)) {
-			unlink($name);
-		}
-	}
 
 }
 

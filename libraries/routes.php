@@ -46,10 +46,10 @@ class routes {
 				$string = trim($_SERVER[$item], '\\/');
 
 				//If it is NOT a forward slash
-				if(SITE_PATH != '/') {
+				if(SITE_URL != '/') {
 					// Remove the site path -ONLY ONE TIME!
 					$string = preg_replace(
-					'/^'. preg_quote(trim(SITE_PATH, '\\/'), '/'). '(.+)?/i', '', $string, 1);
+					'/^'. preg_quote(trim(SITE_URL, '\\/'), '/'). '(.+)?/i', '', $string, 1);
 
 				}
 
@@ -138,11 +138,11 @@ class routes {
 
 	/**
 	 * Returns a singleton reference to the current class.
-	 */
+	 *
 	public static function & current() {
 		static $instance = null;
 		return $instance = (empty($instance)) ? new self() : $instance ;
-	}
+	}*/
 
 	//For testing
 	public function __destruct() {
@@ -151,4 +151,3 @@ class routes {
 	
 }
 
-?>

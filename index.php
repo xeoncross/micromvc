@@ -15,7 +15,7 @@
  */
 
 
-/**
+/*
  * DEFINE START-UP SYSTEM VALUES
  */
 
@@ -50,32 +50,38 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH'])
 	define('AJAX_REQUEST', 0);
 }
 
+/*
+ * Begine loading of the system
+ */
+
 //Require the config file for this site name
 require('sites/'. SITE_NAME. '/config.php');
 
-//Require the config file for this server
-require_once('sites/'. SITE_NAME. '/server.php');
-
 //Include the common file
-require_once(INCLUDES_DIR. 'common.php');
+require_once(CORE_DIR. 'common.php');
 
-//Get IP address - if proxy lets get the REAL IP address
-$ip = !empty($_SERVER["HTTP_X_FORWARDED_FOR"]) 
-	? $_SERVER["HTTP_X_FORWARDED_FOR"] 
-	: $_SERVER['REMOTE_ADDR'];
+//Override the PHP error handler
+set_error_handler('mvc_error_handler');
 
-//Clean It
-sanitize_text($ip);
+//Load the caching class
+$cache = load_class('cache');
 
-//Set it
-define('IP_ADDRESS', $ip);
+//Require the config file for the hooks
+require('sites/'. SITE_NAME. '/hooks.php');
 
+//Load the hooks class
+$hooks = load_class('hooks', $hooks);
+
+//Call first hook
+$hooks->call('system_startup');
 
 /**
  * Check for cached version -die if found
  */
-if(fetch_cache(md5(PAGE_NAME. AJAX_REQUEST), null, null)) {
+if($output = $cache->fetch(md5(PAGE_NAME. AJAX_REQUEST), null, null)) {
 
+	print $output;
+	
 	//If debuging is enabled
 	if(DEBUG_MODE) {
 		$time = round((microtime(true) - START_TIME), 5);
@@ -85,28 +91,6 @@ if(fetch_cache(md5(PAGE_NAME. AJAX_REQUEST), null, null)) {
 	}
 
 }
-
-
-
-
-
-/**
- * Load the Core System Files
- */
-//glob() is much slower so we use opendir...
-if ($dh = opendir(INCLUDES_DIR)) {
-	while (($file = readdir($dh)) !== false) {
-		if(preg_match("/.php/", $file)) {
-			$file = INCLUDES_DIR. $file;
-			//Include the file
-			require_once($file);
-		}
-	}
-	closedir($dh);
-} else {
-	die('Couldn\'t load the system files');
-}
-
 
 
 /**
@@ -124,18 +108,23 @@ if (ini_get('magic_quotes_gpc')) {
 }
 
 
+//Include the core file
+require_once(CORE_DIR. 'core.php');
+
+//Include the base file
+require_once(CORE_DIR. 'base.php');
 
 
 /**
  * Get the controller from the URI
  */
-$routes	= routes::current();
+$routes = load_class('routes');
 
 //Set default controller/method if none is set in URL
 $routes->set_defaults(
-$config['default_controller'],
-$config['default_method'],
-$config['permitted_uri_chars']
+	$config['default_controller'],
+	$config['default_method'],
+	$config['permitted_uri_chars']
 );
 
 //Parse the URI
@@ -167,19 +156,17 @@ if (!class_exists($controller)) {
 
 //Make sure someone isn't trying to access core/private functions
 if(($method !== 'request_error' && method_exists('core', $method))
-|| !method_exists($controller, $method)
-|| !is_callable(array($controller, $method))) {
-
+//And make sure this method exists (and is public)
+|| !in_array($method, get_class_methods($controller))) {
 	//Trigger a 404 not found error
 	$method = 'request_error';
-
 }
 
 //Create a new instance of that controller and pass the $config
 $controller = new $controller($config);
 
 //Call the startup hook
-$controller->call_hook('startup');
+$controller->hooks->call('post_constructor');
 
 // Call the requested method.
 // Any URI segments present (besides the class/function)
@@ -187,10 +174,10 @@ $controller->call_hook('startup');
 call_user_func_array(array(&$controller, $method), array_slice($routes->fetch(true), 2));
 
 //Call the post-controller hook
-$controller->call_hook('post_method');
+$controller->hooks->call('post_method');
 
 // And we're done!
 $controller->render();
 
 //Call the finish hook
-$controller->call_hook('finish');
+$controller->hooks->call('system_shutdown');

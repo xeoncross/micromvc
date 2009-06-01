@@ -15,6 +15,235 @@
  */
 
 
+function ip_address() {
+
+	//Get IP address - if proxy lets get the REAL IP address
+	if (!empty($_SERVER['REMOTE_ADDR']) AND !empty($_SERVER['HTTP_CLIENT_IP'])) {
+		$ip = $_SERVER['HTTP_CLIENT_IP'];
+	} elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+		$ip = $_SERVER['REMOTE_ADDR'];
+	} elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+		$ip = $_SERVER['HTTP_CLIENT_IP'];
+	} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+	} else {
+		$ip = '0.0.0.0';
+	} 
+	
+	//Clean the IP and set it
+	//define('IP_ADDRESS', sanitize_text($ip, 2));
+	return sanitize_text($ip, 2);
+}
+
+/**
+* Class registry
+*
+* This function acts as a singleton.  If the requested class does not
+* exist it is instantiated and set to a static variable.  If it has
+* previously been instantiated the variable is returned.
+*
+* @access	public
+* @param	string	the class name being requested
+* @param	bool	optional flag that lets classes get loaded but not instantiated
+* @return	object
+*/
+function load_class($class=null, $params=null, $path='libraries', $instantiate = TRUE) {
+
+	static $objects = array();
+	
+	//If a class is NOT given
+	if (!$class) { return; }
+	
+	//If this class is already loaded
+	if(!empty($objects[$class])) {
+		return $objects[$class];
+	}
+	
+	// If the class is not already loaded
+	if ( ! class_exists($class)) {
+	
+		$file = SITE_DIR. $path . '/'. $class . '.php';
+		
+		// If the requested file does not exist
+		if (!file_exists($file)) {
+			return FALSE;
+		}
+		
+		//Require the file
+		require_once($file);
+		
+	}
+	
+	//If we just want to load the file - nothing more
+	if ($instantiate == FALSE) {
+		return TRUE;
+	}
+	
+	return $objects[$class] = new $class(($params ? $params : ''));
+}
+
+
+
+
+
+
+
+
+/**
+ * Custom error handler which shows more details when needed, yet can hide scary data
+ * from the user. Auto-detects the level of errors you allow in your php.ini file and
+ * only shows those errors and higher.
+ * 
+ * @param $level
+ * @param $message
+ * @param $file
+ * @param $line
+ * @param $variables
+ * @return void
+ */
+function mvc_error_handler($level='', $message='', $file='', $line='', $variables='') {
+
+	static $controller = NULL;
+	
+	if( ! $controller) {
+		$controller = get_instance();
+	}
+	
+	//Only show the system file that had the problem - not the whole server dir structure!
+	$file = str_replace(SITE_DIR, '', $file);
+	
+	//Set error types
+	$error_levels = array(
+		E_ERROR				=>	'Error',
+		E_WARNING			=>	'Warning',
+		E_PARSE				=>	'Parsing Error',
+		E_NOTICE			=>	'Notice',
+		E_CORE_ERROR		=>	'Core Error',
+		E_CORE_WARNING		=>	'Core Warning',
+		E_COMPILE_ERROR		=>	'Compile Error',
+		E_COMPILE_WARNING	=>	'Compile Warning',
+		E_USER_ERROR		=>	'User Error',
+		E_USER_WARNING		=>	'User Warning',
+		E_USER_NOTICE		=>	'User Notice',
+		E_STRICT			=>	'Runtime Notice'
+	);
+
+	//Data for error view
+	$data = array(
+		'line' => $line,
+		'file' => $file,
+		'message' => $message,
+		'level'	=> $level,
+		'error' => $error_levels[$level]
+	);
+	
+	//If we only show simple error data
+	if(DEBUG_MODE == FALSE) {
+		
+		//Create sentence
+		$data['line_info'] = 'On line '. $line. ' in '. $data['file'];
+		
+	} else {
+	
+		//Get backtrace and remove last entry (this function)
+		$backtrace = debug_backtrace();	
+		//Remove first entry (this error function)
+		unset($backtrace[0]); 
+	
+		if($backtrace) {
+			
+			//Store the array of backtraces
+			$trace = array();
+			
+			//Max of 5 levels deep
+			if(count($backtrace) > 5) {
+				//$backtrace = array_chunk($backtrace, 5, TRUE);
+				//$backtrace = $backtrace[0];
+				//print_pre($backtrace);
+				
+			}
+			
+			// start backtrace
+			foreach ($backtrace as $v) {
+				
+				if(empty($v['line'])) {
+					$v['line'] = '';
+				}
+				if(empty($v['file'])) {
+					$v['file'] = '';
+				}
+				
+				$args = array();
+				foreach ($v['args'] as $a) {
+					$type = gettype($a);
+					if($type == 'integer' OR $type == 'double') {
+						$args[] = $a;
+						
+					} elseif ($type == 'string') {
+						//Longer than 25 chars?
+						$a = strlen($a) > 25 ? substr($a, 0, 25). '...' : $a;
+						$args[] = '"'. htmlentities($a, ENT_QUOTES, 'utf-8'). '"';
+					
+					} elseif ($type == 'array') {
+						$args[] = 'Array('.count($a).')';
+					
+					} elseif ($type == 'object') {
+						$args[] = 'Object('.get_class($a).')';
+					
+					} elseif ($type == 'resource') {
+						$args[] = 'Resource('.strstr($a, '#').')';
+					
+					} elseif ($type == 'boolean') {
+						$args[] = ($a ? 'True' : 'False'). '';
+					
+					} elseif ($type == 'Null') {
+						$args[] = 'Null';
+					} else {
+						$args[] = 'Unknown';
+					}
+				}
+				
+				//If only a couple arguments were given - convert to string
+				if(count($args) < 4) {
+					$args = implode(', ', $args);
+				}
+				
+				// Compose Backtrace
+				
+				$string = '';
+				
+				if(!empty($trace)) {
+					$string .= 'Called by ';
+				}
+				
+				//If this is a class
+				if (isset($v['class'])) {
+					$string .= 'Method <b>'.$v['class']. '->'. $v['function']. '('. (is_string($args) ? $args : ''). ')</b>';
+				} else {
+					$string .= 'Function <b>'. $v['function']. '('. (is_string($args) ? $args : ''). ')</b>';
+				}
+				
+				//Add line number and file
+				$string .= ' on line '. $v['line']. ' in '. str_replace(SITE_DIR, '', $v['file']). '<br />';
+				
+				//Create an element containing the trace and function args (only if still an array)
+				$trace[] = array($string, (is_string($args) ? '' : $args));
+				
+			}
+			
+			$data['trace'] = $trace;
+		}
+	}
+	
+	//If we should report this error
+	if (($level & error_reporting()) == $level) {
+		//Load the view file
+		$controller->view('errors/php_error', $data, FALSE);
+	}
+	
+}
+
+
 /**
  * Add <pre> tags around objects you want to dump.
  *
@@ -581,104 +810,7 @@ function destroy_directory($dir='', $remove=true) {
 }
 
 
-/**
- * Fetch a cache file
- *
- * @param	string	Name of the cache File
- * @param	int		max file life
- * @param	boolean	return data or print it out?
- * @return	void
- */
-function fetch_cache($file='', $time=null, $method=true) {
 
-	//If caching is disabled
-	if(!CACHING) { return; }
-
-	//If the life of the cache is not given - use default
-	if(!$time) { $time = CACHING; }
-
-	//set the file path
-	$path = SITE_DIR. 'cache/'. $file. '.php';
-
-	//IF the file exists AND the cach life has not expired
-	if(file_exists($path) && ((time() - filemtime($path)) < $time)) {
-
-		if($method) {
-			//return string containing the file contents
-			return file_get_contents($path);
-		} else {
-			//Print the file to the screen and return true
-			readfile($path);
-			return true;
-		}
-	}
-}
-
-
-
-/**
- * Create Cache
- *
- * @param	string	Name of the cache File
- * @param	string	String of contents to insert
- * @return	void
- */
-function create_cache($file=null, $contents=null) {
-
-	//If cacheing is not enabled - quit function
-	if (!CACHING) { return true; }
-
-	//If one isn't set - return
-	if(!$file || !$contents) { return; }
-
-	//Set the file path
-	$path = SITE_DIR. 'cache/'. $file. '.php';
-
-	// Open for writing and place the file pointer at the beginning
-	// of the file and truncate the file (if it doesn't exist try to make it)
-	if (!$handle = @fopen($path, 'w')) {
-		trigger_error('Cannot open/create cache file ('. $path. ')');
-		return;
-	}
-
-	// Write $content to our opened file.
-	if (fwrite($handle, $contents) === FALSE) {
-		trigger_error('Cannot write to cache file ('. $path. ')');
-		return;
-	}
-
-	//Close the file
-	fclose($handle);
-
-	return true;
-
-}
-
-
-/**
- * Delete a Cache
- * @return	boolean
- */
-function delete_cache($file=null) {
-	if(!$file) { return; }
-
-	//Delete the file+path
-	if(unlink(SITE_DIR. 'cache/'. $file. '.php')) {
-		return true;
-	}
-
-}
-
-/**
- * Delete ALL Caches
- * @return	boolean
- */
-function delete_caches() {
-	//Destroy all files in the cache dir
-	if(destroy_dir(CACHE_DIR, false)) {
-		return true;
-	}
-}
 
 
 /**

@@ -1,6 +1,17 @@
 <?php
-
-
+/*
+ * Hooks Class
+ *
+ * Provides plugin points for classes and functions to run and/or filter data.
+ *
+ * @package		MicroMVC
+ * @author		David Pennington
+ * @copyright	Copyright (c) 2009 MicroMVC
+ * @license		http://www.gnu.org/licenses/gpl-3.0.html
+ * @link		http://micromvc.com
+ * @version		1.0.1 <5/31/2009>
+ ********************************** 80 Columns *********************************
+ */
 class hooks {
 
 	//keeps us out of trouble with hook loops

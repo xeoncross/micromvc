@@ -58,12 +58,12 @@
  *
  * @todo		Add support for PostgreSQL and MSSQL
  * @todo		Auto-add table prefix (replace `table` with `prefix_table`)
- * @package		PDOORM
+ * @package		MicroMVC
  * @author		David Pennington
- * @copyright	Copyright (c) 2009 PDOORM
+ * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
- * @link		http://xeoncross.com
- * @version		1.0.0 <3/20/2009>
+ * @link		http://micromvc.com
+ * @version		1.0.1 <5/31/2009>
  ********************************** 80 Columns *********************************
  */
 

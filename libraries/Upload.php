@@ -1,28 +1,14 @@
 <?php
 /**
- * CodeIgniter
- *
- * An open source application development framework for PHP 4.3.2 or newer
- *
- * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008, EllisLab, Inc.
- * @license		http://codeigniter.com/user_guide/license.html
- * @link		http://codeigniter.com
- * @since		Version 1.0
- * @filesource
- */
-
-// ------------------------------------------------------------------------
-
-/**
  * File Uploading Class
  *
- * @package		CodeIgniter
- * @subpackage	Libraries
- * @category	Uploads
- * @author		ExpressionEngine Dev Team
- * @link		http://codeigniter.com/user_guide/libraries/file_uploading.html
+ * @package		MicroMVC
+ * @author		David Pennington
+ * @copyright	Copyright (c) 2009 MicroMVC
+ * @license		http://www.gnu.org/licenses/gpl-3.0.html
+ * @link		http://micromvc.com
+ * @version		1.0.1 <5/31/2009>
+ ********************************** 80 Columns *********************************
  */
 class upload {
 	

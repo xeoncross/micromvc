@@ -1,8 +1,18 @@
 <?php
 /*
+ * Validation Class
+ *
  * Checks for and processes submitted form $_POST and $_FILE data.
  * Creates the POST values given so you don't have to worry about
  * non-set fields in the $_POST data.
+ *
+ * @package		MicroMVC
+ * @author		David Pennington
+ * @copyright	Copyright (c) 2009 MicroMVC
+ * @license		http://www.gnu.org/licenses/gpl-3.0.html
+ * @link		http://micromvc.com
+ * @version		1.0.1 <5/31/2009>
+ ********************************** 80 Columns *********************************
  */
 class validation {
 

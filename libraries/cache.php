@@ -1,5 +1,17 @@
 <?php
-
+/*
+ * Cache Class
+ *
+ * This class handles caching of pages and other strings using the filesystem.
+ *
+ * @package		MicroMVC
+ * @author		David Pennington
+ * @copyright	Copyright (c) 2009 MicroMVC
+ * @license		http://www.gnu.org/licenses/gpl-3.0.html
+ * @link		http://micromvc.com
+ * @version		1.0.1 <5/31/2009>
+ ********************************** 80 Columns *********************************
+ */
 class cache {
 
 	//Life of cache files (can be overwritten)

@@ -1,4 +1,4 @@
-Welcome to Micro Model-View-Controller
+## Welcome to Micro Model-View-Controller
 
 A tiny MVC framework crammed into less than 150kb - including documentation!
 
@@ -12,11 +12,11 @@ MicroMVC is *not* a replacement for a full MCV framework. Do not plan on buildin
 
 MicroMVC is licenced under the http://www.gnu.org/licenses/gpl-3.0.html so you can use it for any personal or corporate projects free of charge.</p>
 
-** Rquirements **
+### Rquirements
 
 * PHP 5
 * mod_rewrite (apache module)
 * PDO if using the Database
 
-David Pennington - http://xeoncross.com
-MicroMVC - http://micromvc.com
+[David Pennington](http://xeoncross.com)
+[MicroMVC](http://micromvc.com)

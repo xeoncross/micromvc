@@ -37,7 +37,7 @@ define('DS', DIRECTORY_SEPARATOR);
 define('SYSTEM_PATH', realpath(dirname(__FILE__)));
 
 //Define the base file system path to MicroMVC
-define('MODULES_PATH', SYSTEM_PATH. 'modules/');
+define('MODULE_PATH', SYSTEM_PATH. 'modules/');
 
 //Define the file system path to the current site
 define('SITE_PATH', SYSTEM_PATH. DS. DOMAIN. DS);

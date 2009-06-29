@@ -64,16 +64,18 @@ function is_ajax_request() {
 /**
 * Class registry
 *
-* This function acts as a singleton.  If the requested class does not
-* exist it is instantiated and set to a static variable.  If it has
+* This function acts as a singleton. If the requested class does not
+* exist it is instantiated and set to a static variable. If it has
 * previously been instantiated the variable is returned.
 *
-* @access	public
-* @param	string	the class name being requested
-* @param	bool	optional flag that lets classes get loaded but not instantiated
+* @param	string	Class name being requested
+* @param	string	Folder name to find it in
+* @param	mixed	Optional params to pass
+* @param	bool	Location to look (1 = SITE, 2 = SYSTEM, 3 = MODULES)
+* @param	bool	(flag) load class but do not instantiate
 * @return	object
 */
-function load_class($class=null, $params=null, $path='libraries', $instantiate = TRUE) {
+function load_class($class=null, $path='libraries', $params=null, $location = 1, $instantiate = TRUE) {
 
 	static $objects = array();
 
@@ -88,15 +90,10 @@ function load_class($class=null, $params=null, $path='libraries', $instantiate =
 	// If the class is not already loaded
 	if ( ! class_exists($class)) {
 
-		$file = SITE_DIR. $path . '/'. $class . '.php';
-
-		// If the requested file does not exist
-		if (!file_exists($file)) {
-			return FALSE;
+		//Load this file
+		if( ! load_file($class, $path, $location)) {
+			die('Failed to load '. $class);
 		}
-
-		//Require the file
-		require_once($file);
 
 	}
 
@@ -111,6 +108,61 @@ function load_class($class=null, $params=null, $path='libraries', $instantiate =
 
 
 
+/**
+ * File Loader
+ *
+ * This class is the smart loader for files. Because of the large
+ * performance hit of the file_exists() function, we can't randomly
+ * guess the location of the file. So the user must also set the
+ * location flag to the proper value or the file load will fail.
+ * While this approach is less "user-friendly" it is better in the
+ * long run.
+ *
+ * @param $name
+ * @param $path
+ * @param $location
+ * @return unknown_type
+ */
+function load_file($name = FALSE, $path = FALSE, $location = 1) {
+
+	//If we are missing something
+	if( ! $name OR ! $path) {
+		return FALSE;
+	}
+
+	//If this is a controller we only need to look in two places
+	if ($path == 'controllers') {
+
+		//Try to load the controller from the site directory first
+		if(file_exists(SITE_PATH. 'controllers/'. $name. '.php')) {
+			return require_once(SITE_PATH. 'controllers/'. $name. '.php');
+		}
+
+		//Else it must be a module - so set the path
+		$path = MODULE_PATH. '/'. $name. '.php';
+
+
+	//If this is a module file (3)
+	} elseif($location == 3) {
+		$path = MODULE_PATH. $module. '/'. $path. '/'. $name. '.php';
+
+	//If this is a global system file (2)
+	} elseif ($location == 2) {
+		$path = SYSTEM_PATH. $path . '/'. $name . '.php';
+
+	//Else it is a site specific file (1)
+	} else {
+		$path = SITE_PATH. $path . '/'. $name . '.php';
+	}
+
+	// If the requested file does not exist
+	if (!file_exists($path)) {
+		return FALSE;
+	}
+
+	//Require the file
+	return require_once($path);
+}
 
 
 

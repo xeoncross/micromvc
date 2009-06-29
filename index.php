@@ -15,43 +15,25 @@
  */
 
 
-/*
- * DEFINE START-UP SYSTEM VALUES
- */
-
-//Get the current time so we can tell how long it takes to run this script
+//Log current time so we can tell how long it takes to run this script
 define('START_TIME', microtime(true));
+
+//Log starting memory useage
 define('START_MEMORY_USAGE', memory_get_usage());
 
-//Set the unique name of the current page
-$var = preg_replace("/([^a-z0-9_\-\.]+)/i", '', $_SERVER["REQUEST_URI"]);
+//Set the unique name of the current page (for the cache)
+$var = preg_replace("/([^a-z0-9_\-\.]+)/i", '_', $_SERVER["REQUEST_URI"]);
 define('PAGE_NAME', ($var ? $var : 'index'));
 
+//Discover the current domain for the whole script
+define('SITE_NAME', current_domain());
 
-// Get the Site Name: www.site.com -also protects from XSS/CSFR attacks
-//preg_match('/(?=[a-z]+:\/\/)?(([a-z0-9\-]{1,70}\.){1,5}([a-z]{2,4}))|localhost/i',
-preg_match('/(?=([a-z]+:\/\/)?)(([a-z0-9\-]{1,70}\.){1,5}([a-z]{2,4}))|localhost/i',
-($_SERVER["SERVER_NAME"] ? $_SERVER["SERVER_NAME"] : $_SERVER['HTTP_HOST']),
-$matches);
+//Discover whether this is an AJAX request or not
+define('AJAX_REQUEST', is_ajax_request());
 
-//MUST HAVE A HOST!
-if(empty($matches[0])) {
-   die('don\'t mess with the host.');
-}
-
-//Define it for the whole script
-define('SITE_NAME', $matches[0]);
-
-//Check to see if it is an ajax request
-if(isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-&& $_SERVER['HTTP_X_REQUESTED_WITH']=="XMLHttpRequest") {
-	define('AJAX_REQUEST', 1);
-} else {
-	define('AJAX_REQUEST', 0);
-}
 
 /*
- * Begine loading of the system
+ * Begin loading of the system
  */
 
 //Require the config file for this site name
@@ -81,7 +63,7 @@ $hooks->call('system_startup');
 if($output = $cache->fetch(md5(PAGE_NAME. AJAX_REQUEST), null, null)) {
 
 	print $output;
-	
+
 	//If debuging is enabled
 	if(DEBUG_MODE) {
 		$time = round((microtime(true) - START_TIME), 5);

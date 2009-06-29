@@ -27,11 +27,38 @@ function ip_address() {
 		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 	} else {
 		$ip = '0.0.0.0';
-	} 
-	
+	}
+
 	//Clean the IP and set it
 	//define('IP_ADDRESS', sanitize_text($ip, 2));
 	return sanitize_text($ip, 2);
+}
+
+
+//Get the current domain
+function current_domain() {
+
+	// Get the Site Name: www.site.com -also protects from XSS/CSFR attacks
+	$regex = '/((([a-z0-9\-]{1,70}\.){1,5}[a-z]{2,4})|localhost)/i';
+
+	//Match the name
+	preg_match($regex,(!empty($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST']), $match);
+
+	//MUST HAVE A HOST!
+	if(empty($match[0])) {
+	   die('Sorry, host not found');
+	}
+
+	return $match[0];
+}
+
+
+//Check to see if it is an ajax request
+function is_ajax_request() {
+	if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
+		return TRUE;
+	}
+	return FALSE;
 }
 
 /**
@@ -49,35 +76,35 @@ function ip_address() {
 function load_class($class=null, $params=null, $path='libraries', $instantiate = TRUE) {
 
 	static $objects = array();
-	
+
 	//If a class is NOT given
 	if (!$class) { return; }
-	
+
 	//If this class is already loaded
 	if(!empty($objects[$class])) {
 		return $objects[$class];
 	}
-	
+
 	// If the class is not already loaded
 	if ( ! class_exists($class)) {
-	
+
 		$file = SITE_DIR. $path . '/'. $class . '.php';
-		
+
 		// If the requested file does not exist
 		if (!file_exists($file)) {
 			return FALSE;
 		}
-		
+
 		//Require the file
 		require_once($file);
-		
+
 	}
-	
+
 	//If we just want to load the file - nothing more
 	if ($instantiate == FALSE) {
 		return TRUE;
 	}
-	
+
 	return $objects[$class] = new $class(($params ? $params : ''));
 }
 
@@ -92,7 +119,7 @@ function load_class($class=null, $params=null, $path='libraries', $instantiate =
  * Custom error handler which shows more details when needed, yet can hide scary data
  * from the user. Auto-detects the level of errors you allow in your php.ini file and
  * only shows those errors and higher.
- * 
+ *
  * @param $level
  * @param $message
  * @param $file
@@ -103,14 +130,14 @@ function load_class($class=null, $params=null, $path='libraries', $instantiate =
 function mvc_error_handler($level='', $message='', $file='', $line='', $variables='') {
 
 	static $controller = NULL;
-	
+
 	if( ! $controller) {
 		$controller = get_instance();
 	}
-	
+
 	//Only show the system file that had the problem - not the whole server dir structure!
 	$file = str_replace(SITE_DIR, '', $file);
-	
+
 	//Set error types
 	$error_levels = array(
 		E_ERROR				=>	'Error',
@@ -135,111 +162,111 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 		'level'	=> $level,
 		'error' => $error_levels[$level]
 	);
-	
+
 	//If we only show simple error data
 	if(DEBUG_MODE == FALSE) {
-		
+
 		//Create sentence
 		$data['line_info'] = 'On line '. $line. ' in '. $data['file'];
-		
+
 	} else {
-	
+
 		//Get backtrace and remove last entry (this function)
-		$backtrace = debug_backtrace();	
+		$backtrace = debug_backtrace();
 		//Remove first entry (this error function)
-		unset($backtrace[0]); 
-	
+		unset($backtrace[0]);
+
 		if($backtrace) {
-			
+
 			//Store the array of backtraces
 			$trace = array();
-			
+
 			//Max of 5 levels deep
 			if(count($backtrace) > 5) {
 				//$backtrace = array_chunk($backtrace, 5, TRUE);
 				//$backtrace = $backtrace[0];
 				//print_pre($backtrace);
-				
+
 			}
-			
+
 			// start backtrace
 			foreach ($backtrace as $v) {
-				
+
 				if(empty($v['line'])) {
 					$v['line'] = '';
 				}
 				if(empty($v['file'])) {
 					$v['file'] = '';
 				}
-				
+
 				$args = array();
 				foreach ($v['args'] as $a) {
 					$type = gettype($a);
 					if($type == 'integer' OR $type == 'double') {
 						$args[] = $a;
-						
+
 					} elseif ($type == 'string') {
 						//Longer than 25 chars?
 						$a = strlen($a) > 25 ? substr($a, 0, 25). '...' : $a;
 						$args[] = '"'. htmlentities($a, ENT_QUOTES, 'utf-8'). '"';
-					
+
 					} elseif ($type == 'array') {
 						$args[] = 'Array('.count($a).')';
-					
+
 					} elseif ($type == 'object') {
 						$args[] = 'Object('.get_class($a).')';
-					
+
 					} elseif ($type == 'resource') {
 						$args[] = 'Resource('.strstr($a, '#').')';
-					
+
 					} elseif ($type == 'boolean') {
 						$args[] = ($a ? 'True' : 'False'). '';
-					
+
 					} elseif ($type == 'Null') {
 						$args[] = 'Null';
 					} else {
 						$args[] = 'Unknown';
 					}
 				}
-				
+
 				//If only a couple arguments were given - convert to string
 				if(count($args) < 4) {
 					$args = implode(', ', $args);
 				}
-				
+
 				// Compose Backtrace
-				
+
 				$string = '';
-				
+
 				if(!empty($trace)) {
 					$string .= 'Called by ';
 				}
-				
+
 				//If this is a class
 				if (isset($v['class'])) {
 					$string .= 'Method <b>'.$v['class']. '->'. $v['function']. '('. (is_string($args) ? $args : ''). ')</b>';
 				} else {
 					$string .= 'Function <b>'. $v['function']. '('. (is_string($args) ? $args : ''). ')</b>';
 				}
-				
+
 				//Add line number and file
 				$string .= ' on line '. $v['line']. ' in '. str_replace(SITE_DIR, '', $v['file']). '<br />';
-				
+
 				//Create an element containing the trace and function args (only if still an array)
 				$trace[] = array($string, (is_string($args) ? '' : $args));
-				
+
 			}
-			
+
 			$data['trace'] = $trace;
 		}
 	}
-	
+
 	//If we should report this error
 	if (($level & error_reporting()) == $level) {
 		//Load the view file
 		$controller->view('errors/php_error', $data, FALSE);
 	}
-	
+
 }
 
 
@@ -674,7 +701,7 @@ function directory($data, $level=1) {
 
 						//Run this function on on the directory to see what is in it (this is where the recursive part starts)
 						$files2 = directory(array('start_dir' => $path. '/', 'good_ext' => $data['good_ext'],
-                                                  'skip_files' => $data['skip_files'], 'limit' => $data['limit'], 
+                                                  'skip_files' => $data['skip_files'], 'limit' => $data['limit'],
                                                   'type' => $data['type'], 'light' => $data['light']), $level + 1);
 
 						//then combine the output with the current $files array
@@ -891,7 +918,7 @@ function &get_instance(){
  * @return array
  */
 function pagination($options=null) {
-	
+
 	/** [Options]
 	 * total		Total number of items
 	 * per_page		Items to show each page
@@ -899,13 +926,13 @@ function pagination($options=null) {
 	 * url			URI value to place in the links (must include "[[page]]")
 	 * 				Example: /home/blog/page/[[page]]/
 	 */
-	
+
 	//Don't allow page 0 or lower
 	if($options['current_page'] < 0) {
 		$options['current_page'] = 0;
 	}
-	
-	
+
+
 	//Initialize
 	$data = array(
 		'links' => null,
@@ -914,29 +941,29 @@ function pagination($options=null) {
 		'total' => null,
 		'offset' => 0,
 	);
-	
+
 	//The offset to start from. This is useful if you are running a DB query
 	if($options['current_page'] > 1) {
 		$data["offset"] = (($options['per_page'] * $options['current_page']) - $options['per_page']);
 	}
-	
+
 	//The Number of pages based on the total number of items and the number to show each page
 	$data['total'] = ceil($options['total'] / $options['per_page']);
-	
+
 	//If there is more than one page...
 	if($data['total'] > 1) {
-	
+
 		//If this is NOT the first page - show a previous link
 		if($options['current_page'] > 1) {
-			$data['previous'] = str_replace('[[page]]', ($options['current_page'] - 1), $options['url']); 
+			$data['previous'] = str_replace('[[page]]', ($options['current_page'] - 1), $options['url']);
 		}
-	
+
 		//If this isn't the last page - add a "next" link
 		if($options['current_page'] + 1 < $data['total']) {
 			$data["next"] = str_replace('[[page]]', ($options['current_page'] + 1), $options['url']);
 		}
 	}
-	
+
 	//For each page, create the URL
 	for($i = 0; $i < $data['total']; $i++) {
 		if($options['current_page'] == $i) {
@@ -946,6 +973,6 @@ function pagination($options=null) {
 			$data["links"][$i] = str_replace('[[page]]', $i, $options['url']);
 		}
 	}
-	
+
 	return $data;
 }

@@ -35,50 +35,16 @@ define('CACHING', FALSE);
 //Should Debug info be shown with errors and such? (true or false)
 define('DEBUG_MODE', TRUE);
 
-
-/* 
- * FILE SYSTEM PATHS
- */
-
-// Absolute file system path to the root
-define('SITE_DIR', rtrim(realpath(dirname(__FILE__). "/../../"), '/\\'). '/');
-
-// Absolute file system path to the themes directory
-define('THEME_DIR', SITE_DIR. 'themes/'. $config['theme']. '/');
-
-// Absolute file system path to /includes
-define('CORE_DIR', SITE_DIR. "core/");
-
-// Absolute file system path to /includes
-define('LIBRARIES_DIR', SITE_DIR. "libraries/");
-
-// Absolute file system path to /includes
-define('MODELS_DIR', SITE_DIR. "models/");
-
-// Absolute file system path to /includes
-define('FUNCTIONS_DIR', SITE_DIR. "functions/");
-
-//The file system path of the upload dir
-define('UPLOAD_DIR', SITE_DIR. 'uploads/');
-
-//The file system path of the cache dir
-define('CACHE_DIR', SITE_DIR. 'cache/');
-
-
-/* 
+/*
  * URL ADDRESS PATHS
  */
 
-// Absolute URL path to the system root
-// Leave blank unless this site is in a subfolder.
+// Absolute URL path to the site root. Leave blank unless this site is in a subfolder.
 define('SITE_URL', '/MicroMVC/');
 
 // Absolute URL path to the themes directory
-define('THEME_URL', SITE_URL. 'themes/'. $config['theme']. '/');
+define('THEME_URL', SITE_URL. 'views/');
 
 // Absolute URL path to the upload directory
 define('UPLOAD_URL', SITE_URL. 'uploads/');
-
-// Absolute URL path to the cache directory
-define('CACHE_URL', SITE_URL. 'cache/');
 

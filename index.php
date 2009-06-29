@@ -14,7 +14,6 @@
  ********************************** 80 Columns *********************************
  */
 
-
 //Log current time so we can tell how long it takes to run this script
 define('START_TIME', microtime(true));
 
@@ -26,10 +25,28 @@ $var = preg_replace("/([^a-z0-9_\-\.]+)/i", '_', $_SERVER["REQUEST_URI"]);
 define('PAGE_NAME', ($var ? $var : 'index'));
 
 //Discover the current domain for the whole script
-define('SITE_NAME', current_domain());
+define('DOMAIN', current_domain());
 
 //Discover whether this is an AJAX request or not
 define('AJAX_REQUEST', is_ajax_request());
+
+//Define the OS file path separator
+define('DS', DIRECTORY_SEPARATOR);
+
+//Define the base file system path to MicroMVC
+define('SYSTEM_PATH', realpath(dirname(__FILE__)));
+
+//Define the base file system path to MicroMVC
+define('MODULES_PATH', SYSTEM_PATH. 'modules/');
+
+//Define the file system path to the current site
+define('SITE_PATH', SYSTEM_PATH. DS. DOMAIN. DS);
+
+//The file system path of the site's upload folder
+define('UPLOAD_PATH', SITE_PATH. 'uploads/');
+
+//The file system path of the site's cache folder
+define('CACHE_PATH', SITE_PATH. 'cache/');
 
 
 /*
@@ -37,10 +54,10 @@ define('AJAX_REQUEST', is_ajax_request());
  */
 
 //Require the config file for this site name
-require('sites/'. SITE_NAME. '/config.php');
+require(SITE_PATH. 'config/config.php');
 
 //Include the common file
-require_once(CORE_DIR. 'common.php');
+require_once(SYSTEM_PATH. 'functions/common.php');
 
 //Override the PHP error handler
 set_error_handler('mvc_error_handler');

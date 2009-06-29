@@ -61,6 +61,7 @@ function is_ajax_request() {
 	return FALSE;
 }
 
+
 /**
 * Class registry
 *
@@ -75,12 +76,12 @@ function is_ajax_request() {
 * @param	bool	(flag) load class but do not instantiate
 * @return	object
 */
-function load_class($class=null, $path='libraries', $params=null, $location = 1, $instantiate = TRUE) {
+function load_class($class = NULL, $path = 'libraries', $params = NULL, $location = 1, $instantiate = TRUE) {
 
 	static $objects = array();
 
 	//If a class is NOT given
-	if (!$class) { return; }
+	if (!$class) { return FALSE; }
 
 	//If this class is already loaded
 	if(!empty($objects[$class])) {
@@ -92,7 +93,7 @@ function load_class($class=null, $path='libraries', $params=null, $location = 1,
 
 		//Load this file
 		if( ! load_file($class, $path, $location)) {
-			die('Failed to load '. $class);
+			return FALSE;
 		}
 
 	}
@@ -142,17 +143,17 @@ function load_file($name = FALSE, $path = FALSE, $location = 1) {
 		$path = MODULE_PATH. '/'. $name. '.php';
 
 
-	//If this is a module file (3)
-	} elseif($location == 3) {
-		$path = MODULE_PATH. $module. '/'. $path. '/'. $name. '.php';
+	//Else it is a site specific file (1)
+	} elseif ($location == 1) {
+		$path = SITE_PATH. $path . '/'. $name . '.php';
 
 	//If this is a global system file (2)
 	} elseif ($location == 2) {
 		$path = SYSTEM_PATH. $path . '/'. $name . '.php';
 
-	//Else it is a site specific file (1)
-	} else {
-		$path = SITE_PATH. $path . '/'. $name . '.php';
+	//If this is a module file (3)
+	} elseif ($location == 3) {
+		$path = MODULE_PATH. $module. '/'. $path. '/'. $name. '.php';
 	}
 
 	// If the requested file does not exist
@@ -188,7 +189,7 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 	}
 
 	//Only show the system file that had the problem - not the whole server dir structure!
-	$file = str_replace(SITE_DIR, '', $file);
+	$file = str_replace(SYSTEM_PATH, '', $file);
 
 	//Set error types
 	$error_levels = array(
@@ -235,10 +236,8 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 
 			//Max of 5 levels deep
 			if(count($backtrace) > 5) {
-				//$backtrace = array_chunk($backtrace, 5, TRUE);
-				//$backtrace = $backtrace[0];
-				//print_pre($backtrace);
-
+				$backtrace = array_chunk($backtrace, 5, TRUE);
+				$backtrace = $backtrace[0];
 			}
 
 			// start backtrace
@@ -302,7 +301,7 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 				}
 
 				//Add line number and file
-				$string .= ' on line '. $v['line']. ' in '. str_replace(SITE_DIR, '', $v['file']). '<br />';
+				$string .= ' on line '. $v['line']. ' in '. str_replace(SYSTEM_PATH, '', $v['file']). '<br />';
 
 				//Create an element containing the trace and function args (only if still an array)
 				$trace[] = array($string, (is_string($args) ? '' : $args));
@@ -327,9 +326,13 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
  *
  * @param mixed $text
  */
-function print_pre($object=null) {
-	print '<pre>';
-	print_r($object);
+function print_pre($data = NULL) {
+	print '<pre style="padding: 1em; margin: 1em 0;">';
+	if(func_num_args() < 2) {
+		print_r($data);
+	} else {
+		print_r(func_get_args());
+	}
 	print '</pre>';
 }
 
@@ -738,7 +741,7 @@ function directory($data, $level=1) {
 					if(!$data['type'] || $data['type'] == 'dir') {
 						//Add the dir to our list
 						$files[$path]['file'] = $file;
-						$files[$path]['dir'] = substr($path, strlen(SITE_DIR), -strlen($file));
+						$files[$path]['dir'] = substr($path, strlen(SYSTEM_PATH), -strlen($file));
 
 						//If we are only getting the file names/paths
 						if(!$data['light']) {
@@ -772,7 +775,7 @@ function directory($data, $level=1) {
 
 						//Add the file to our list
 						$files[$path]['file'] = $file;
-						$files[$path]['dir'] = substr($path, strlen(SITE_DIR), -strlen($file));
+						$files[$path]['dir'] = substr($path, strlen(SYSTEM_PATH), -strlen($file));
 						//Get the LAST "." followed by 2-4 letters/numbers
 						$files[$path]['ext'] = $ext;
 

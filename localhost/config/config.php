@@ -43,7 +43,7 @@ define('DEBUG_MODE', TRUE);
 define('SITE_URL', '/MicroMVC/');
 
 // Absolute URL path to the themes directory
-define('THEME_URL', SITE_URL. 'views/');
+define('THEME_URL', SITE_URL. DOMAIN. '/views/');
 
 // Absolute URL path to the upload directory
 define('UPLOAD_URL', SITE_URL. 'uploads/');

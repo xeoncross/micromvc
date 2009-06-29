@@ -8,8 +8,8 @@
 
 # Hide the following from the world
 <FilesMatch "\.(htaccess|htpasswd|ini|php|log|sh|sql)$">
- Order Allow,Deny
- Deny from all
+	Order Allow,Deny
+	Deny from all
 </FilesMatch>
 
 # Allow the index file though..
@@ -58,12 +58,7 @@ DirectoryIndex index.php index.html
     ####RewriteCond $1 !^(images|themes|favicon\.ico|robots\.txt|index\.php) [NC]
     
 	RewriteRule ^(.*)$ index.php/$1 [QSA,L]
-	
-	
-    # Rewrite for everything else
-    #RewriteRule ^(([A-Za-z\-]+)/)?(([A-Za-z_]+)/)?(.+/)?$ index.php?controller=$2&method=$4&data=$5 [QSA,NC,L]
     
-	
     # Deny any people (or bots) from the following sites: (to stop spam comments)
     #RewriteCond %{HTTP_REFERER} nienschanz\.ru [NC,OR]
     #RewriteCond %{HTTP_REFERER} porn\.com
@@ -77,8 +72,8 @@ DirectoryIndex index.php index.html
 
 
 # implement minimal caching during site development
-<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|js|css|pdf|swf|html|htm|txt)$">
-ExpiresActive Off
-Header set Cache-Control "max-age=0"
+#<FilesMatch "\.(flv|gif|jpg|jpeg|png|ico|js|css|pdf|swf|html|htm|txt)$">
+#ExpiresActive Off
+#Header set Cache-Control "max-age=0"
 #Header unset Cache-Control
-</FilesMatch>
+#</FilesMatch>

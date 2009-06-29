@@ -24,20 +24,23 @@ define('START_MEMORY_USAGE', memory_get_usage());
 $var = preg_replace("/([^a-z0-9_\-\.]+)/i", '_', $_SERVER["REQUEST_URI"]);
 define('PAGE_NAME', ($var ? $var : 'index'));
 
+//Define the OS file path separator
+define('DS', DIRECTORY_SEPARATOR);
+
+//Define the base file system path to MicroMVC
+define('SYSTEM_PATH', realpath(dirname(__FILE__)). DS);
+
+//Include the common file to continue loading
+require_once(SYSTEM_PATH. 'functions/common.php');
+
+//Define the base file system path to MicroMVC
+define('MODULE_PATH', SYSTEM_PATH. 'modules/');
+
 //Discover the current domain for the whole script
 define('DOMAIN', current_domain());
 
 //Discover whether this is an AJAX request or not
 define('AJAX_REQUEST', is_ajax_request());
-
-//Define the OS file path separator
-define('DS', DIRECTORY_SEPARATOR);
-
-//Define the base file system path to MicroMVC
-define('SYSTEM_PATH', realpath(dirname(__FILE__)));
-
-//Define the base file system path to MicroMVC
-define('MODULE_PATH', SYSTEM_PATH. 'modules/');
 
 //Define the file system path to the current site
 define('SITE_PATH', SYSTEM_PATH. DS. DOMAIN. DS);
@@ -48,28 +51,20 @@ define('UPLOAD_PATH', SITE_PATH. 'uploads/');
 //The file system path of the site's cache folder
 define('CACHE_PATH', SITE_PATH. 'cache/');
 
-
-/*
- * Begin loading of the system
- */
+//Override the PHP error handler
+set_error_handler('mvc_error_handler');
 
 //Require the config file for this site name
 require(SITE_PATH. 'config/config.php');
 
-//Include the common file
-require_once(SYSTEM_PATH. 'functions/common.php');
-
-//Override the PHP error handler
-set_error_handler('mvc_error_handler');
+//Require the config file for the hooks
+require(SITE_PATH. 'config/hooks.php');
 
 //Load the caching class
-$cache = load_class('cache');
-
-//Require the config file for the hooks
-require('sites/'. SITE_NAME. '/hooks.php');
+$cache = load_class('cache', 'libraries', NULL, 2);
 
 //Load the hooks class
-$hooks = load_class('hooks', $hooks);
+$hooks = load_class('hooks', 'libraries', $hooks, 2);
 
 //Call first hook
 $hooks->call('system_startup');
@@ -108,16 +103,16 @@ if (ini_get('magic_quotes_gpc')) {
 
 
 //Include the core file
-require_once(CORE_DIR. 'core.php');
+load_file('core', 'libraries', 2);
 
 //Include the base file
-require_once(CORE_DIR. 'base.php');
+load_file('base', 'libraries', 2);
 
 
 /**
  * Get the controller from the URI
  */
-$routes = load_class('routes');
+$routes = load_class('routes', 'libraries', NULL, 2);
 
 //Set default controller/method if none is set in URL
 $routes->set_defaults(
@@ -138,31 +133,23 @@ $method		= $routes->fetch(1);
  * START-UP THE SYSTEM!
  */
 
-//If the file doesn't exist - default to the core
-if(!file_exists(SITE_DIR. 'controllers/'. $controller. '.php')) {
+//If the file doesn't exist - default to the core class
+if( ! load_class($controller, 'controllers', NULL, 1, FALSE)) {
+	$method		= 'requrst_error';
 	$controller = 'core';
-
-	//Else include it
-} else {
-	//Include the file that has the class
-	require_once(SITE_DIR. 'controllers/'. $controller. '.php');
-}
-
-//If that file does NOT contain a matching class name
-if (!class_exists($controller)) {
-	die($controller. ' class not found');
 }
 
 //Make sure someone isn't trying to access core/private functions
 if(($method !== 'request_error' && method_exists('core', $method))
-//And make sure this method exists (and is public)
-|| !in_array($method, get_class_methods($controller))) {
+	//And make sure this method exists (and is public)
+	|| !in_array($method, get_class_methods($controller))) {
+
 	//Trigger a 404 not found error
 	$method = 'request_error';
 }
 
 //Create a new instance of that controller and pass the $config
-$controller = new $controller($config);
+$controller = load_class($controller, NULL, $config);
 
 //Call the startup hook
 $controller->hooks->call('post_constructor');

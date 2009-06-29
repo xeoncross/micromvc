@@ -22,8 +22,8 @@ class core {
 	private static $instance;
 	//Site Config
 	public $config = array();
-	
-	
+
+
 	/**
 	 * Load the config values for this system
 	 *
@@ -53,7 +53,7 @@ class core {
 	public function config($name=null) {
 
 		//Only load once
-		if(!empty($this->config[$name])) { 
+		if(!empty($this->config[$name])) {
 			return $this->config[$name];
 		}
 
@@ -70,7 +70,7 @@ class core {
 			$this->config[$name] = $$name;
 
 		}
-		
+
 		//Return the config array
 		return $this->config[$name];
 	}
@@ -84,13 +84,13 @@ class core {
 
 		//Don't load the DB object twice!!!
 		if(!empty($this->db)) { return; }
-		
+
 		//Load the DB class (but don't create it)
 		load_class('db', NULL, 'models', FALSE);
-		
+
 		//Load the config for this database
 		$config = $this->config('database');
-		
+
 		//Create a new instance of the database child class "mysql"
 		$this->db = load_class($config['type'], $config);
 
@@ -116,11 +116,11 @@ class core {
 
 		//Load the class
 		$this->$name = load_class($class, $params, $path);
-		
+
 		return true;
 	}
 
-	
+
 
 	/**
 	 * This function is used to load views files.
@@ -131,10 +131,18 @@ class core {
 	 * @param	boolean	return the output or print it?
 	 * @return	void
 	 */
-	public function view($__file = NULL, $__variables = NULL, $__return = TRUE) {
+	public function view($__file = NULL, $__variables = NULL, $__return = TRUE, $__location = 1) {
 
 		//If no file is given - just return false
 		if(!$__file) { return; }
+
+		if($__location == 1) {
+			//If this is a view in the site view folder
+			$__file = SITE_PATH. 'views/'. $__file. '.php';
+		} else {
+			//It is located in the modules folder
+			$__file = MODULE_PATH. $__file. '.php';
+		}
 
 		if(is_array($__variables)) {
 			//Make each value passed to this view available for use
@@ -146,24 +154,24 @@ class core {
 		// Delete them now
 		$__variables = null;
 
-		if (!file_exists(THEME_DIR. $__file. '.php')) {
-			trigger_error('Unable to load the requested file: <b>'. $__file. '.php</b>');
+		if (!file_exists($__file)) {
+			trigger_error('Unable to load the requested file: <b>'. $__file. '</b>');
 			return;
 		}
 
 		// We just want to print to the screen
 		if( ! $__return) {
-			include(THEME_DIR. $__file. '.php');
+			include($__file);
 		}
-		
-		
+
+
 		/*
 		 * Buffer the output so we can return it
 		 */
 		ob_start();
 
 		// include() vs include_once() allows for multiple views with the same name
-		include(THEME_DIR. $__file. '.php');
+		include($__file);
 
 		//Get the output
 		$buffer = ob_get_contents();
@@ -173,8 +181,8 @@ class core {
 		return $buffer;
 
 	}
-	
-	
+
+
 
 	/**
 	 * Show a 400-500 Header error within the site theme
@@ -187,7 +195,7 @@ class core {
 
 		//Clean the type of error from XSS stuff
 		//$type = preg_replace('/[^a-z0-9]+/i', '', $type);
-		
+
 		//Check the type of error
 		if ($type == '400') {
 			header("HTTP/1.0 400 Bad Request");
@@ -227,10 +235,10 @@ class core {
 
 		// Load the template
 		$output = $this->view($this->layout, $this->data);
-		
+
 		// Cache the file
 		$this->cache->create(md5(PAGE_NAME. AJAX_REQUEST), $output);
-		
+
 		// Show the output
 		print $output;
 
@@ -245,29 +253,29 @@ class core {
 		return self::$instance;
 	}
 
-	
-	
+
+
 	/*
 	 * Make all loaded libraries available to the given object
 	 * @author	http://CodeIgniter.com
 	 *
 	public function assign_libraries($name = NULL) {
-		
+
 		//Get all variable keys
 		$object_vars = array_keys(get_object_vars($this));
-		
+
 		foreach ($object_vars as $key) {
-			
+
 			//Only pass objects (other libraries) to this class
 			if(is_object($this->$key)) {
-			
+
 				//If a propery by this name doesn't already exist -and it is not this classe
 				if (!isset($this->$name->$key) AND $key != $name) {
 					$this->$name->$key = $this->$key;
 				}
-				
+
 			}
 		}
 	}*/
-	
+
 }

@@ -2,7 +2,6 @@
 
 class loader {
 
-	public $loaded_files = array();
 
 	//Load a library
 	public function library($class = NULL, $params = NULL, $name = NULL, $module = FALSE) {
@@ -68,14 +67,6 @@ class loader {
 
 		//Is this a module's library -or a global system library?
 		$path = ($module ? MODULE_PATH. $module. DS : SYSTEM_PATH). 'functions'. DS. $name. '.php';
-
-		//If already loaded
-		if(in_array($path, $this->loaded_files)) {
-			return TRUE;
-		}
-
-		//Log this file (faster than using require_once)
-		$this->loaded_files[] = $path;
 
 		//Try to load the file
 		return require_once($path);

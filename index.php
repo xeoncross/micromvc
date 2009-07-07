@@ -32,10 +32,10 @@ define('DS', DIRECTORY_SEPARATOR);
 define('SYSTEM_PATH', realpath(dirname(__FILE__)). DS);
 
 //Define the base file system path to MicroMVC
-define('LIBRARY_PATH', SYSTEM_PATH. DS. 'libraries'. DS);
+define('LIBRARY_PATH', SYSTEM_PATH. 'libraries'. DS);
 
 //Define the base file system path to MicroMVC
-define('FUNCTION_PATH', SYSTEM_PATH. DS. 'functions'. DS);
+define('FUNCTION_PATH', SYSTEM_PATH. 'functions'. DS);
 
 //Define the base file system path to MicroMVC
 define('MODULE_PATH', SYSTEM_PATH. 'modules'. DS);
@@ -71,7 +71,7 @@ define('VIEW_PATH', SITE_PATH. 'views'. DS);
 
 
 //Override the PHP error handler
-//set_error_handler('mvc_error_handler');
+set_error_handler('_error_handler');
 
 //Require the config file for this site name
 require(SITE_PATH. 'config/config.php');
@@ -121,10 +121,10 @@ if (ini_get('magic_quotes_gpc')) {
 }
 
 
-//Include the core file
-load_class('core', LIBRARY_PATH, NULL, FALSE);
+//Include the controller class file
+load_class('controller', LIBRARY_PATH, NULL, FALSE);
 
-//Include the base file
+//Include the base class file
 load_class('base', LIBRARY_PATH, NULL, FALSE);
 
 /**
@@ -155,16 +155,13 @@ $method		= $routes->fetch(1);
 if(file_exists(SITE_PATH. 'controllers'. DS. $controller. '.php')) {
 	$path = SITE_PATH. 'controllers'. DS;
 
-
 //Then try to see if there is a module
 } elseif(file_exists(MODULE_PATH. $controller. DS. 'controllers'. DS. $controller. '.php')) {
 	$path = MODULE_PATH. $controller. DS. 'controllers'. DS;
 
-//Else just default to the request_error method
 } else {
-	$path		= NULL;
-	$method		= 'request_error';
-	$controller = 'core';
+	//Show a 404 error and exit the script
+	request_error();
 }
 
 //Load the controller and pass the $config
@@ -174,8 +171,8 @@ $controller = load_class($controller, $path, $config);
 if($method != 'request_error' && $controller != 'core') {
 	//Make sure this method exists (and is public)
 	if(method_exists('core', $method) OR ! in_array($method, get_class_methods($controller))) {
-		//Trigger a 404 not found error
-		$method = 'request_error';
+		//Show a 404 error and exit the script
+		request_error();
 	}
 }
 

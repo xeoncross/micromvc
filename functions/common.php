@@ -29,8 +29,7 @@ function ip_address() {
 		$ip = '0.0.0.0';
 	}
 
-	//Clean the IP and set it
-	//define('IP_ADDRESS', sanitize_text($ip, 2));
+	//Clean the IP and return it
 	return sanitize_text($ip, 2);
 }
 
@@ -46,7 +45,7 @@ function current_domain() {
 
 	//MUST HAVE A HOST!
 	if(empty($match[0])) {
-	   die('Sorry, host not found');
+		die('Sorry, host not found');
 	}
 
 	return $match[0];
@@ -63,25 +62,28 @@ function is_ajax_request() {
 
 
 /**
-* Class registry
-*
-* This function acts as a singleton. If the requested class does not
-* exist it is instantiated and set to a static variable. If it has
-* previously been instantiated the variable is returned.
-*
-* @param	string	Class name being requested
-* @param	string	Folder name to find it in
-* @param	mixed	Optional params to pass
-* @param	bool	Location to look (1 = SITE, 2 = SYSTEM, 3 = MODULES)
-* @param	bool	(flag) load class but do not instantiate
-* @return	object
-*/
+ * Class registry
+ *
+ * This function acts as a singleton. If the requested class does not
+ * exist it is instantiated and set to a static variable. If it has
+ * previously been instantiated the variable is returned.
+ *
+ * @param	string	Class name being requested
+ * @param	string	Folder name to find it in
+ * @param	mixed	Optional params to pass
+ * @param	bool	Location to look (1 = SITE, 2 = SYSTEM, 3 = MODULES)
+ * @param	bool	(flag) load class but do not instantiate
+ * @return	object
+ */
 function load_class($class = NULL, $path = NULL, $params = NULL, $instantiate = TRUE) {
 
 	static $objects = array();
 
 	//If a class is NOT given
-	if ( ! $class) { die('Failed to load class '. $class); return FALSE; }
+	if ( ! $class) {
+		trigger_error('Attempted to load a non-existent class with no name.');
+		return FALSE;
+	}
 
 	//If this class is already loaded
 	if(!empty($objects[$class])) {
@@ -103,67 +105,6 @@ function load_class($class = NULL, $path = NULL, $params = NULL, $instantiate = 
 }
 
 
-
-
-/**
- * File Loader
- *
- * This class is the smart loader for files. Because of the large
- * performance hit of the file_exists() function, we can't randomly
- * guess the location of the file. So the user must also set the
- * location flag to the proper value or the file load will fail.
- * While this approach is less "user-friendly" it is better in the
- * long run.
- *
- * @param $name
- * @param $path
- * @param $location
- * @return unknown_type
- *
-function load_file($name = FALSE, $path = FALSE, $location = 1) {
-
-	//If we are missing something
-	if( ! $name OR ! $path) {
-		return FALSE;
-	}
-
-	//If this is a controller we only need to look in two places
-	if ($path == 'controllers') {
-
-		//Try to load the controller from the site directory first
-		if(file_exists(SITE_PATH. 'controllers/'. $name. '.php')) {
-			return require_once(SITE_PATH. 'controllers/'. $name. '.php');
-		}
-
-		//Else it must be a module - so set the path
-		//$path = MODULE_PATH. '/'. $name. '.php';
-
-
-	//Else it is a site specific file (1)
-	} elseif ($location == 1) {
-		$path = SITE_PATH. $path . '/'. $name . '.php';
-
-	//If this is a global system file (2)
-	} elseif ($location == 2) {
-		$path = SYSTEM_PATH. $path . '/'. $name . '.php';
-
-	//If this is a module file (3)
-	} elseif ($location == 3) {
-		//$path = MODULE_PATH. $module. '/'. $path. '/'. $name. '.php';
-	}
-
-	// If the requested file does not exist
-	if (!file_exists($path)) {
-		return FALSE;
-	}
-
-	//Require the file
-	return require_once($path);
-}
-*/
-
-
-
 /**
  * Custom error handler which shows more details when needed, yet can hide scary data
  * from the user. Auto-detects the level of errors you allow in your php.ini file and
@@ -176,12 +117,11 @@ function load_file($name = FALSE, $path = FALSE, $location = 1) {
  * @param $variables
  * @return void
  */
-function mvc_error_handler($level='', $message='', $file='', $line='', $variables='') {
+function _error_handler($level='', $message='', $file='', $line='', $variables='') {
 
-	static $controller = NULL;
-
-	if( ! $controller) {
-		$controller = get_instance();
+	//If this error isn't worth reporting (or below the set level) - skip it
+	if ($level == E_STRICT OR ($level & error_reporting()) !== $level) {
+		return;
 	}
 
 	//Only show the system file that had the problem - not the whole server dir structure!
@@ -189,34 +129,28 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 
 	//Set error types
 	$error_levels = array(
-		E_ERROR				=>	'Error',
-		E_WARNING			=>	'Warning',
-		E_PARSE				=>	'Parsing Error',
-		E_NOTICE			=>	'Notice',
-		E_CORE_ERROR		=>	'Core Error',
-		E_CORE_WARNING		=>	'Core Warning',
-		E_COMPILE_ERROR		=>	'Compile Error',
-		E_COMPILE_WARNING	=>	'Compile Warning',
-		E_USER_ERROR		=>	'User Error',
-		E_USER_WARNING		=>	'User Warning',
-		E_USER_NOTICE		=>	'User Notice',
-		E_STRICT			=>	'Runtime Notice'
+	E_ERROR				=>	'Error',
+	E_WARNING			=>	'Warning',
+	E_PARSE				=>	'Parsing Error',
+	E_NOTICE			=>	'Notice',
+	E_CORE_ERROR		=>	'Core Error',
+	E_CORE_WARNING		=>	'Core Warning',
+	E_COMPILE_ERROR		=>	'Compile Error',
+	E_COMPILE_WARNING	=>	'Compile Warning',
+	E_USER_ERROR		=>	'User Error',
+	E_USER_WARNING		=>	'User Warning',
+	E_USER_NOTICE		=>	'User Notice',
+	E_STRICT			=>	'Runtime Notice'
 	);
 
-	//Data for error view
-	$data = array(
-		'line' => $line,
-		'file' => $file,
-		'message' => $message,
-		'level'	=> $level,
-		'error' => $error_levels[$level]
-	);
+	//Get Human-safe error title
+	$error = $error_levels[$level];
 
 	//If we only show simple error data
 	if(DEBUG_MODE == FALSE) {
 
 		//Create sentence
-		$data['line_info'] = 'On line '. $line. ' in '. $data['file'];
+		$line_info = 'On line '. $line. ' in '. $file;
 
 	} else {
 
@@ -247,42 +181,43 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 				}
 
 				$args = array();
-				foreach ($v['args'] as $a) {
-					$type = gettype($a);
-					if($type == 'integer' OR $type == 'double') {
-						$args[] = $a;
+				if(isset($v['args'])) {
+					foreach ($v['args'] as $a) {
+						$type = gettype($a);
+						if($type == 'integer' OR $type == 'double') {
+							$args[] = $a;
 
-					} elseif ($type == 'string') {
-						//Longer than 25 chars?
-						$a = strlen($a) > 25 ? substr($a, 0, 25). '...' : $a;
-						$args[] = '"'. htmlentities($a, ENT_QUOTES, 'utf-8'). '"';
+						} elseif ($type == 'string') {
+							//Longer than 25 chars?
+							$a = strlen($a) > 25 ? substr($a, 0, 25). '...' : $a;
+							$args[] = '"'. htmlentities($a, ENT_QUOTES, 'utf-8'). '"';
 
-					} elseif ($type == 'array') {
-						$args[] = 'Array('.count($a).')';
+						} elseif ($type == 'array') {
+							$args[] = 'Array('.count($a).')';
 
-					} elseif ($type == 'object') {
-						$args[] = 'Object('.get_class($a).')';
+						} elseif ($type == 'object') {
+							$args[] = 'Object('.get_class($a).')';
 
-					} elseif ($type == 'resource') {
-						$args[] = 'Resource('.strstr($a, '#').')';
+						} elseif ($type == 'resource') {
+							$args[] = 'Resource('.strstr($a, '#').')';
 
-					} elseif ($type == 'boolean') {
-						$args[] = ($a ? 'True' : 'False'). '';
+						} elseif ($type == 'boolean') {
+							$args[] = ($a ? 'True' : 'False'). '';
 
-					} elseif ($type == 'Null') {
-						$args[] = 'Null';
-					} else {
-						$args[] = 'Unknown';
+						} elseif ($type == 'Null') {
+							$args[] = 'Null';
+						} else {
+							$args[] = 'Unknown';
+						}
+					}
+
+					//If only a couple arguments were given - convert to string
+					if(count($args) < 4) {
+						$args = implode(', ', $args);
 					}
 				}
 
-				//If only a couple arguments were given - convert to string
-				if(count($args) < 4) {
-					$args = implode(', ', $args);
-				}
-
 				// Compose Backtrace
-
 				$string = '';
 
 				if(!empty($trace)) {
@@ -303,23 +238,60 @@ function mvc_error_handler($level='', $message='', $file='', $line='', $variable
 				$trace[] = array($string, (is_string($args) ? '' : $args));
 
 			}
-
-			$data['trace'] = $trace;
 		}
 	}
 
-	//If we should report this error
-	if (($level & error_reporting()) == $level) {
-		//Load the view file
-		$controller->view('errors/php_error', $data, FALSE);
+	//Flush any output buffering first
+	ob_end_flush();
+
+	//Load the view
+	include(VIEW_PATH. 'errors'. DS. 'php_error.php');
+
+	exit();
+}
+
+
+/**
+ * Load a HTTP header error page and then exit script
+ * @param $type
+ */
+function request_error($type = '404') {
+
+	//Check the type of error
+	if ($type == '400') {
+		header("HTTP/1.0 400 Bad Request");
+	} elseif ($type == '401') {
+		header("HTTP/1.0 401 Unauthorized");
+	} elseif ($type == '403') {
+		header("HTTP/1.0 403 Forbidden");
+	} elseif ($type == '500') {
+		header("HTTP/1.0 500 Internal Server Error");
+	} else {
+		$type = '404';
+		header("HTTP/1.0 404 Not Found");
 	}
 
+	//Load the view
+	include(VIEW_PATH. 'errors'. DS. $type. '.php');
+
+	//Exit
+	exit();
+}
+
+
+/**
+ * Load an error using the general error template and then exit the script
+ * @param $message
+ * @param $title
+ */
+function show_error($message = '', $title = 'An Error Was Encountered') {
+	//Load the view
+	exit(include(VIEW_PATH. 'errors'. DS. 'general.php'));
 }
 
 
 /**
  * Add <pre> tags around objects you want to dump.
- *
  * @param mixed $text
  */
 function print_pre($data = NULL) {
@@ -330,13 +302,6 @@ function print_pre($data = NULL) {
 		print_r(func_get_args());
 	}
 	print '</pre>';
-}
-
-/**
- * Wrap an error message with the global error class tag
- */
-function wrap_error($text=null) {
-	return '<div class="error">'. $text. '</div>';
 }
 
 
@@ -355,44 +320,6 @@ function sanitize_text(&$text, $level=0){
 		$text = preg_replace("/([^a-z0-9_\-\.]+)/i", '_', trim($text));
 	}
 }
-
-
-/**
- * comma_to_array
- *
- * Create an array containing elements from a comma-separated string
- *
- * @param	String  Text containing values
- * @return	Array
- */
-function comma_to_array($tags) {
-	/*
-	 //Can handle even the most messed-up tag strings like below:
-	 $tags = "\n\r". 'tag1, this is tag2, or tag3. but we can\'t tag4, tag5, other '. "\n".
-	 'tag6, "plus tag7", #tag8,'. "\n\n". ',,,, ,,,,, ,,,'. "\n". ',, '.
-	 "\n\n\n". '< this is another, tag9.,, , ';
-	 */
-
-	//Replace anything that isn't a letter, comma, space, or number!
-	$tags = preg_replace("/[^a-z0-9, ]/", '', trim(strtolower($tags)));
-
-	//Remove empty "," so that we don't make empty elements
-	$tags = preg_replace("/,[^a-z0-9]*,/", ',', $tags);
-
-	//If there is an ending comma.... kill it!
-	$tags = rtrim($tags, ',');
-
-	//Turn the string into an array of tags
-	$tags = explode(',', $tags);
-
-	//Remove extra spaces from front and back of each element
-	foreach($tags as $key => $tag) {
-		$tags[$key] = trim($tag);
-	}
-
-	return $tags;
-}
-
 
 
 /**
@@ -418,9 +345,7 @@ function split_text($text='', $start='<code>', $end='</code>') {
 	}
 
 	return array($inside, $outside);
-
 }
-
 
 
 /**
@@ -447,126 +372,6 @@ function random_charaters($number, $type=0) {
 
 
 /**
- * timestamp_to_array
- *
- * Create an array containing the pieces of a timestamp.
- * The currnent time is used if $time is empty.
- *
- * @param	Int		10 Digit Hex Timestamp
- * @return	Array
- */
-function timestamp_to_array($time=null) {
-	$time = $time ? $time : time();
-	$output = array();
-	$output['year'] = date("Y", $time);
-	$output['month'] = date("F", $time);
-	$output['day'] = date("j", $time);
-	$output['hour'] = date("g", $time);
-	$output['minute'] = date("i", $time);
-	$output['second'] = date("s", $time);
-	$output['ampm'] = date("A", $time);
-	$output['gmt'] = date("O", $time);
-	return $output;
-}
-
-
-
-/**
- * array_to_timestamp
- *
- * Turn Date array back into a UNIX timestamp (10 digit number)
- *
- * @param	Array   Array of time elements
- * @return	String
- */
-
-function array_to_timestamp($date=null) {
-
-	//If they entered "pm" then we should add 12 hours to get the computer time.
-	//i.e. if it is 1pm then that is 13:00 in computer langauge. (they don't use am/pm)
-	if($date['ampm'] == 'pm') {
-		$date['hour'] += 12;
-	}
-
-	// Feed it all to the mktime function and it will give us a 10 digit UNIX timestamp.
-	return mktime($date['hour'], $date['minute'], $date['second'], $date['month'], $date['day'], $date['year']);
-
-}
-
-
-/**
- * Show a human-readable time difference ("10 seconds")
- *
- * @param int		$from_time
- * @param int		$to_time
- * @return string
- */
-function time_difference($from_time=0, $to_time=null) {
-
-	//If not set - use current time
-	if(!$to_time) { $to_time= time(); }
-
-	//timestamp difference
-	$difference = round(abs($to_time - $from_time));
-
-	//Try seconds first
-	if ($difference <= 60) {
-		return $difference. ' seconds';
-	}
-
-	//Time Types (you can add to this)
-	$times = array(
-    	'minutes'	=> 60,
-    	'hours'		=> 60,
-    	'days'		=> 24,
-    	'weeks'		=> 7,
-    	'years'		=> 52
-	);
-
-	//Try each type of time
-	foreach($times as $type => $value) {
-
-		//Find number of minutes
-		$difference = round($difference / $value);
-
-		if ($difference <= $value) {
-			return $difference. ' '. $type;
-		}
-	}
-}
-
-
-
-/**
- * Too Long
- *
- * Check to make sure a value is not a long XSS attack
- *
- * @param	string	value to check
- * @param	int		max length it can be
- * @return	boolean
- */
-function too_long($value, $length) {
-
-	//Ok, check to see if it is an array, integer, or string -
-	//And then make sure it is not to long!
-	if ( (is_string($value)) && (strlen($value) <= $length) ) {
-		return TRUE;
-	} elseif ( (is_numeric($value)) && ($value <= $length) ) {
-		return TRUE;
-	} elseif ( (is_array($value) && (count($value) <= $length)) ) {
-		return TRUE;
-	} else {
-		/* If it is somthing else (object, Boolean, NULL, etc..), or
-		 if it is too long, return FALSE (to warn the script before something bad happens!)
-		 */
-		return FALSE;
-	}
-}
-
-
-
-/**
  * Valid Email
  * @param	string	email to check
  * @return	boolean
@@ -574,7 +379,6 @@ function too_long($value, $length) {
 function valid_email($text){
 	return ( ! preg_match("/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i", $text)) ? FALSE : TRUE;
 }
-
 
 
 /**
@@ -798,10 +602,10 @@ function directory($data, $level=1) {
 		//Return the result
 		return $files;
 
-	} else {
-		trigger_error($data['start_dir']. " is not a valid directory.");
-		return array('0' => array('file' => 'not a valid directory'));
 	}
+
+	trigger_error($data['start_dir']. " is not a valid directory.");
+	return FALSE;
 }
 
 
@@ -887,38 +691,6 @@ function destroy_directory($dir='', $remove=true) {
 }
 
 
-
-
-
-/**
- * Highlight PHP code using proper CSS class names
- *
- * @param	string $code Code to highlight
- * @return	string
- */
-function highlight_php($code='') {
-
-	//If there are opening and closing PHP tags
-	if (strpos($code, '<?php') !== false && strpos($code, '?>') !== false) {
-
-		ini_set('highlight.default', 'code_default');
-		ini_set('highlight.comment', 'code_comment');
-		ini_set('highlight.keyword', 'code_keyword');
-		ini_set('highlight.string', 'code_string');
-		ini_set('highlight.html', 'code_html');
-
-		$code = highlight_string($code, true);
-		$code = str_replace('<span style="color: ', '<span class="', $code);
-
-		return '<div class="codebox">'. $code. '</div>';
-
-		//Else since there are no PHP tags - just place it in a code box
-	} else {
-		return '<div class="codebox"><code>'
-		. htmlentities($code, ENT_QUOTES, 'UTF-8'). '</code></div>';
-	}
-}
-
 /**
  * Gzip/Compress Output
  * Original function came from wordpress.org
@@ -958,8 +730,6 @@ function gzip_compression() {
 function &get_instance(){
 	return core::get_instance();
 }
-
-
 
 
 /**

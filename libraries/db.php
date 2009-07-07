@@ -1,9 +1,10 @@
 <?php
 /**
- * PDOORM - PDO Object/Relational Mapping System by David Pennington
+ * PDOORM - PDO Object/Relational Mapping System
+ * By David Pennington
  *
  * This class extends the PDO class to provide DB query abstraction in the form
- * of an easy-to-use ORM pattern. This provides a simple way to query different 
+ * of an easy-to-use ORM pattern. This provides a simple way to query different
  * types of databases without needing to change your code.
  *
  * About PDO:
@@ -17,36 +18,36 @@
  * like SELECT, REPLACE, INSERT, UPDATE, and DELETE queries. The actual PDO
  * object is not changed in anyway - each of these functions still returns a
  * PDOStatement Object and you can use all of the native PDO methods.
- * 
- * 
+ *
+ *
  * *******************
  * ** Example Usage **
  * *******************
- * 
- * 
+ *
+ *
  * ******************************************** Simple SELECT
- * 
+ *
  * $db->where('users.id', 1);
  * $result = $db->get('users');
- * 
+ *
  * -------------------------------------------------------------------------
  * SQL: SELECT * FROM users WHERE `users`.`id` = 1
  * -------------------------------------------------------------------------
- * 
- * 
+ *
+ *
  * ******************************************** Complex SELECT
- * 
+ *
  * $db->select('u.id as uid,u.user_login,u.user_email,p.ID as pid,p.post_date,p.post_title');
  * $db->from('users AS u');
  * $db->join('posts AS p', 'p.post_author = u.id');
  * $db->limit(10, 2);
- * 
+ *
  * //Count the rows first
  * print $db->count(). ' Rows found';
- * 
+ *
  * //Run Query
  * $result = $db->get();
- * 
+ *
  * -------------------------------------------------------------------------
  * SQL: SELECT `users`.`id` as uid,`users`.`user_login`,`users`.`user_email`,
  * `posts`.`ID` as pid,`posts`.`post_date`,`posts`.`post_title`
@@ -54,7 +55,7 @@
  * WHERE `users`.`ID` = 1
  * LIMIT 2, 10
  * -------------------------------------------------------------------------
- * 
+ *
  *
  * @todo		Add support for PostgreSQL and MSSQL
  * @todo		Auto-add table prefix (replace `table` with `prefix_table`)
@@ -114,7 +115,7 @@ class db {
 	public $last_table			= NULL;
 	//Use the row class?
 	public $row_class			= 'ORM_Row';
-	
+
 	//Active Record Clauses
 	public $orm_select			= '*';
 	public $orm_from			= '';
@@ -144,10 +145,10 @@ class db {
 	public function __construct($config=null) {
 		//Set the instance of this class
 		self::$instance[] =& $this;
-		
+
 		//Set the config
 		$this->setup($config);
-		
+
 		//Connect to the db
 		$this->connect();
 	}
@@ -171,14 +172,14 @@ class db {
 	 * Test if this driver is installed
 	 */
 	public function driver_installed() {
-		
+
 		//If this install of PHP does NOT have the right PDO driver
 		If(!in_array($this->config['type'], PDO::getAvailableDrivers())) {
 			print_pre(PDO::getAvailableDrivers());
 			trigger_error('The PDO Database type <b>'. $this->config['type']
 			. '</b> is not supported on this PHP install.', E_USER_ERROR);
 		}
-		
+
 		//Driver is installed
 		return TRUE;
 	}
@@ -196,7 +197,7 @@ class db {
 		if(!$this->driver_installed()) { return; }
 
 		try {
-				
+
 			//Connect to the database
 			$this->pdo = new PDO(
 			$this->config['type']. ':'. $this->config['dns'],
@@ -207,8 +208,8 @@ class db {
 
 			//Set the error mode to show warning along with error codes
 			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, $this->error_mode);
-			
-			
+
+
 		} catch (PDOException $error) {
 			trigger_error($error->getMessage());
 		}
@@ -292,35 +293,35 @@ class db {
 	 * @return string
 	 */
 	public function quote_table($table=null) {
-		
+
 		//If we are not allowed to quote stuff
 		if( ! $this->quote_fields) {
 			return $table;
 		}
-		
+
 		//Get the identifier separator
 		$sep = $this->quote_identifier();
-		
+
 		//If not already quoted
 		if(strpos($table, $sep) !== FALSE) {
 			return $table;
 		}
-		
+
 		//Break it apart
 		preg_match('/([a-z0-9\_]+)(\)?\s+AS\s+)?([a-z]+)?/i', $table, $matches);
-		
+
 		//print_pre($matches, $table);
-		
+
 		//If no alias
 		if(empty($matches[2])) {
 			return $sep. $matches[1]. $sep;
 		}
-		
+
 		//Quote `table` AS `alias`
 		return $sep. $matches[1]. $sep. ' AS '. $sep. $matches[3]. $sep;
-		
+
 	}
-	
+
 	/*
 	 * Place the database "field quotes" around all table.column values
 	 * in the query string. i.e. table.column = `table`.`column`
@@ -451,16 +452,16 @@ class db {
 	 * @return	string
 	 */
 	public function insert_string($table, $keys, $values) {
-		
+
 		//Get the identifier separator
 		$sep = $this->quote_identifier();
-		
+
 		//Create column list
 		$columns = $sep. implode($sep. ', '. $sep, $keys). $sep;
-		
+
 		//Return the query
 		return 'INSERT INTO '. $this->quote_table($table) .' ('. $columns. ') VALUES (' .implode(', ', $values). ')';
-		
+
 	}
 
 
@@ -468,7 +469,7 @@ class db {
 	 * Update statement
 	 *
 	 * Generates a platform-specific update string from the supplied data.
-	 * When calling this function from outside this object make sure to 
+	 * When calling this function from outside this object make sure to
 	 * escape/quote every value submitted.
 	 *
 	 * @param	string	the table name
@@ -479,7 +480,7 @@ class db {
 
 		//Get the identifier separator
 		$sep = $this->quote_identifier();
-		
+
 		//Get values
 		foreach($values as $key => $value) {
 			$fields[] = $sep. $key. $sep. " = ". $value;
@@ -554,32 +555,32 @@ class db {
 	 * @return	void
 	 */
 	public function from($from=null) {
-		
+
 		//Quote the table name
 		$from = $this->quote_table($from);
-		
+
 		//Add this to our from clauses
 		$this->orm_from = 'FROM '. $from;
-		
+
 		//If we are going to use the row class, then we need to know where the row came from
 		if($this->row_class) {
-		
+
 			//Look for a valid table name
 			preg_match('/^(?:[\'"`]*)([a-z0-9\_]+)\b/i', $from, $table);
-			
+
 			//If a valid table was found
 			if(!empty($table[1])) {
 				//Set last table used for the $row->save() method
 				$this->last_table = $table[1];
 			} else {
-				//Reset the value incase some query was run before this 
+				//Reset the value incase some query was run before this
 				//and we might inherit the table name!
 				$this->last_table = NULL;
 			}
 		}
-		
+
 	}
-	
+
 
 	/**
 	 * Generates the JOIN portion of the query
@@ -673,8 +674,8 @@ class db {
 			if (is_null($value)){
 				//If is a NULL value - state that!
 				$this->orm_where[] = $type. ' '. $field. ' IS NULL';
-					
-					
+
+
 				//Else if this is an array
 			} elseif($value && is_array($value)) {
 
@@ -686,10 +687,10 @@ class db {
 				//Create the where list
 				$this->orm_where[] = $type. ' '. $field. ' '. $in. ' in ('. implode(',', $value). ')';
 
-					
+
 				//Else it is just a plain where clause
 			} else {
-					
+
 				//If an operator is not already set!
 				if(!preg_match('/[=><]/', $field)) {
 					//Default to "equals"
@@ -883,7 +884,7 @@ class db {
 		 * just a string function and not really a clause of it's own.
 		 * http://dev.mysql.com/doc/refman/5.0/en/string-functions.html
 		 */
-			
+
 		//If there is a WHERE clause
 		if(!empty($this->orm_where) && is_array($this->orm_where)) {
 
@@ -968,12 +969,12 @@ class db {
 
 		//Build the query
 		$sql = $this->compile_select();
-		
+
 		//Quote the fields
 		if($this->quote_fields) {
 			$sql = $this->quote_fields($sql);
 		}
-		
+
 		//Remove the AR data?
 		if(!$save) {
 			$this->clear();
@@ -1001,53 +1002,53 @@ class db {
 
 		//Fetch and store the PDOStatement Object
 		$this->result = $this->pdo->query($sql);
-		
+
 		if(!$this->result) { return; }
-		
+
 		//If this is NOT a class fetch
 		if($this->fetch_mode != PDO::FETCH_CLASS) {
 			//Set default fetch method
 			$this->result->setFetchMode($this->fetch_mode);
-			
+
 		} else {
 			//Set default fetch method to our Row class
 			$this->result->setFetchMode(PDO::FETCH_CLASS, $this->row_class);
 		}
-		
+
 		//return the object
 		return $this->result;
 	}
 
-	
+
 	/**
 	 * Creates a SELECT COUNT query from the current AR Clauses
 	 * Use this to figure out the number of rows for a query.
-	 * 
+	 *
 	 * @param string	COUNT(*) statement
 	 * @param boolean	save the AR clauses
 	 */
 	 public function count($table = NULL, $select='COUNT(*)', $save=TRUE) {
-		
+
 	 	//We don't want to erase the current select statement
 	 	$temp = $this->orm_select;
-	 	
+
 	 	//Set the new SELECT COUNT statement
 		$this->select($select);
-		
+
 		//Fetch the result and save(?) the AR Clauses.
 		$result = $this->get($table,NULL,$save);
-		
+
 	 	//If we are just returning the query
 		if($this->return_query) {
 			return $result;
 		}
-		
+
 		//Restore the old select statement
 		$this->select($temp);
-		
+
 		//Return the number of found rows
 		return $result->fetchColumn();
-		
+
 	}
 
 
@@ -1115,7 +1116,7 @@ class db {
 	public function __toString() {
 		return $this->last_query();
 	}
-	
+
 }
 
 
@@ -1170,7 +1171,7 @@ class mysql extends db {
 	 * Explain all columns within a table
 	 */
 	public function list_columns($table=null) {
-			
+
 		//if the table name is empty/null
 		if(!$table) { return; }
 
@@ -1329,12 +1330,12 @@ class pgsql extends db {
 	 */
 	public function list_tables($like=null) {
 		//$like can have wild cards like "%value%"
-		
-		$sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"	
+
+		$sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
 		. ($like ? ' AND table_name LIKE \''. $like. '\'' : '');
-		
+
 		$result = $this->query($sql);
-		
+
 		//For each result we added it to the array
 		$tables = array();
 		while($table = $result->fetchColumn()) {
@@ -1348,14 +1349,14 @@ class pgsql extends db {
 	 * Explain all columns within a table
 	 */
 	public function list_columns($table=null) {
-		
+
 		//Create query
 		//$query = "SELECT column_name, column_default, data_type,  FROM '
-		
+
 		//Busted for now - until Postgre admin fixes this
 		$query = 'SELECT * FROM'
 		. " information_schema.columns WHERE table_name ='". $table ."'";
-		
+
 		$result = $this->query($query);
 		/* RESULT:
 		 Array
@@ -1399,23 +1400,23 @@ class pgsql extends db {
  * your own.
  */
 Class ORM_Row {
-	
+
 	public function save($instance_id=null) {
-		
+
 		static $db = null;
-		
+
 		//Must have an ID column - change if you want
 		if(empty($this->id)) {
 			trigger_error('Can\'t update row, No "id" column found.', E_USER_WARNING);
 			return;
 		}
-		
+
 		//Fetch the database instance
 		if(!$db) {
 			//Get the last database insance
 			$db = db::get_instance($instance_id);
 		}
-		
+
 		//Update the database row
 		return $db->update($db->last_table, $this, array('id' => $this->id));
 	}

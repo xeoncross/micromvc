@@ -27,32 +27,51 @@ define('PAGE_NAME', ($var ? $var : 'index'));
 //Define the OS file path separator
 define('DS', DIRECTORY_SEPARATOR);
 
+
 //Define the base file system path to MicroMVC
 define('SYSTEM_PATH', realpath(dirname(__FILE__)). DS);
 
-//Include the common file to continue loading
-require_once(SYSTEM_PATH. 'functions/common.php');
+//Define the base file system path to MicroMVC
+define('LIBRARY_PATH', SYSTEM_PATH. DS. 'libraries'. DS);
 
 //Define the base file system path to MicroMVC
-define('MODULE_PATH', SYSTEM_PATH. 'modules/');
+define('FUNCTION_PATH', SYSTEM_PATH. DS. 'functions'. DS);
 
-//Discover the current domain for the whole script
-define('DOMAIN', current_domain());
+//Define the base file system path to MicroMVC
+define('MODULE_PATH', SYSTEM_PATH. 'modules'. DS);
+
+
+//Include the common file to continue loading
+require_once(FUNCTION_PATH. 'common.php');
 
 //Discover whether this is an AJAX request or not
 define('AJAX_REQUEST', is_ajax_request());
 
+//Discover the current domain for the whole script
+define('DOMAIN', current_domain());
+
+
 //Define the file system path to the current site
 define('SITE_PATH', SYSTEM_PATH. DS. DOMAIN. DS);
 
-//The file system path of the site's upload folder
-define('UPLOAD_PATH', SITE_PATH. 'uploads/');
-
 //The file system path of the site's cache folder
-define('CACHE_PATH', SITE_PATH. 'cache/');
+define('CACHE_PATH', SITE_PATH. 'cache'. DS);
+
+//The file system path of the site's upload folder
+define('CONFIG_PATH', SITE_PATH. 'config'. DS);
+
+//The file system path of the site's upload folder
+define('MODEL_PATH', SITE_PATH. 'modles'. DS);
+
+//The file system path of the site's upload folder
+define('UPLOAD_PATH', SITE_PATH. 'uploads'. DS);
+
+//The file system path of the site's upload folder
+define('VIEW_PATH', SITE_PATH. 'views'. DS);
+
 
 //Override the PHP error handler
-set_error_handler('mvc_error_handler');
+//set_error_handler('mvc_error_handler');
 
 //Require the config file for this site name
 require(SITE_PATH. 'config/config.php');
@@ -61,10 +80,10 @@ require(SITE_PATH. 'config/config.php');
 require(SITE_PATH. 'config/hooks.php');
 
 //Load the caching class
-$cache = load_class('cache', 'libraries', NULL, 2);
+$cache = load_class('cache', LIBRARY_PATH);
 
 //Load the hooks class
-$hooks = load_class('hooks', 'libraries', $hooks, 2);
+$hooks = load_class('hooks', LIBRARY_PATH, $hooks);
 
 //Call first hook
 $hooks->call('system_startup');
@@ -103,16 +122,15 @@ if (ini_get('magic_quotes_gpc')) {
 
 
 //Include the core file
-load_file('core', 'libraries', 2);
+load_class('core', LIBRARY_PATH, NULL, FALSE);
 
 //Include the base file
-load_file('base', 'libraries', 2);
-
+load_class('base', LIBRARY_PATH, NULL, FALSE);
 
 /**
  * Get the controller from the URI
  */
-$routes = load_class('routes', 'libraries', NULL, 2);
+$routes = load_class('routes', LIBRARY_PATH);
 
 //Set default controller/method if none is set in URL
 $routes->set_defaults(
@@ -133,23 +151,33 @@ $method		= $routes->fetch(1);
  * START-UP THE SYSTEM!
  */
 
-//If the file doesn't exist - default to the core class
-if( ! load_class($controller, 'controllers', NULL, 1, FALSE)) {
-	$method		= 'requrst_error';
+//Try to load the controller from the site directory first
+if(file_exists(SITE_PATH. 'controllers'. DS. $controller. '.php')) {
+	$path = SITE_PATH. 'controllers'. DS;
+
+
+//Then try to see if there is a module
+} elseif(file_exists(MODULE_PATH. $controller. DS. 'controllers'. DS. $controller. '.php')) {
+	$path = MODULE_PATH. $controller. DS. 'controllers'. DS;
+
+//Else just default to the request_error method
+} else {
+	$path		= NULL;
+	$method		= 'request_error';
 	$controller = 'core';
 }
 
-//Make sure someone isn't trying to access core/private functions
-if(($method !== 'request_error' && method_exists('core', $method))
-	//And make sure this method exists (and is public)
-	|| !in_array($method, get_class_methods($controller))) {
+//Load the controller and pass the $config
+$controller = load_class($controller, $path, $config);
 
-	//Trigger a 404 not found error
-	$method = 'request_error';
+//Make sure someone isn't trying to access core or private functions
+if($method != 'request_error' && $controller != 'core') {
+	//Make sure this method exists (and is public)
+	if(method_exists('core', $method) OR ! in_array($method, get_class_methods($controller))) {
+		//Trigger a 404 not found error
+		$method = 'request_error';
+	}
 }
-
-//Create a new instance of that controller and pass the $config
-$controller = load_class($controller, NULL, $config);
 
 //Call the startup hook
 $controller->hooks->call('post_constructor');

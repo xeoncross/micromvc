@@ -76,12 +76,12 @@ function is_ajax_request() {
 * @param	bool	(flag) load class but do not instantiate
 * @return	object
 */
-function load_class($class = NULL, $path = 'libraries', $params = NULL, $location = 1, $instantiate = TRUE) {
+function load_class($class = NULL, $path = NULL, $params = NULL, $instantiate = TRUE) {
 
 	static $objects = array();
 
 	//If a class is NOT given
-	if (!$class) { return FALSE; }
+	if ( ! $class) { die('Failed to load class '. $class); return FALSE; }
 
 	//If this class is already loaded
 	if(!empty($objects[$class])) {
@@ -90,12 +90,8 @@ function load_class($class = NULL, $path = 'libraries', $params = NULL, $locatio
 
 	// If the class is not already loaded
 	if ( ! class_exists($class)) {
-
-		//Load this file
-		if( ! load_file($class, $path, $location)) {
-			return FALSE;
-		}
-
+		//Require the file
+		require_once($path. $class. '.php');
 	}
 
 	//If we just want to load the file - nothing more
@@ -123,7 +119,7 @@ function load_class($class = NULL, $path = 'libraries', $params = NULL, $locatio
  * @param $path
  * @param $location
  * @return unknown_type
- */
+ *
 function load_file($name = FALSE, $path = FALSE, $location = 1) {
 
 	//If we are missing something
@@ -140,7 +136,7 @@ function load_file($name = FALSE, $path = FALSE, $location = 1) {
 		}
 
 		//Else it must be a module - so set the path
-		$path = MODULE_PATH. '/'. $name. '.php';
+		//$path = MODULE_PATH. '/'. $name. '.php';
 
 
 	//Else it is a site specific file (1)
@@ -153,7 +149,7 @@ function load_file($name = FALSE, $path = FALSE, $location = 1) {
 
 	//If this is a module file (3)
 	} elseif ($location == 3) {
-		$path = MODULE_PATH. $module. '/'. $path. '/'. $name. '.php';
+		//$path = MODULE_PATH. $module. '/'. $path. '/'. $name. '.php';
 	}
 
 	// If the requested file does not exist
@@ -164,7 +160,7 @@ function load_file($name = FALSE, $path = FALSE, $location = 1) {
 	//Require the file
 	return require_once($path);
 }
-
+*/
 
 
 

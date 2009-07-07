@@ -12,16 +12,19 @@
  * @version		1.0.1 <5/31/2009>
  ********************************** 80 Columns *********************************
  */
-class core {
+require(LIBRARY_PATH. 'loader.php');
+class core extends loader {
 
-	//Data for final site Layout
-	public $data = null;
+	//Data for final site layout
+	public $views = array();
 	//Name of final site layout file
 	public $layout = 'layout';
 	//Singleton instance object
 	private static $instance;
-	//Site Config
+	//Config array
 	public $config = array();
+	//Is this a module?
+	public $is_module = FALSE;
 
 
 	/**
@@ -37,9 +40,8 @@ class core {
 		//Set the core site config
 		$this->config['config'] = $config;
 
-		//load other config files
+		//Set pre-loaded classes in this controller
 		foreach(array('hooks', 'cache', 'routes') as $name) {
-			//Load it
 			$this->$name = load_class($name);
 		}
 
@@ -49,7 +51,7 @@ class core {
 	/**
 	 * Load a config file
 	 * @param string $config
-	 */
+	 *
 	public function config($name=null) {
 
 		//Only load once
@@ -57,42 +59,40 @@ class core {
 			return $this->config[$name];
 		}
 
-		//Path to the config file
-		$path = SITE_DIR. 'sites/'. SITE_NAME. '/'. $name. '.php';
+		//If this is a module - then look in the modules folder
+		if($this->is_module && $name != 'database') {
+			$path = MODULE_PATH. get_class($this). '/config/'. $name. '.php';
 
-		//Check to see if it exists
-		if(file_exists($path)) {
-
-			//include the config
-			include($path);
-
-			//Set the values in our object
-			$this->config[$name] = $$name;
-
+		} else { //Look in the normal site folder
+			$path = SITE_PATH. 'config/'. $name. '.php';
 		}
 
-		//Return the config array
-		return $this->config[$name];
+		//include the config
+		require($path);
+
+		//Set the values in our config array and return
+		return $this->config[$name] = $$name;
+
 	}
 
 
 	/**
 	 * Load and initialize the database connection
 	 * @param array $config
-	 */
+	 *
 	public function load_database() {
 
 		//Don't load the DB object twice!!!
 		if(!empty($this->db)) { return; }
 
-		//Load the DB class (but don't create it)
-		load_class('db', NULL, 'models', FALSE);
+		//Load the DB class (but don't create the class)
+		load_class('db', NULL, NULL, NULL, FALSE);
 
 		//Load the config for this database
 		$config = $this->config('database');
 
 		//Create a new instance of the database child class "mysql"
-		$this->db = load_class($config['type'], $config);
+		$this->db = load_class($config['type'], NULL, $config);
 
 	}
 
@@ -105,17 +105,21 @@ class core {
 	 * @param	array	params to pass to the model constructor
 	 * @param	string	folder name of the class
 	 * @return	void
-	 */
-	public function load($class=null, $name=null, $params=null, $path='models', $assign_libraries = TRUE) {
+	 *
+	public function load($class = NULL, $name = NULL, $path = NULL, $params = NULL, $location = NULL) {
 
 		//If a model is NOT given
-		if (!$class) { return; }
+		if ( ! $class) { return; }
 
 		//If a name is not given
-		if(!$name) { $name = $class; }
+		if( ! $name) { $name = $class; }
+
+		if($this->is_module) {
+			$path = '';
+		}
 
 		//Load the class
-		$this->$name = load_class($class, $params, $path);
+		$this->$name = load_class($class, $path, $params, $location);
 
 		return true;
 	}
@@ -130,7 +134,7 @@ class core {
 	 * @param	array	values to pass to the view
 	 * @param	boolean	return the output or print it?
 	 * @return	void
-	 */
+	 *
 	public function view($__file = NULL, $__variables = NULL, $__return = TRUE, $__location = 1) {
 
 		//If no file is given - just return false
@@ -165,9 +169,7 @@ class core {
 		}
 
 
-		/*
-		 * Buffer the output so we can return it
-		 */
+		//Buffer the output so we can return it
 		ob_start();
 
 		// include() vs include_once() allows for multiple views with the same name
@@ -181,6 +183,7 @@ class core {
 		return $buffer;
 
 	}
+	*/
 
 
 
@@ -249,7 +252,7 @@ class core {
 	 * Return this classes instance
 	 * @return singleton
 	 */
-	public static function &get_instance() {
+	public static function get_instance() {
 		return self::$instance;
 	}
 

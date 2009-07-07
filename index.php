@@ -134,9 +134,9 @@ $routes = load_class('routes', LIBRARY_PATH);
 
 //Set default controller/method if none is set in URL
 $routes->set_defaults(
-	$config['default_controller'],
-	$config['default_method'],
-	$config['permitted_uri_chars']
+$config['default_controller'],
+$config['default_method'],
+$config['permitted_uri_chars']
 );
 
 //Parse the URI
@@ -155,7 +155,7 @@ $method		= $routes->fetch(1);
 if(file_exists(SITE_PATH. 'controllers'. DS. $controller. '.php')) {
 	$path = SITE_PATH. 'controllers'. DS;
 
-//Then try to see if there is a module
+	//Then try to see if there is a module
 } elseif(file_exists(MODULE_PATH. $controller. DS. 'controllers'. DS. $controller. '.php')) {
 	$path = MODULE_PATH. $controller. DS. 'controllers'. DS;
 

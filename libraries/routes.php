@@ -16,7 +16,7 @@ class routes {
 
 	public $uri_string				= '';
 	public $uri_segments			= array();
-	public $permitted_uri_chars	= '';
+	public $permitted_uri_chars		= '';
 
 	/**
 	 * Parse the URI

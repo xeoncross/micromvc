@@ -8,10 +8,6 @@ $config['default_controller'] = 'welcome';
 $config['default_method'] = 'index';
 //Characters to allow in the URI string ($_GET data)
 $config['permitted_uri_chars'] = 'a-z 0-9~%.:_\-';
-//An array of config files to auto-load (FALSE for none)
-$config['load_config'] = array('hooks');
-// Use hooks?
-$config['hooks'] = TRUE;
 
 //Enable error reporting?
 //error_reporting(E_ALL|E_STRICT);
@@ -28,7 +24,7 @@ date_default_timezone_set("America/Chicago");
  *
  * Set to FALSE to disable caching
  * Set to a number (in seconds) to enable:
- * i.e. 60 * 2 = 2 minutes
+ * i.e. 60 * 2 = (2 minutes)
  */
 define('CACHING', FALSE);
 

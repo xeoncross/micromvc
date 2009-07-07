@@ -52,7 +52,7 @@ define('DOMAIN', current_domain());
 
 
 //Define the file system path to the current site
-define('SITE_PATH', SYSTEM_PATH. DS. DOMAIN. DS);
+define('SITE_PATH', SYSTEM_PATH. DOMAIN. DS);
 
 //The file system path of the site's cache folder
 define('CACHE_PATH', SITE_PATH. 'cache'. DS);

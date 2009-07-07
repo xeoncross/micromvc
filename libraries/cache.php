@@ -27,19 +27,19 @@ class cache {
 	 * @return	void
 	 */
 	function fetch($file = '') {
-	
+
 		//If caching is disabled
 		if(!$this->cache) { return; }
-		
+
 		//set the file path
-		$path = SITE_DIR. 'cache/'. $file;
-	
+		$path = CACHE_DIR. $file;
+
 		//IF the file exists AND the cach life has not expired
 		if(file_exists($path) && ((time() - filemtime($path)) < $this->cache)) {
-		
+
 			//return string containing the file contents
 			return file_get_contents($path);
-		
+
 		}
 	}
 
@@ -52,32 +52,32 @@ class cache {
 	 * @return	void
 	 */
 	function create($file=null, $contents=null) {
-	
+
 		//If cacheing is not enabled - quit function
 		if (!$this->cache) { return true; }
-	
+
 		//If one isn't set - return
 		if(!$file || !$contents) { return; }
-	
+
 		//Set the file path
-		$path = SITE_DIR. 'cache/'. $file;
-	
+		$path = CACHE_DIR. $file;
+
 		// Open for writing and place the file pointer at the beginning
 		// of the file and truncate the file (if it doesn't exist try to make it)
 		if (!$handle = fopen($path, 'w')) {
 			return;
 		}
-	
+
 		// Write $content to our opened file.
 		if (fwrite($handle, $contents) === FALSE) {
 			return;
 		}
-	
+
 		//Close the file
 		fclose($handle);
-	
+
 		return true;
-	
+
 	}
 
 
@@ -87,12 +87,12 @@ class cache {
 	 */
 	function delete($file=null) {
 		if(!$file) { return; }
-	
+
 		//Delete the file+path
-		if(unlink(SITE_DIR. 'cache/'. $file)) {
+		if(unlink(CACHE_DIR. $file)) {
 			return true;
 		}
-	
+
 	}
 
 
@@ -102,7 +102,7 @@ class cache {
 	 */
 	function delete_caches() {
 		//Destroy all files in the cache dir
-		if(destroy_dir(SITE_DIR. 'cache/', false)) {
+		if(destroy_dir(CACHE_DIR, false)) {
 			return true;
 		}
 	}

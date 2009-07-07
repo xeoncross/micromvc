@@ -18,7 +18,6 @@ class routes {
 	public $uri_segments			= array();
 	public $permitted_uri_chars	= '';
 
-
 	/**
 	 * Parse the URI
 	 */
@@ -95,7 +94,7 @@ class routes {
 	 * Set the default controller/Method to use if none was found in the URI
 	 */
 	public function set_defaults($controller=null, $method=null, $permitted_uri_chars=null) {
-	
+
 		//If a controller was NOT set in the URL
 		if(empty($this->uri_segments[0]) && $controller) {
 			$this->uri_segments[0] = $controller;
@@ -136,18 +135,10 @@ class routes {
 		print_pre($this->uri_segments, $this->uri_string, @$_SERVER['PATH_INFO'], @$_SERVER['REQUEST_URI']);
 	}
 
-	/**
-	 * Returns a singleton reference to the current class.
-	 *
-	public static function & current() {
-		static $instance = null;
-		return $instance = (empty($instance)) ? new self() : $instance ;
-	}*/
-
 	//For testing
 	public function __destruct() {
 		//if(DEBUG_MODE) { $this->debug(); }
 	}
-	
+
 }
 

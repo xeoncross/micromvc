@@ -18,12 +18,12 @@ class hooks {
 	public $hook_in_progress = false;
 	//List of hooks
 	public $hooks = array();
-	
+
 	//Set Hook configuration
 	public function __construct($config=null) {
 		$this->hooks = $config;
 	}
-	
+
 	/**
 	 * Call
 	 *
@@ -36,18 +36,7 @@ class hooks {
 	 * @return	mixed
 	 */
 	public function call($name = '', $data = NULL) {
-		/*
-		print_pre('Nane: '. $name, $data);
-		print '<hr>';
-		foreach($this->hooks as $key => $value) {
-			print_pre($key, $value);
-		}
-		print_pre($this->hooks);
-		die();
-		print_pre($this);
-		*/
-		
-		
+
 		//If no hook is given OR found with that name
 		if (!$name OR empty($this->hooks[$name])) {
 			return $data;
@@ -112,18 +101,18 @@ class hooks {
 		if( ! $function) {
 			unset($this->hooks[$name]);
 		}
-		
+
 		//If there are several hooks to clear
 		if(isset($this->hooks[$name][0]) && is_array($this->hooks[$name])) {
-			
+
 			foreach($this->hooks[$name] as $key => $hook) {
 				if($hook['function'] == $function) {
 					unset($this->hooks[$name][$key]);
 					return true;
 				}
 			}
-			
-		//Else it is only one hook
+
+			//Else it is only one hook
 		} else {
 			if($this->hooks[$name]['function'] == $function) {
 				unset($this->hooks[$name]);
@@ -151,10 +140,10 @@ class hooks {
 		if (!is_array($hook)) {
 			return $data;
 		}
-		
+
 		/*
 		 * Safety - Prevents run-away loops
-		 * 
+		 *
 		 * If the script being called happens to have the same
 		 * hook call within it a loop can happen
 		 */
@@ -170,7 +159,7 @@ class hooks {
 		/*
 		 * Error Checking
 		 */
-		
+
 		//If we are missing a lot of stuff...
 		if (!$class && !$function) {
 			return $data;
@@ -181,12 +170,12 @@ class hooks {
 			return $data;
 		}
 
-		//Default to "functions/" or "libraries/" for classes
+		//Default to "functions/" or "libraries/" for hooks
 		if(!$path) {
 			if($class) {
-				$path = 'libraries';
+				$path = LIBRARY_PATH;
 			} else {
-				$path = 'functions';
+				$path = FUNCTION_PATH;
 			}
 		}
 
@@ -200,35 +189,31 @@ class hooks {
 		// -----------------------------------
 		// Call the requested class and/or function
 		// -----------------------------------
-		
+
 		if($class) {
-			
+
 			//Load the class
-			$object = load_class($class, $data, $path);
+			$object = load_class($class, $path, $data);
 
 			//Check for the object first
 			if($object && method_exists($object, $function)) {
-	
+
 				//Run the function
 				$data = $object->$function($data);
 			}
-		
-			//Else just run the function
-		} elseif($function) {
+
+		} else { //Else just run the function
 
 			//If the function does not alreay exist
 			if (!function_exists($function)) {
-				require_once($path. '/'. $file);
+				require_once($path. $file. '.php');
 			}
 
 			$data = $function($data);
-
 		}
-		//If a class/object/function was not found - do nothing!
-
 
 		$this->hook_in_progress = FALSE;
 		return $data;
 	}
-	
+
 }

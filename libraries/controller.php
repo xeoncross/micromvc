@@ -2,7 +2,9 @@
 /**
  * Core
  *
- * This is the parent class for all controllers. Controller must extend this class
+ * This is the parent class for all controllers. Controller must extend this
+ * class. If you want, you can also extend this class with another class which
+ * your controllers can then extend.
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -12,8 +14,7 @@
  * @version		1.0.1 <5/31/2009>
  ********************************** 80 Columns *********************************
  */
-require(LIBRARY_PATH. 'loader.php');
-class controller extends loader {
+class controller {
 
 	//Data for final site layout
 	public $views = array();
@@ -26,14 +27,18 @@ class controller extends loader {
 
 
 	/**
-	 * Load the config values for this system
-	 *
+	 * Setup some basic controller items on load
 	 * @param array $config
 	 */
 	public function __construct($config=null) {
 
 		//Set singleton instance
 		self::$instance =& $this;
+
+		//If this is an ajax request
+		if(AJAX_REQUEST) {
+			$this->layout = 'ajax';
+		}
 
 		//Set the core site config
 		$this->config['config'] = $config;
@@ -45,36 +50,188 @@ class controller extends loader {
 
 	}
 
+
 	/**
-	 * Show a 400-500 Header error within the site theme
+	 * Load a library
+	 * @param $class
+	 * @param $params
+	 * @param $name
+	 * @param $module
+	 * @return boolean
+	 */
+	public function library($class = NULL, $params = NULL, $name = NULL, $module = FALSE) {
+
+		//Is this a module's library -or a global system library?
+		$path = ($module ? MODULE_PATH. $module. DS : SYSTEM_PATH). 'libraries'. DS;
+
+		//Try to load the class
+		return $this->object($class, $name, $path, $params);
+	}
+
+
+	/**
+	 * Load a model
+	 * @param $class
+	 * @param $params
+	 * @param $name
+	 * @param $module
+	 * @return boolean
+	 */
+	public function model($class = NULL, $params = NULL, $name = NULL, $module = FALSE) {
+
+		//Is this a module's model -or a site model?
+		$path = ($module ? MODULE_PATH. $module. DS : SITE_PATH). 'models'. DS;
+
+		//Try to load the class
+		return $this->object($class, $name, $path, $params);
+	}
+
+
+	/**
+	 * Loads and instantiates models, libraries, and other classes
 	 *
-	 * @access	public
-	 * @param	string
+	 * @param	string	the name of the class
+	 * @param	string	name for the class
+	 * @param	array	params to pass to the model constructor
+	 * @param	string	folder name of the class
 	 * @return	void
 	 */
-	public function request_error($type='404') {
+	public function object($class = NULL, $name = NULL, $path = NULL, $params = NULL) {
 
-		//Clean the type of error from XSS stuff
-		//$type = preg_replace('/[^a-z0-9]+/i', '', $type);
+		//If a model is NOT given
+		if ( ! $class OR ! $path) { return FALSE; }
 
-		//Check the type of error
-		if ($type == '400') {
-			header("HTTP/1.0 400 Bad Request");
-		} elseif ($type == '401') {
-			header("HTTP/1.0 401 Unauthorized");
-		} elseif ($type == '403') {
-			header("HTTP/1.0 403 Forbidden");
-		} elseif ($type == '500') {
-			header("HTTP/1.0 500 Internal Server Error");
-		} else {
-			$type = '404';
-			header("HTTP/1.0 404 Not Found");
+		//Allow classes to be located in subdirectories (sub/sub2/class)
+		if (strpos($class, '/') !== FALSE) {
+
+			// explode the path so we can separate the filename from the path
+			$x = explode('/', $class);
+
+			// Get class name from end of string
+			$class = array_pop($x);
+
+			// Glue the path back together (minus the filename)
+			$path .= implode($x, DS). DS;
 		}
 
-		$this->data['content'] = $this->view('errors/'. $type);
+		//If a name is not given
+		if( ! $name) { $name = $class; }
+
+		//Load the class
+		$this->$name = load_class($class, $path, $params);
+
+		return TRUE;
+	}
+
+
+	/**
+	 * Load a helper function file
+	 * @param $name
+	 * @param $module
+	 * @return boolean
+	 */
+	public function helper($name = NULL, $module = FALSE) {
+
+		//Is this a module's library -or a global system library?
+		$path = ($module ? MODULE_PATH. $module. DS : SYSTEM_PATH). 'functions'. DS. $name. '.php';
+
+		//Try to load the file
+		return require_once($path);
+	}
+
+
+	/**
+	 * Load a config file
+	 * @param string $config
+	 */
+	public function load_config($name=null, $module = FALSE) {
+
+		//Only load once
+		if(!empty($this->config[$name])) {
+			return $this->config[$name];
+		}
+
+		//Is this a module's config -or a site config?
+		$path = ($module ? MODULE_PATH. $module. DS : SITE_PATH). 'config'. DS. $name. '.php';
+
+		//include the config
+		require($path);
+
+		//Set the values in our config array and return
+		return $this->config[$name] = $$name;
 
 	}
 
+
+	/**
+	 * Load and initialize the database connection
+	 * @param array $config
+	 */
+	public function load_database() {
+
+		//Don't load the DB object twice!!!
+		if(!empty($this->db)) { return; }
+
+		//Load the DB class (but don't create the class)
+		load_class('db', LIBRARY_PATH, NULL, FALSE);
+
+		//Load the config for this database
+		$config = $this->config('database');
+
+		//Create a new instance of the database child class "mysql"
+		$this->db = load_class($config['type'], NULL, $config);
+	}
+
+
+	/**
+	 * This function is used to load views files.
+	 *
+	 * @access	private
+	 * @param	String	file path/name
+	 * @param	array	values to pass to the view
+	 * @param	boolean	return the output or print it?
+	 * @return	void
+	 */
+	public function view($__file = NULL, $__variables = NULL, $__return = TRUE, $__module = FALSE) {
+
+		//If no file is given - just return false
+		if(!$__file) { return; }
+
+		//Is this a module's library -or a global system library?
+		$__path = ($__module ? MODULE_PATH. $__module. DS : SITE_PATH);
+
+		//Add the path
+		$__path .= 'views'. DS. $__file. '.php';
+
+		if(is_array($__variables)) {
+			//Make each value passed to this view available for use
+			foreach($__variables as $__key => $__variable) {
+				$$__key = $__variable;
+			}
+		}
+
+		// Delete them now
+		$__variables = null;
+
+		// We just want to print to the screen
+		if( ! $__return) {
+			if( ! include($__path)) {
+				return FALSE;
+			}
+		}
+
+		//Buffer the output so we can save it to a string
+		ob_start();
+
+		// include() vs include_once() allows for multiple views with the same name
+		include($__path);
+
+		//Get the output
+		$__buffer = ob_get_contents();
+		ob_end_clean();
+
+		return $__buffer;
+	}
 
 
 	/**
@@ -86,16 +243,8 @@ class controller extends loader {
 	 */
 	public function render() {
 
-		//If the user has NOT overriden this value
-		if($this->layout == 'layout') {
-			//Check to see if it is an ajax request
-			if(AJAX_REQUEST) {
-				$this->layout = 'ajax';
-			}
-		}
-
 		// Load the template
-		$output = $this->view($this->layout, $this->data);
+		$output = $this->view($this->layout, $this->views);
 
 		// Cache the file
 		$this->cache->create(md5(PAGE_NAME. AJAX_REQUEST), $output);

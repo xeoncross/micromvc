@@ -25,7 +25,7 @@ class welcome extends controller {
 		$view['function'] = __FUNCTION__;
 
 		//Fetch it and set it as the layout content
-		$this->data['content'] = $this->view('welcome/welcome', $view, true);
+		$this->views['content'] = $this->view('welcome/welcome', $view);
 
 		//trigger_error('This is an error');
 		//show_error('there was a problem');
@@ -38,10 +38,10 @@ class welcome extends controller {
 	function hooks() {
 
 		//Call a function from a hook
-		$this->data['content'] = $this->hooks->call('my_first_hook', true);
+		$this->views['content'] = $this->hooks->call('my_first_hook', true);
 
 		//Call two class methods from a hook
-		$this->data['content'] .= $this->hooks->call('my_second_hook', 'MY_WORD');
+		$this->views['content'] .= $this->hooks->call('my_second_hook', 'MY_WORD');
 
 	}
 

@@ -10,7 +10,7 @@ function convert_time($timestamp=null) {
 
 	//If there is nothing set - default to now()
 	if( ! $timestamp || '0000-00-00' == $timestamp
-		|| '0000-00-00 00:00:00' == $timestamp) {
+	|| '0000-00-00 00:00:00' == $timestamp) {
 		return time();
 	}
 
@@ -89,13 +89,13 @@ function timestamp_to_array($ts=null) {
  * @return int
  */
 function array_to_timestamp($data = NULL) {
-    //Sometimes hours/minutes/seconds aren't set; default to zero;
-    $hour   = @$data['hour']   ? $data['hour']   : 0;
-    $minute = @$data['minute'] ? $data['minute'] : 0;
-    $second = @$data['second'] ? $data['second'] : 0;
+	//Sometimes hours/minutes/seconds aren't set; default to zero;
+	$hour   = @$data['hour']   ? $data['hour']   : 0;
+	$minute = @$data['minute'] ? $data['minute'] : 0;
+	$second = @$data['second'] ? $data['second'] : 0;
 
-    //Return the value (ten digit UNIX timestamp).
-    return mktime($hour, $minute, $second, $data['month'], $data['day'], $data['year']);
+	//Return the value (ten digit UNIX timestamp).
+	return mktime($hour, $minute, $second, $data['month'], $data['day'], $data['year']);
 }
 
 
@@ -129,8 +129,8 @@ function date_to_select($time=null, $name='date') {
 				$year = $value + $x;
 
 				$output[$type] .= "\t". '<option value="'. $year. '"'
-					. ($year == $value ? ' selected="selected"' : '')
-					. '>'. $year. '</option>'. "\n";
+				. ($year == $value ? ' selected="selected"' : '')
+				. '>'. $year. '</option>'. "\n";
 			}
 
 		}
@@ -139,60 +139,46 @@ function date_to_select($time=null, $name='date') {
 		if($type == 'month') {
 
 			/*
-			We need to hard code the months because timezones can
-			throw off the PHP date function and return two month
-			choices that are the same.
-			*/
+			 We need to hard code the months because timezones can
+			 throw off the PHP date function and return two month
+			 choices that are the same.
+			 */
 
 			$months = array(
-				1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May',
-				6 => 'Jun', 7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct',
-				11 => 'Nov', 12 => 'Dec'
+			1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May',
+			6 => 'Jun', 7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct',
+			11 => 'Nov', 12 => 'Dec'
 			);
 
 			for($x=1; $x<=12; $x++) {
 				$output[$type] .= "\t". '<option value="'. $x. '"'
-					. ($x == $value ? ' selected="selected"' : '')
-					. '>'. $months[$x]. '</option>'. "\n";
+				. ($x == $value ? ' selected="selected"' : '')
+				. '>'. $months[$x]. '</option>'. "\n";
 			}
 		}
 
-		/* Can't caculate days based off current month!!!!
-		//Create Days
-		if($type == 'day') {
-			$days_in_month = date('t', strtotime($time['year']. '-'. $time['month']. '-1'));
-
-			for($x=1;$x<$days_in_month;$x++) {
-				$output[$type] .= "\t". '<option value="'. $x. '"'
-					. ($x == $value ? ' selected="selected"' : '')
-					. '>'. date("j", mktime(0, 0, 0, 0, $x)). '</option>'. "\n";
-			}
-		}
-		*/
-
+		// Cannot caculate days based off current month! So we must just list all 32!
 		if($type == 'day') {
 			for($x=1;$x<32;$x++) {
 				$output[$type] .= "\t". '<option value="'. $x. '"'
-					. ($x == $value ? ' selected="selected"' : '')
-					. '>'. $x. '</option>'. "\n";
+				. ($x == $value ? ' selected="selected"' : '')
+				. '>'. $x. '</option>'. "\n";
 			}
 		}
-
-
 
 		if($type == 'hour') {
 			for($x=1;$x<24;$x++) {
 				$output[$type] .= "\t". '<option value="'. $x. '"'
-					. ($x == $value ? ' selected="selected"' : '')
-					. '>'. $x. '</option>'. "\n";
+				. ($x == $value ? ' selected="selected"' : '')
+				. '>'. $x. '</option>'. "\n";
 			}
 		}
 
 		if($type == 'minute' OR $type == 'second') {
 			for($x=0;$x<60;$x+=5) {
 				$output[$type] .= "\t". '<option value="'. $x. '"'
-					. ($value >= $x && $value <= $x + 4 ? ' selected="selected"' : '')
-					. '>'. $x. '</option>'. "\n";
+				. ($value >= $x && $value <= $x + 4 ? ' selected="selected"' : '')
+				. '>'. $x. '</option>'. "\n";
 			}
 		}
 

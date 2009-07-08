@@ -1,21 +1,21 @@
-## Welcome to Micro Model-View-Controller
+## Welcome to MicroMVC
 
-A tiny MVC framework crammed into less than 150kb - including documentation!
+A microscopic Model-View-Controller framework for PHP 5!
 
-It offers Model, Library, Controller, Function, and View management. Plus other features like URI Routing, hooks/plugins, file uploads, database abstraction, captcha creation, and more! If you are new the Model/View/Controller world of OOP - then this system is for you. Every line is documented and it is as simple of a system to tear-apart as you can get.
+It offers Model, Library, Controller, Function, Modules, and View management. Plus other features like URI Routing, hooks/plugins, file uploads, database abstraction, captcha creation, and more! If you are new the Model/View/Controller world of OOP - then this system is for you. Every line is documented and it is as simple of a system to tear-apart as you can get.
 
-MicroMVC is *not* a replacement for a full MCV framework. Do not plan on building the next Facebook with it! However, It is built for several reasons.
+MicroMVC is built to speed up the core setup process that so many other frameworks bloat. By loading only a couple small classes and config files, this system can be setup and ready to role in a matter of a couple milliseconds (vs a couple hundred or *thousand* for other frameworks).
 
-* Teach How MVC Works with a simple-to-understand code structure.
-* Provide a base speed for comparing frameworks</li>
-* Run small scripts and systems (like blogs) that need MVC without a lot of overhead.
+MicroMVC was built so that any PHP library or existing code will work with this system so you don't have to give up your favorite classes while still enjoying the benefits of a structured MVC.
 
-MicroMVC is licenced under the http://www.gnu.org/licenses/gpl-3.0.html so you can use it for any personal or corporate projects free of charge.</p>
+Our core reasons for building this system is first and foremost speed and performance. But we also believe that this system can help teach Object Oriented Programming (OOP) with a simple-to-understand code structure.
 
-### Rquirements
+MicroMVC is licenced under the http://www.gnu.org/licenses/gpl-3.0.html so you can use it for any personal or corporate projects totally free! You can even build your own open source projects on it.
+
+### Requirements
 
 * PHP 5
-* mod_rewrite (apache module)
+* mod_rewrite (Apache module)
 * PDO if using the Database
 
 [David Pennington](http://xeoncross.com)

@@ -727,8 +727,8 @@ function gzip_compression() {
  * Return a singleton instance of the current controller
  * @return object
  */
-function &get_instance(){
-	return core::get_instance();
+function get_instance(){
+	return controller::get_instance();
 }
 
 

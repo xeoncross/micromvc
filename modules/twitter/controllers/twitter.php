@@ -1,8 +1,8 @@
 <?php
 /**
- * Welcome Controller
+ * Twitter Controller
  *
- * Shows several examples of how to load, call, and render pages.
+ * Loads the twitter API and shows the latest tweets from around the world.
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -13,29 +13,12 @@
  ********************************** 80 Columns *********************************
  */
 
-class welcome extends controller {
-
-	/*
-	 * Load a view that shows a welcome message
-	 */
-	function index() {
-
-		//Create Some data
-		$view['class'] = get_class($this);
-		$view['function'] = __FUNCTION__;
-
-		//Fetch it and set it as the layout content
-		$this->views['content'] = $this->view('welcome/welcome', $view);
-
-		//trigger_error('This is an error');
-		//show_error('there was a problem');
-	}
-
+class twitter extends controller {
 
 	/*
 	 * Show and example of loading a API model and requesting data
 	 */
-	function twitter() {
+	function index() {
 		//See it live here
 		//http://twitter.com/statuses/public_timeline.rss
 
@@ -49,7 +32,6 @@ class welcome extends controller {
 		//Load the twitter model and create object
 		$this->library('twitter_api', $options);
 
-
 		//Get current user_timeline
 		$object = $this->twitter_api->public_timeline();
 
@@ -62,7 +44,7 @@ class welcome extends controller {
 		$view['object'] = $object;
 
 		//Render the view
-		$this->views['content'] = $this->view('welcome/twitter', $view);
+		$this->views['content'] = $this->view('twitter/tweets', $view, TRUE, 'twitter');
 
 	}
 }

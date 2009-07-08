@@ -1,8 +1,8 @@
 <?php
 /**
- * Core
+ * Controller
  *
- * This is the parent class for all controllers. Controller must extend this
+ * This is the parent class for all controllers. Controllers must extend this
  * class. If you want, you can also extend this class with another class which
  * your controllers can then extend.
  *
@@ -11,7 +11,7 @@
  * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
  * @link		http://micromvc.com
- * @version		1.0.1 <5/31/2009>
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 class controller {
@@ -146,19 +146,22 @@ class controller {
 	 */
 	public function load_config($name=null, $module = FALSE) {
 
-		//Only load once
-		if(!empty($this->config[$name])) {
-			return $this->config[$name];
-		}
-
 		//Is this a module's config -or a site config?
 		$path = ($module ? MODULE_PATH. $module. DS : SITE_PATH). 'config'. DS. $name. '.php';
 
 		//include the config
 		require($path);
 
-		//Set the values in our config array and return
-		return $this->config[$name] = $$name;
+		//If this element already exists - mearge the new array in (overwritting as needed)
+		if( ! empty($this->config[$name])) {
+			$this->config[$name] = array_merge($this->config[$name], $$name);
+
+		} else { //Set the values in our config array
+			$this->config[$name] = $$name;
+		}
+
+		//Return new config array
+		return $this->config[$name];
 
 	}
 
@@ -176,7 +179,7 @@ class controller {
 		load_class('db', LIBRARY_PATH, NULL, FALSE);
 
 		//Load the config for this database
-		$config = $this->config('database');
+		$config = $this->load_config('database');
 
 		//Create a new instance of the database child class "mysql"
 		$this->db = load_class($config['type'], NULL, $config);

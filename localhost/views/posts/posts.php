@@ -7,3 +7,6 @@
 <p><?php print $row->text; ?></p>
 
 <?php } ?>
+
+<h2><?php print count($this->db->queries); ?> Database Queries Run</h2>
+<?php $this->db->print_queries(); ?>

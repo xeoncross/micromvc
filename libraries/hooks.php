@@ -9,7 +9,7 @@
  * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
  * @link		http://micromvc.com
- * @version		1.0.1 <5/31/2009>
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 class hooks {
@@ -137,7 +137,7 @@ class hooks {
 	public function run_hook($hook = NULL, $data = NULL) {
 
 		//If it is NOT a hook config
-		if (!is_array($hook)) {
+		if (!is_array($hook) OR empty($hook)) {
 			return $data;
 		}
 
@@ -152,7 +152,7 @@ class hooks {
 		}
 
 		// Set each value to avoid php notices
-		foreach(array('class', 'function', 'file', 'path') as $type) {
+		foreach(array('class', 'function', 'file', 'path', 'module') as $type) {
 			$$type = empty($hook[$type]) ? NULL : $hook[$type];
 		}
 
@@ -162,11 +162,13 @@ class hooks {
 
 		//If we are missing a lot of stuff...
 		if (!$class && !$function) {
+			trigger_error('Trying to run a Hook with no class or function.');
 			return $data;
 		}
 
 		//If a function is being called we HAVE TO HAVE a file name!
 		if (!$class && (!$file && $function)) {
+			trigger_error('Cannot run the '. $function. ' hook without a file');
 			return $data;
 		}
 
@@ -205,7 +207,7 @@ class hooks {
 		} else { //Else just run the function
 
 			//If the function does not alreay exist
-			if (!function_exists($function)) {
+			if ( ! function_exists($function)) {
 				require_once($path. $file. '.php');
 			}
 

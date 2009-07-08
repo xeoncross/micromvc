@@ -2,39 +2,20 @@
 /*
  * Run on system startup
  */
-$hooks['startup'][] = array();
+$hooks['system_startup'][] = array();
 
+/*
+ * Run after the controller is loaded
+ */
+$hooks['post_constructor'][] = array();
 
-//Call a simple function from a hook
-$hooks['my_first_hook'] = array(
-	'function'	=> 'hook_test',
-	'file'		=> 'hook_test',
-);
+/**
+ * Run after the method is called, but before rendering page
+ */
+$hooks['post_method'] = array();
 
-
-
-//Call a method of a class from a hook
-$hooks['my_second_hook'][] = array(
-	'class'		=> 'my_second_hook',	//Name of class to find function in
-	'function'	=> 'filter',			//The method to call
-	'file'		=> 'my_second_hook',	//File that contains the class
-);
-
-//Then call this hook before returning the data
-$hooks['my_second_hook'][] = array(
-	'class'	=> 'my_second_hook',	//Name of object to find function in
-	'function'	=> 'say',
-);
-
-//Then call this hook before returning the data
-$hooks['my_second_hook'][] = array(
-	'class'		=> 'my_second_hook',	//Name of class to find function in
-	'function'	=> 'speak',
-);
-
-
-//Then call this hook before returning the data
-$hooks['my_second_hook'][] = array(
-	'class'		=> 'my_second_hook',	//Name of class to find function in
-);
+/**
+ * Called after everything is done
+ */
+$hooks['system_shutdown'] = array();
 

@@ -8,10 +8,10 @@
  *
  * @package		MicroMVC
  * @author		David Pennington
- * @copyright	Copyright (c) 2008 CodeXplorer
+ * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
- * @link		http://codexplorer.com
- * @version		1.0.0 <8/15/2008>
+ * @link		http://micromvc.com
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 class my_second_hook {

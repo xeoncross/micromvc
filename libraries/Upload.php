@@ -2,16 +2,18 @@
 /**
  * File Uploading Class
  *
+ * Allows easy uploading of files.
+ *
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
  * @link		http://micromvc.com
- * @version		1.0.1 <5/31/2009>
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 class upload {
-	
+
 	//An array of error messages
 	public $error_messages	= array();
 	//The array to hold upload errors (if any)
@@ -41,17 +43,17 @@ class upload {
 	//Should the file name be changed to a random hash value?
 	public $encrypt_name	= FALSE;
 
-	
+
 	/*
 	 * On object creation set the error messages
 	 */
 	public function __construct() {
-		
+
 		//Make the allowed types an array (if not already)
 		if($this->allowed_types && !is_array($this->allowed_types)) {
 			$this->allowed_types = explode('|', $this->allowed_types);
 		}
-		
+
 		$errors = array();
 		$errors['upload_no_file_selected'] = "You did not select a file to upload.";
 		$errors['upload_bad_destination'] = 'The destination directory does not exist or is not writable.';
@@ -64,12 +66,12 @@ class upload {
 		$errors['upload_invalid_filetype'] = "The filetype you are attempting to upload is not allowed.";
 		$errors['upload_invalid_filesize'] = "The file you are attempting to upload is larger than the permitted size.";
 		$errors['upload_destination_error'] = "A problem was encountered while attempting to move the uploaded file to the final destination.";
-		
+
 		$this->error_messages = $errors;
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Perform the file upload
 	 *
@@ -77,7 +79,7 @@ class upload {
 	 * @return	bool
 	 */
 	function do_upload($field = 'userfile') {
-		
+
 		// Is $_FILES[$field] set? If not, no reason to continue.
 		if ( ! isset($_FILES[$field])) {
 			$this->set_error('upload_no_file_selected');
@@ -92,7 +94,7 @@ class upload {
 
 		// Was the file able to be uploaded? If not, determine the reason why.
 		if ( ! is_uploaded_file($_FILES[$field]['tmp_name'])) {
-			
+
 			$error = ( ! isset($_FILES[$field]['error'])) ? 4 : $_FILES[$field]['error'];
 
 			switch($error) {
@@ -123,23 +125,23 @@ class upload {
 
 			return FALSE;
 		}
-		
+
 		//Clean the file name and also get the extension
 		$this->process_filename($_FILES[$field]['name']);
-		
+
 		//Set the full file path
 		$file_path = $this->upload_path. $this->file_name. $this->file_ext;
-		
+
 		// Set the uploaded data as class variables
 		$this->file_temp = $_FILES[$field]['tmp_name'];
 		$this->file_size = $_FILES[$field]['size'];
 		$this->file_type = preg_replace("/^(.+?);.*$/", "\\1", $_FILES[$field]['type']);
-	
+
 		// Convert the file size to kilobytes
 		if ($this->file_size > 0) {
 			$this->file_size = round($this->file_size/1024, 2);
 		}
-		
+
 		// Is the file type allowed to be uploaded?
 		if ($this->allowed_types && ( ! in_array($this->file_ext, $this->allowed_types))) {
 			$this->set_error('upload_invalid_filetype');
@@ -152,7 +154,7 @@ class upload {
 			return FALSE;
 		}
 
-		
+
 		/*
 		 * Move the file to the final destination
 		 * To deal with different server configurations
@@ -174,7 +176,7 @@ class upload {
 	/**
 	 * Set the file name
 	 *
-	 * This function takes a filename as input and filters it to make it safe 
+	 * This function takes a filename as input and filters it to make it safe
 	 * for use. It also gets the file extension. Finally, it looks for the
 	 * existence of a file with the same name. If found, it will append a
 	 * number to the end of the filename to avoid overwriting a pre-existing file.
@@ -185,33 +187,33 @@ class upload {
 	 * @return	string
 	 */
 	function process_filename($filename='') {
-		
+
 		//First get the extension of the file
 		$ext = strrchr($filename, '.');
-		
+
 		//Then get the file name
 		$filename = ($ext === FALSE) ? $filename : substr($filename, 0, -strlen($ext));
-		
+
 		//Should we encrypt the filename?
 		if ($this->encrypt_name == TRUE) {
 			mt_srand();
 			//Set the file name to a random value
 			$filename = md5(uniqid(mt_rand()));
-			
+
 		} else {
-		
+
 			//Make the files name "filename" safe (no weird chars allowed like "/")
 			$filename = sanitize_text($filename, 4);
-			
+
 			/*
-			 * Separate extensions with "_" to prevent possible script execution 
+			 * Separate extensions with "_" to prevent possible script execution
 			 * from Apache's handling of files with multiple extensions.
 			 * http://httpd.apache.org/docs/1.3/mod/mod_mime.html#multipleext
 			 */
 			if(strpos($filename, '.')) {
 				//First, break apart the name into pieces
 				$parts = explode('.', $filename);
-				
+
 				foreach($parts as &$part) {
 					//If this extension is not allowed
 					if(!in_array($part, $this->allowed_types)) {
@@ -219,20 +221,20 @@ class upload {
 						$part .= '_';
 					}
 				}
-				
+
 				//Put the filename back togeither
 				$filename = implode('.', $parts);
 			}
-			
+
 		}
-		
-		
+
+
 		//Check to see if the file with this name exists already
 		if (file_exists($this->upload_dir. $filename. $ext)) {
-			
+
 			//If we should NOT overwrite the existing files
 			if( ! $this->overwrite) {
-				//Then keep adding a number to the file name 
+				//Then keep adding a number to the file name
 				//until you find one that doesn't exist!
 				for ($i = 1; $i < 1000; $i++) {
 					if ( ! file_exists($this->upload_dir. $filename. $i. $ext)) {
@@ -242,11 +244,11 @@ class upload {
 				}
 			}
 		}
-		
+
 		//Set the name and file extension
 		$this->file_name = $filename;
 		$this->file_ext = $ext;
-		
+
 	}
 
 

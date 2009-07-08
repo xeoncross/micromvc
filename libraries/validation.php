@@ -11,7 +11,7 @@
  * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
  * @link		http://micromvc.com
- * @version		1.0.1 <5/31/2009>
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 class validation {
@@ -85,7 +85,7 @@ class validation {
 
 		//Check each form element
 		foreach($config as $field => $rules) {
-			
+
 			//Break apart rules
 			if(strpos($rules, '|') !== FALSE) {
 				$rules = explode('|', $rules);
@@ -111,10 +111,10 @@ class validation {
 
 					//Fetch the function arguments
 					preg_match('/([a-z0-9_]+)\[(.*?)\]/i', $rule, $matches);
-						
+
 					//Fetch the rule name
 					$rule = $matches[1];
-						
+
 					//Get the params
 					$params = $matches[2];
 
@@ -165,9 +165,9 @@ class validation {
 			//Now that we are done working with the data - save it
 			$_POST[$field] = $data;
 		}
-		
+
 		//print_pre($_POST);
-		
+
 		//If no errors then we are good!
 		if(empty($this->errors)) {
 			return TRUE;
@@ -351,7 +351,7 @@ class validation {
 
 	/**
 	 * Check to see if the email entered is valid
-	 * 
+	 *
 	 * @param $field
 	 * @param $data
 	 * @return boolean
@@ -360,7 +360,7 @@ class validation {
 		if(valid_email($data)) {
 			return TRUE;
 		}
-		
+
 		//Set the error
 		$this->errors[$field] = sprintf($this->error_messages['valid_email'], ucwords($field));
 		return FALSE;

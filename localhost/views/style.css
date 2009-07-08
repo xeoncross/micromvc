@@ -68,6 +68,12 @@ padding: 2em;
 border-top: 1px solid #ddd;
 }
 
+pre {
+background: #eee; 
+overflow: auto;
+padding: .5em;
+border: 1px solid #e1e1e1;
+}
 
 #footer { 
 border-top: 1px solid #eee; 

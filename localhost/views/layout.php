@@ -21,9 +21,9 @@
 			//Create a list of the menu links
 			$links = array(
 				'Welcome' => 'welcome/index',
-				'Hooks' => 'welcome/hooks',
-				'URI' => 'welcome/say',
-				'Twitter' => 'welcome/twitter',
+				'Hooks' => 'hooks',
+				'URI' => 'hooks/say',
+				'Twitter' => 'twitter',
 				'SQLite' => 'posts',
 			);
 

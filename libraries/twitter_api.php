@@ -20,7 +20,7 @@
  * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
  * @link		http://micromvc.com
- * @version		1.0.1 <5/31/2009>
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 
@@ -43,7 +43,7 @@ class twitter_api {
 	 * in case of abuse. Include your email.
 	 * @var string
 	 */
-	var $user_agent = SITE_NAME;
+	var $user_agent = DOMAIN;
 
 	/**
 	 * Can be set to JSON or XML - JSON is faster though...
@@ -85,7 +85,7 @@ class twitter_api {
 	 * Setup the Twitter Request Options
 	 */
 	function setup($options=array()) {
-			
+
 		/* [Options]
 		 * username		Your Twitter Username
 		 * password		Your Twitter Password

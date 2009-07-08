@@ -9,10 +9,45 @@
  * @copyright	Copyright (c) 2009 MicroMVC
  * @license		http://www.gnu.org/licenses/gpl-3.0.html
  * @link		http://micromvc.com
- * @version		1.0.0 <2/20/2009>
+ * @version		1.1.0 <7/7/2009>
  ********************************** 80 Columns *********************************
  */
 class posts_model extends base {
+
+
+	//Check to see if the table exists - install it if not!
+	function check_install() {
+
+		//Get the database name
+		$dbname = preg_replace('/.+?dbname=([a-z0-9_]+)/i', '$1', $this->db->config['dns']);
+
+		//Create query
+		$sql = "SELECT count(*) FROM information_schema.tables
+				WHERE table_schema = '". $dbname. "' AND table_name = 'posts'";
+
+		//Send query
+		$result = $this->db->query($sql);
+
+		//If the table is not found
+		if( ! $result->fetchColumn()) {
+			$this->posts->create_table();
+		}
+	}
+
+
+	// Create the posts table
+	function create_table() {
+		$sql = 'CREATE TABLE IF NOT EXISTS `posts` (
+			  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+			  `title` varchar(255) NOT NULL,
+			  `author` int(10) unsigned NOT NULL,
+			  `text` text NOT NULL,
+			  PRIMARY KEY (`id`)
+			) ENGINE=MyISAM ;';
+
+		//Create the table
+		$this->db->exec($sql);
+	}
 
 
 	/**
@@ -23,7 +58,7 @@ class posts_model extends base {
 
 		//CREATE NEW ROWS IN THE TABLE
 		$data[] = array(
-			'title' => 'My First Post', 
+			'title' => 'My First Post',
 			'text' => 'Today I finished the beta of my new website!',
 			'author' => 'Me'
 		);
@@ -47,7 +82,7 @@ class posts_model extends base {
 
 	}
 
-	
+
 	/*
 	 * Get all the posts
 	 */

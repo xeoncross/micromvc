@@ -36,7 +36,7 @@ class validation {
 
 		//Set error messages
 		$this->error_messages = array(
-			'no_rules'			=> 'Wow dude, there\'s like "no rules" set - sweet.',
+			'no_rules'			=> 'The %s field does not contain a valid rule (%s)',
 			'required'			=> 'The %s field is required.',
 			'rule_not_found'	=> 'The %s form rule was not found.',
 			'alpha'				=> 'The %s field may only contain alphabetical characters.',
@@ -140,10 +140,10 @@ class validation {
 
 					//Else just look for a function with this name
 				} elseif(function_exists($rule)) {
-					$result = $rule($field, $data);
+					$result = $rule($data, $field);
 
 				} else {
-					$this->errors[$field] = sprintf($this->error_messages['rule_not_found'], $rule);
+					$this->errors[$field] = sprintf($this->error_messages['rule_not_found'], $field, $rule);
 					break; //End the checks for this field
 				}
 

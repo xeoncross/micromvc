@@ -311,13 +311,13 @@ function print_pre($data = NULL) {
  * @param boolean	$level	Set to TRUE to only enable file safe chars
  * @return void
  */
-function sanitize_text(&$text, $level=0){
+function sanitize_text($text, $level=0){
 	if(!$level) {
 		//Delete anything that isn't a letter, number, or common symbol - then HTML encode the rest.
-		$text = trim(htmlentities(preg_replace("/([^a-z0-9!@#$%^&*()_\-+\]\[{}\s\n<>:\\/\.,\?;'\"]+)/i", '', $text), ENT_QUOTES, 'UTF-8'));
+		return trim(htmlentities(preg_replace("/([^a-z0-9!@#$%^&*()_\-+\]\[{}\s\n<>:\\/\.,\?;'\"]+)/i", '', $text), ENT_QUOTES, 'UTF-8'));
 	} else {
 		//Make the text file/title/emailname safe
-		$text = preg_replace("/([^a-z0-9_\-\.]+)/i", '_', trim($text));
+		return preg_replace("/([^a-z0-9_\-\.]+)/i", '_', trim($text));
 	}
 }
 

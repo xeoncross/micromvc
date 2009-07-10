@@ -61,7 +61,7 @@ define('CACHE_PATH', SITE_PATH. 'cache'. DS);
 define('CONFIG_PATH', SITE_PATH. 'config'. DS);
 
 //The file system path of the site's upload folder
-define('MODEL_PATH', SITE_PATH. 'modles'. DS);
+define('MODEL_PATH', SITE_PATH. 'models'. DS);
 
 //The file system path of the site's upload folder
 define('UPLOAD_PATH', SITE_PATH. 'uploads'. DS);

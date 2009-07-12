@@ -171,13 +171,13 @@ function _error_handler($level='', $message='', $file='', $line='', $variables='
 			}
 
 			// start backtrace
-			foreach ($backtrace as $v) {
+			foreach ($backtrace as $key => $v) {
 
-				if(empty($v['line'])) {
-					$v['line'] = '';
+				if(!isset($v['line'])) {
+					$v['line'] = ($key === 1 ? $line : '(unknown)');
 				}
-				if(empty($v['file'])) {
-					$v['file'] = '';
+				if(!isset($v['file'])) {
+					$v['file'] = ($key === 1 ? $file : '(unknown)');
 				}
 
 				$args = array();
@@ -292,7 +292,7 @@ function show_error($message = '', $title = 'An Error Was Encountered') {
 
 /**
  * Add <pre> tags around objects you want to dump.
- * @param mixed $text
+ * @param mixed $data
  */
 function print_pre($data = NULL) {
 	print '<pre style="padding: 1em; margin: 1em 0;">';
@@ -302,6 +302,20 @@ function print_pre($data = NULL) {
 		print_r(func_get_args());
 	}
 	print '</pre>';
+}
+
+
+/**
+ * Return the output of print_pre as a string
+ * @param	mixed $data
+ * @return	string
+ */
+function return_print_pre($data = NULL) {
+	ob_start();
+	print_pre(func_get_args());
+	$output = ob_get_contents();
+	ob_end_clean();
+	return $output;
 }
 
 

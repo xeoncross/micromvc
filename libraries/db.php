@@ -224,13 +224,15 @@ class db {
 		$this->orm_select	= '*';
 		$this->orm_from		= '';
 		$this->orm_join		= array();
-		$this->orm_where		= array();
+		$this->orm_where	= array();
 		$this->orm_group_by	= '';
 		$this->orm_order_by	= '';
 		$this->orm_having	= array();
-		$this->orm_limit		= NULL;
+		$this->orm_limit	= NULL;
 		$this->orm_offset	= NULL;
 		$this->orm_distinct	= NULL;
+		$this->orm_set		= array();
+		//print_pre($this->queries, $this->orm_where);
 	}
 
 
@@ -425,6 +427,29 @@ class db {
 	}
 
 
+	public function delete($table = NULL, $where = NULL) {
+
+		if($where) {
+			$this->where($where);
+		}
+
+		//If there is a WHERE clause
+		if(empty($this->orm_where)) {
+			return FALSE;
+		}
+
+		//Create the Delete SQL
+		$sql = 'DELETE FROM '. $this->quote_table($table);
+
+		//Remove the first AND/OR condition as it is invalid
+		$this->orm_where[0] = preg_replace('/(AND|OR) /', '', $this->orm_where[0]);
+
+		//Add all of the where clauses
+		$sql .= "\nWHERE ". implode("\n", $this->orm_where);
+
+		return $this->exec($sql);
+	}
+
 	/**
 	 * Creates a simple INSERT/REPLACE INTO query.
 	 */
@@ -524,7 +549,7 @@ class db {
 		}
 
 		//Remove the AR data
-		$this->orm_set = array();
+		$this->clear();
 
 		if($this->return_query) {
 			return $sql;
@@ -955,7 +980,7 @@ class db {
 	 * @param	boolean	save the query?
 	 * @return	object
 	 */
-	public function get($table = '', $return_query = NULL, $save = TRUE) {
+	public function get($table = '', $return_query = NULL, $save = FALSE) {
 
 		//If they passed the table
 		if($table) {
@@ -976,7 +1001,7 @@ class db {
 		}
 
 		//Remove the AR data?
-		if(!$save) {
+		if($save) {
 			$this->clear();
 		}
 
@@ -1073,6 +1098,16 @@ class db {
 	 Alias Functions
 	 ------------------------------------------
 	 */
+
+
+
+	/**
+	 * Alias for get and where
+	 */
+	public function get_where($table = '', $where = NULL, $return_query = NULL, $save = TRUE) {
+		$this->where($where);
+		return $this->get($table, $return_query, $save);
+	}
 
 
 	/*

@@ -423,7 +423,7 @@ class db {
 		foreach ($key as $k => $value) {
 			$this->orm_set[$k] = $this->quote($value);
 		}
-
+		return $this;
 	}
 
 
@@ -558,6 +558,7 @@ class db {
 		//Fetch the result object
 		$this->result = $this->query($sql);
 
+		return $this;
 	}
 
 
@@ -569,6 +570,7 @@ class db {
 	 */
 	public function distinct($val = TRUE) {
 		$this->orm_distinct = ($val ? TRUE : NULL);
+		return $this;
 	}
 
 
@@ -603,7 +605,7 @@ class db {
 				$this->last_table = NULL;
 			}
 		}
-
+		return $this;
 	}
 
 
@@ -629,6 +631,7 @@ class db {
 		// Assemble the JOIN statement
 		$this->orm_join[] = $type.' JOIN '. $this->quote_table($table).' ON '.$condition;
 
+		return $this;
 	}
 
 
@@ -636,7 +639,7 @@ class db {
 	 * alias for where()
 	 */
 	public function or_where($column = NULL, $value = NULL) {
-		$this->where($column, $value, 'OR');
+		return $this->where($column, $value, 'OR');
 	}
 
 
@@ -644,7 +647,7 @@ class db {
 	 * alias for where()
 	 */
 	public function where_in($column = NULL, $value = NULL) {
-		$this->where($column, $value, 'AND');
+		return $this->where($column, $value, 'AND');
 	}
 
 
@@ -652,7 +655,7 @@ class db {
 	 * alias for where()
 	 */
 	public function or_where_in($column = NULL, $value = NULL) {
-		$this->where($column, $value, 'OR');
+		return $this->where($column, $value, 'OR');
 	}
 
 
@@ -660,7 +663,7 @@ class db {
 	 * alias for where()
 	 */
 	public function where_not_in($column = NULL, $value = NULL) {
-		$this->where($column, $value, 'AND', 'NOT');
+		return $this->where($column, $value, 'AND', 'NOT');
 	}
 
 
@@ -668,7 +671,7 @@ class db {
 	 * alias for where()
 	 */
 	public function or_where_not_in($column = NULL, $value = NULL) {
-		$this->where($column, $value, 'OR', 'NOT');
+		return $this->where($column, $value, 'OR', 'NOT');
 	}
 
 
@@ -727,6 +730,7 @@ class db {
 
 		}
 
+		return $this;
 	}
 
 
@@ -734,7 +738,7 @@ class db {
 	 * alias for like()
 	 */
 	public function or_like($column=null, $match = '', $side = 'both') {
-		$this->like($column, $match, $side, null, 'OR');
+		return $this->like($column, $match, $side, null, 'OR');
 	}
 
 
@@ -742,7 +746,7 @@ class db {
 	 * alias for like()
 	 */
 	public function not_like($column=null, $match = '', $side = 'both') {
-		$this->like($column, $match, $side, 'NOT', 'AND');
+		return $this->like($column, $match, $side, 'NOT', 'AND');
 	}
 
 
@@ -750,7 +754,7 @@ class db {
 	 * alias for like()
 	 */
 	public function or_not_like($column=null, $match = '', $side = 'both') {
-		$this->like($column, $match, $side, 'NOT', 'OR');
+		return $this->like($column, $match, $side, 'NOT', 'OR');
 	}
 
 
@@ -780,6 +784,7 @@ class db {
 		//Add this to our where Clause
 		$this->orm_where[] = "$type $column $not LIKE $match";
 
+		return $this;
 	}
 
 
@@ -788,6 +793,7 @@ class db {
 	 */
 	function group_by($value=null) {
 		$this->orm_group_by = $value;
+		return $this;
 	}
 
 
@@ -796,6 +802,7 @@ class db {
 	 */
 	function order_by($value=null, $direction = 'DESC') {
 		$this->orm_order_by = $value. ' '. $direction;
+		return $this;
 	}
 
 
@@ -834,6 +841,7 @@ class db {
 			}
 		}
 
+		return $this;
 	}
 
 
@@ -851,6 +859,7 @@ class db {
 			$this->orm_offset = $offset;
 		}
 
+		return $this;
 	}
 
 
@@ -861,6 +870,7 @@ class db {
 	 */
 	public function offset($offset=NULL) {
 		$this->orm_offset = $offset;
+		return $this;
 	}
 
 
@@ -872,6 +882,7 @@ class db {
 	public function select($select = '*', $escape = NULL){
 		//Register the select
 		$this->orm_select = $select;
+		return $this;
 	}
 
 
@@ -1011,7 +1022,6 @@ class db {
 		}
 
 		return $this->query($sql);
-
 	}
 
 
@@ -1089,7 +1099,6 @@ class db {
 
 		//Return the number of found rows
 		return $result->fetchColumn();
-
 	}
 
 
@@ -1113,8 +1122,8 @@ class db {
 	/*
 	 * Alias for fetching the result from the PDOStatement
 	 */
-	public function fetch() {
-		return $this->result->fetch();
+	public function fetch($type = NULL) {
+		return $this->result->fetch($type);
 	}
 
 
@@ -1173,8 +1182,10 @@ class db {
 	 * Print out all of the queries run using <pre> tags
 	 */
 	public function print_queries() {
-		foreach($this->queries as $query) {
-			print '<pre>'. str_replace("\t", '', $query). '</pre>'. "\n\n";
+		if($this->queries) {
+			foreach($this->queries as $query) {
+				print '<pre>'. str_replace(array("\t", "\n"), ' ', $query). ';</pre>'. "\n\n";
+			}
 		}
 	}
 

@@ -154,6 +154,13 @@ function _error_handler($level='', $message='', $file='', $line='', $variables='
 
 	} else {
 
+		//If the database class is loaded - get the queries run (if any)
+		if(class_exists('db')) {
+
+			$db = db::get_instance();
+			//$queries = $db->print_queries();
+		}
+
 		//Get backtrace and remove last entry (this function)
 		$backtrace = debug_backtrace();
 		//Remove first entry (this error function)
@@ -189,7 +196,7 @@ function _error_handler($level='', $message='', $file='', $line='', $variables='
 
 						} elseif ($type == 'string') {
 							//Longer than 25 chars?
-							$a = strlen($a) > 25 ? substr($a, 0, 25). '...' : $a;
+							$a = strlen($a) > 45 ? substr($a, 0, 45). '...' : $a;
 							$args[] = '"'. htmlentities($a, ENT_QUOTES, 'utf-8'). '"';
 
 						} elseif ($type == 'array') {
@@ -242,7 +249,7 @@ function _error_handler($level='', $message='', $file='', $line='', $variables='
 	}
 
 	//Flush any output buffering first
-	ob_end_flush();
+	if(ob_get_level()) { ob_end_flush(); }
 
 	//Load the view
 	include(VIEW_PATH. 'errors'. DS. 'php_error.php');

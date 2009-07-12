@@ -581,7 +581,7 @@ class db {
 	 * @param	string
 	 * @return	void
 	 */
-	public function from($from=null) {
+	public function from($from = NULL) {
 
 		//Quote the table name
 		$from = $this->quote_table($from);
@@ -695,13 +695,16 @@ class db {
 			$column = array($column => $value);
 		}
 
+		//Add quotes around each field
+		$qi = $this->quote_identifier();
+
 		//Go though each statement
 		foreach ($column as $field => $value) {
 
 			//Value appears not to have been set, set to "IS NULL"
 			if (is_null($value)){
 				//If is a NULL value - state that!
-				$this->orm_where[] = $type. ' '. $field. ' IS NULL';
+				$this->orm_where[] = $type. ' '. $qi. $field. $qi. ' IS NULL';
 
 
 				//Else if this is an array
@@ -713,7 +716,7 @@ class db {
 				}
 
 				//Create the where list
-				$this->orm_where[] = $type. ' '. $field. ' '. $in. ' in ('. implode(',', $value). ')';
+				$this->orm_where[] = $type. ' '. $qi. $field. $qi. ' '. $in. ' in ('. implode(',', $value). ')';
 
 
 				//Else it is just a plain where clause
@@ -722,7 +725,7 @@ class db {
 				//If an operator is not already set!
 				if(!preg_match('/[=><]/', $field)) {
 					//Default to "equals"
-					$field .= ' = ';
+					$field = $qi. $field. $qi. ' = ';
 				}
 
 				$this->orm_where[] = $type. ' '. $field. $this->quote($value);
@@ -880,8 +883,26 @@ class db {
 	 * @param	string
 	 */
 	public function select($select = '*', $escape = NULL){
-		//Register the select
-		$this->orm_select = $select;
+		$qi = $this->quote_identifier();
+
+		//If this is an array (or a string without quotes) - parse it!
+		if(is_array($select) OR (is_string($select) && strpos($select, $qi) === FALSE)) {
+
+			//Make an array
+			if(is_string($select)) {
+				$select = explode(',', $select);
+			}
+
+			$string = '';
+			//Add each piece
+			foreach($select as $value) {
+				$string .= $qi. trim($value). $qi. ',';
+			}
+
+			//Register the select and remove last comma
+			$this->orm_select = rtrim($string, ',');
+		}
+
 		return $this;
 	}
 
@@ -991,7 +1012,7 @@ class db {
 	 * @param	boolean	save the query?
 	 * @return	object
 	 */
-	public function get($table = '', $return_query = NULL, $save = FALSE) {
+	public function get($table = NULL, $return_query = NULL, $save = FALSE) {
 
 		//If they passed the table
 		if($table) {

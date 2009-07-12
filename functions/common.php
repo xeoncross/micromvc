@@ -156,9 +156,7 @@ function _error_handler($level='', $message='', $file='', $line='', $variables='
 
 		//If the database class is loaded - get the queries run (if any)
 		if(class_exists('db')) {
-
 			$db = db::get_instance();
-			//$queries = $db->print_queries();
 		}
 
 		//Get backtrace and remove last entry (this function)

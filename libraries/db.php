@@ -447,6 +447,8 @@ class db {
 		//Add all of the where clauses
 		$sql .= "\nWHERE ". implode("\n", $this->orm_where);
 
+		$this->clear();
+
 		return $this->exec($sql);
 	}
 
@@ -556,9 +558,8 @@ class db {
 		}
 
 		//Fetch the result object
-		$this->result = $this->query($sql);
+		return $this->exec($sql);
 
-		return $this;
 	}
 
 
@@ -885,23 +886,22 @@ class db {
 	public function select($select = '*', $escape = NULL){
 		$qi = $this->quote_identifier();
 
-		//If this is an array (or a string without quotes) - parse it!
-		if(is_array($select) OR (is_string($select) && strpos($select, $qi) === FALSE)) {
+		//If string - convert to an array
+		if( ! is_array($select)) {
+			$select = explode(',', $select);
+		}
 
-			//Make an array
-			if(is_string($select)) {
-				$select = explode(',', $select);
-			}
-
-			$string = '';
-			//Add each piece
-			foreach($select as $value) {
+		$string = '';
+		foreach($select as $value) {
+			//If this is a string without quotes (or without a function like COUNT() or MAX())
+			if(strpos($value, $qi) === FALSE && strpos($value, '(') === FALSE) {
+				//Then quote the value
 				$string .= $qi. trim($value). $qi. ',';
 			}
-
-			//Register the select and remove last comma
-			$this->orm_select = rtrim($string, ',');
 		}
+
+		//Register the select and remove last comma
+		$this->orm_select = rtrim($string, ',');
 
 		return $this;
 	}
@@ -1033,7 +1033,7 @@ class db {
 		}
 
 		//Remove the AR data?
-		if($save) {
+		if(! $save) {
 			$this->clear();
 		}
 

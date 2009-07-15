@@ -31,14 +31,17 @@ define('DS', DIRECTORY_SEPARATOR);
 //Define the base file system path to MicroMVC
 define('SYSTEM_PATH', realpath(dirname(__FILE__)). DS);
 
-//Define the base file system path to MicroMVC
+//Define the base file system path to libraries
 define('LIBRARY_PATH', SYSTEM_PATH. 'libraries'. DS);
 
-//Define the base file system path to MicroMVC
+//Define the base file system path to functions
 define('FUNCTION_PATH', SYSTEM_PATH. 'functions'. DS);
 
-//Define the base file system path to MicroMVC
+//Define the base file system path to modules
 define('MODULE_PATH', SYSTEM_PATH. 'modules'. DS);
+
+//Define the base file system path to logs
+define('LOG_PATH', SYSTEM_PATH. 'logs'. DS);
 
 
 //Include the common file to continue loading
@@ -57,16 +60,16 @@ define('SITE_PATH', SYSTEM_PATH. DOMAIN. DS);
 //The file system path of the site's cache folder
 define('CACHE_PATH', SITE_PATH. 'cache'. DS);
 
-//The file system path of the site's upload folder
+//The file system path of the site's config folder
 define('CONFIG_PATH', SITE_PATH. 'config'. DS);
 
-//The file system path of the site's upload folder
+//The file system path of the site's models folder
 define('MODEL_PATH', SITE_PATH. 'models'. DS);
 
-//The file system path of the site's upload folder
+//The file system path of the site's uploads folder
 define('UPLOAD_PATH', SITE_PATH. 'uploads'. DS);
 
-//The file system path of the site's upload folder
+//The file system path of the site's views folder
 define('VIEW_PATH', SITE_PATH. 'views'. DS);
 
 

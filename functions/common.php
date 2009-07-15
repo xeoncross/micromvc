@@ -827,9 +827,9 @@ function pagination($options=null) {
  * @param	bool	whether the error is a native PHP error
  * @return	bool
  */
-function log_message($message = '', $php_error = FALSE) {
+function log_message($message = '') {
 
-	$filepath = SYSTEM_PATH. 'log-'. date('Y-m-d'). '.php';
+	$filepath = LOG_PATH. 'log-'. date('Y-m-d'). '.php';
 
 	//Add a exit header to the file
 	if ( ! file_exists($filepath)) {
@@ -841,13 +841,13 @@ function log_message($message = '', $php_error = FALSE) {
 	}
 
 	//Add a timestamp
-	$message .= ' on '. date("M j, Y, g:i a"). "\n";
+	$message .= ' - '. date("M j, Y, g:i a"). "\n";
 
 	flock($fp, LOCK_EX);
 	fwrite($fp, $message);
 	flock($fp, LOCK_UN);
 	fclose($fp);
 
-	@chmod($filepath, '0666');
 	return TRUE;
 }
+

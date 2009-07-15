@@ -897,6 +897,8 @@ class db {
 			if(strpos($value, $qi) === FALSE && strpos($value, '(') === FALSE) {
 				//Then quote the value
 				$string .= $qi. trim($value). $qi. ',';
+			} else {
+				$string .= trim($value). ',';
 			}
 		}
 
@@ -1099,7 +1101,7 @@ class db {
 	 * @param string	COUNT(*) statement
 	 * @param boolean	save the AR clauses
 	 */
-	 public function count($table = NULL, $select='COUNT(*)', $save=TRUE) {
+	 public function count($table = NULL, $select = 'COUNT(*)', $save = FALSE) {
 
 	 	//We don't want to erase the current select statement
 	 	$temp = $this->orm_select;

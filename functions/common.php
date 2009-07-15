@@ -816,3 +816,38 @@ function pagination($options=null) {
 
 	return $data;
 }
+
+
+/**
+ * Write Log File
+ *
+ * @access	public
+ * @param	string	the error level
+ * @param	string	the error message
+ * @param	bool	whether the error is a native PHP error
+ * @return	bool
+ */
+function log_message($message = '', $php_error = FALSE) {
+
+	$filepath = SYSTEM_PATH. 'log-'. date('Y-m-d'). '.php';
+
+	//Add a exit header to the file
+	if ( ! file_exists($filepath)) {
+		$message = "<". "?php exit('Access Denied'); ?".">\n\n". $message;
+	}
+
+	if ( ! $fp = @fopen($filepath, 'a')) {
+		return FALSE;
+	}
+
+	//Add a timestamp
+	$message .= ' on '. date("M j, Y, g:i a"). "\n";
+
+	flock($fp, LOCK_EX);
+	fwrite($fp, $message);
+	flock($fp, LOCK_UN);
+	fclose($fp);
+
+	@chmod($filepath, '0666');
+	return TRUE;
+}

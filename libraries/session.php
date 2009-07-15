@@ -18,7 +18,7 @@ class session {
 	public $match_ip			= FALSE;			//Require user IP to match?
 	public $match_fingerprint	= TRUE;				//Require user agent fingerprint to match?
 	public $match_token			= FALSE;			//Require this token to match?
-	public $session_handler		= 'session_model';	//Class to use, FALSE for native file based sessions
+	public $session_handler		= 'session_handler_db';	//Class to use for storage, FALSE for native php
 	public $session_table		= 'sessions';		//If using a DB, what is the table name?
 	public $session_name		= 'mvc_session';	//What should the session be called?
 	public $session_id			= NULL;				//Specify a custom ID to use instead of default cookie ID

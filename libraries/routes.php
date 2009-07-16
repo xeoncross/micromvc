@@ -22,7 +22,6 @@ class routes {
 	 * Parse the URI
 	 */
 	public function parse() {
-
 		$this->get_uri();
 		$this->parse_uri();
 	}

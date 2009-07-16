@@ -28,7 +28,7 @@ class session {
 	public $cookie_secure		= NULL;				//Should cookies only be sent over secure connections?
 	public $cookie_httponly		= NULL;				//Only accessible through the HTTP protocol?
 
-	public $regenerate			= 300;				//Update the session every five minutes
+	public $regenerate			= 300;				//Update the session every five minutes (FALSE to disable)
 	public $expiration			= 7200;				//The session expires after 2 hours of non-use
 	public $gc_probability		= 100;				//Chance (in 100) that old sessions will be removed
 
@@ -158,7 +158,7 @@ class session {
 			$_SESSION['regenerate'] = time();
 
 		//Check to see if the session needs to be regenerated
-		} elseif($_SESSION['regenerate'] + $this->regenerate < time()) {
+		} elseif($this->regenerate && $_SESSION['regenerate'] + $this->regenerate < time()) {
 
 			//Generate a new session id and a new cookie with the updated id
 			session_regenerate_id();

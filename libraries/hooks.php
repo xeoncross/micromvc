@@ -25,14 +25,11 @@ class hooks {
 	}
 
 	/**
-	 * Call
+	 * Calls a particular hook allowing data to be
+	 * filtered by the hook(s) and the result returned.
 	 *
-	 * Calls a particular hook(s). Also, alows data to be
-	 * filtered by a hook(s) and the result returned.
-	 *
-	 * @access	public
 	 * @param	string	the hook name
-	 * @param	mixed	Data to be parsed
+	 * @param	mixed	data to be parsed
 	 * @return	mixed
 	 */
 	public function call($name = '', $data = NULL) {
@@ -54,7 +51,7 @@ class hooks {
 				}
 
 				//done
-				return true;
+				return TRUE;
 
 			} else {
 
@@ -84,31 +81,28 @@ class hooks {
 	}
 
 
-
 	/**
-	 * Remove Hook
+	 * Remove the given function (or all) from the given hook trigger
 	 *
-	 * remove a particular function (or all) from the given hook trigger
-	 *
-	 * @access	private
 	 * @param	string	the hook name
 	 * @param	string	the function name
-	 * @return	void
+	 * @return	boolean
 	 */
 	public function remove($name = '', $function = NULL) {
 
 		//If we are to remove all hooks for this trigger
 		if( ! $function) {
 			unset($this->hooks[$name]);
+			return TRUE;
 		}
 
 		//If there are several hooks to clear
-		if(isset($this->hooks[$name][0]) && is_array($this->hooks[$name])) {
+		if(!empty($this->hooks[$name][0])) {
 
 			foreach($this->hooks[$name] as $key => $hook) {
 				if($hook['function'] == $function) {
 					unset($this->hooks[$name][$key]);
-					return true;
+					return TRUE;
 				}
 			}
 
@@ -116,20 +110,37 @@ class hooks {
 		} else {
 			if($this->hooks[$name]['function'] == $function) {
 				unset($this->hooks[$name]);
-				return true;
+				return TRUE;
 			}
 		}
 
 	}
 
 
+	/**
+	 * Add a hook to the list for the given hook trigger
+	 *
+	 * @param	string	the hook name
+	 * @param	array	the hook array
+	 * @return	boolean
+	 */
+	public function add($name = '', $hook = NULL) {
+
+		//If invaild data was given
+		if( ! $name OR ! is_array($hook)) {
+			return FALSE;
+		}
+
+		//Add the hook
+		$this->hooks[$name][] = $hook;
+
+		return TRUE;
+	}
+
 
 	/**
-	 * Run Hook
+	 * Runs the given hook
 	 *
-	 * Runs a particular hook
-	 *
-	 * @access	public
 	 * @param	array	the hook details
 	 * @param	array	optional data to be filtered
 	 * @return	bool

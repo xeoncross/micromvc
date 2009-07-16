@@ -315,7 +315,7 @@ class session_handler_db extends base {
 			$this->db->update($this->session_table, array('data' => $data), array('session_id' => $id));
 
 		} else {
-			$this->db->insert($this->session_table, array('data' => $data));
+			$this->db->insert($this->session_table, array('data' => $data, 'session_id' => $id));
 		}
 
 	}

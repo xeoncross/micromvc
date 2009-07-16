@@ -14,6 +14,11 @@
  ********************************** 80 Columns *********************************
  */
 
+
+/**
+ * Try to fetch the current users IP address
+ * @return string
+ */
 function ip_address() {
 
 	//Get IP address - if proxy lets get the REAL IP address
@@ -34,7 +39,10 @@ function ip_address() {
 }
 
 
-//Get the current domain
+/**
+ * Get the current domain (sub.site.tld)
+ * @return	string
+ */
 function current_domain() {
 
 	// Get the Site Name: www.site.com -also protects from XSS/CSFR attacks
@@ -52,12 +60,35 @@ function current_domain() {
 }
 
 
-//Check to see if it is an ajax request
+/**
+ * Check to see if this request is an ajax request
+ * @return boolean
+ */
 function is_ajax_request() {
 	if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
 		return TRUE;
 	}
 	return FALSE;
+}
+
+
+/**
+ * Record memory usage and timestamp and then return difference next run (and restart)
+ * @return	array
+ */
+function benchmark() {
+	static $start_time;
+	static $memory_usage;
+
+	//Caculate result
+	$result = array((microtime(true) - $start_time), (memory_get_usage() - $memory_usage));
+
+	//Set new times
+	$start_time = microtime(true);
+	$memory_usage = memory_get_usage();
+
+	//return
+	return $result;
 }
 
 
@@ -296,11 +327,11 @@ function show_error($message = '', $title = 'An Error Was Encountered') {
 
 
 /**
- * Add <pre> tags around objects you want to dump.
+ * Print <pre> tags around objects you want to dump.
  * @param mixed $data
  */
 function print_pre($data = NULL) {
-	print '<pre style="padding: 1em; margin: 1em 0;">';
+	print '<pre style="padding: 1em; margin: 1em 0; background: #eee;">';
 	if(func_num_args() < 2) {
 		print_r($data);
 	} else {
@@ -311,16 +342,17 @@ function print_pre($data = NULL) {
 
 
 /**
- * Return the output of print_pre as a string
- * @param	mixed $data
- * @return	string
+ * Return data dump surrounded by <pre> tags.
+ * @param mixed $data
  */
-function return_print_pre($data = NULL) {
-	ob_start();
-	print_pre(func_get_args());
-	$output = ob_get_contents();
-	ob_end_clean();
-	return $output;
+function return_pre($data = NULL) {
+	$string = '<pre style="padding: 1em; margin: 1em 0; background: #eee;">';
+	if(func_num_args() < 2) {
+		$string .= print_r($data, TRUE);
+	} else {
+		$string .= print_r(func_get_args(), TRUE);
+	}
+	return $string. '</pre>';
 }
 
 
@@ -401,316 +433,6 @@ function valid_email($text){
 
 
 /**
- * unzip a file to a new location
- */
-function unzip($file, $new_file) {
-
-	if(file_exists($file)) {
-		$zip = new ZipArchive;
-		$zip->open($file);
-		$zip->extractTo($new_file);
-		$zip->close();
-		return true;
-	}
-
-	return false;
-}
-
-
-
-/**
- * Upload Check Errors
- *
- * Checks the given tmpfile for any errors or problems with
- * the upload
- *
- * @access	public
- * @param	string	Name of the File
- * @return	boolean
- */
-function upload_check_errors($file_name='') {
-
-	$errors = array(
-	UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
-	UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
-	UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded.',
-	UPLOAD_ERR_NO_FILE => 'No file was uploaded.',
-	UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
-	UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
-	UPLOAD_ERR_EXTENSION => 'File upload stopped by extension.',
-	);
-
-	//Get the error
-	$error = $_FILES[$file_name]['error'];
-
-	//IF the error is something OTHER than "OK"
-	if($error !== UPLOAD_ERR_OK) {
-		if(isset($errors[$error])) {
-			trigger_error($errors[$error], E_USER_WARNING);
-		} else {
-			trigger_error('Unknown file upload error in file: <b>'
-			. clean_value($_FILES[$file_name]['name']). '</b>',
-			E_USER_WARNING);
-		}
-		return false;
-	}
-
-	//If the file never made it to the server
-	if(!is_uploaded_file($_FILES[$file_name]['tmp_name'])) {
-		trigger_error('Possible file upload attack in file: '
-		. clean_value($_FILES[$file_name]['name']). '</b>',
-		E_USER_WARNING);
-		return false;
-	}
-
-	return true;
-
-}
-
-
-
-/**
- * Upload Files
- *
- * @access	public
- * @param	string	The directory to place the uploaded files
- * @return	boolean
- */
-function upload_files($dir) {
-
-	//If the upload directory is useable and there are files to upload
-	if(directory_usable($dir) && isset($_FILES)) {
-
-		//Foreach file that has been uploaded
-		foreach($_FILES as $name => $file) {
-
-			//If no errors with the file
-			if(upload_check_errors($name)) {
-				if(!move_uploaded_file($file['tmp_name'], $dir. $file['name'])) {
-					trigger_error('Could not move file', E_USER_ERROR);
-					return;
-				}
-			}
-
-		}
-		return true;
-	}
-
-}
-
-
-
-///////////////////////////////////////////////////////////
-// A function to list all files within the specified directory
-// and it's sub-directories. This is a recursive function that
-// has no limit on the number of levels down you can search.
-///////////////////////////////////////////////////////////
-// What info does this function need?
-/////////////////
-//
-// $data['start_dir']   The directory to start searching from   (Required) ("./" = current dir, "../" = up one level)
-// $data['good_ext']    The file extensions to allow.           (Required) (set to 'array('all') to include everything)
-// $data['skip_files']  An array of files to skip.              (Required) (empty array if you don't want to skip anything)
-// $data['limit']       The limit of dir to search              (Required)
-// $data['type']        Return files or Directories?            (Optional) (defaults to BOTH types but can also set to 'dir' or 'file')
-// $data['light']       Only return file name and path          (Optional) (defaults to false) (true or false)
-//
-/////////////////
-// Example data
-/////////////////
-//
-// $data['start_dir']      = "../../";
-// $data['good_ext']       = array('php', 'html');
-// $data['skip_files']     = array('..', '.', 'txt', '.htaccess');
-// $data['limit']          = 5;
-// $data['type']           = 'file';
-// $data['light']          = false;
-//
-//////////////////////////////////////////////////
-function directory($data, $level=1) {
-
-	//If no type was specified - default to showing BOTH
-	if(!isset($data['type']) || !$data['type']) { $data['type'] = false; }
-
-	//If light was not specified - defualt to heavy version
-	if(!isset($data['light']) || !$data['light']) { $data['light'] = false; }
-
-	//If the directory given actually IS a directory
-	if (is_dir($data['start_dir'])) {
-
-		//Then open the directory
-		$handle = opendir($data['start_dir']);
-
-		//Initialize array
-		$files = array();
-
-		//while their are files in the directory...
-		while (($file = readdir($handle)) !== false) {
-
-			//If the file is NOT in the bad file list...
-			if (!(array_search($file, $data['skip_files']) > -1)) {
-
-				//Store the full file path in a var
-				$path = $data['start_dir']. $file;
-
-				//if it is a dir
-				if (filetype($path) == "dir") {
-
-					//add it to our list of dirs
-					if(!$data['type'] || $data['type'] == 'dir') {
-						//Add the dir to our list
-						$files[$path]['file'] = $file;
-						$files[$path]['dir'] = substr($path, strlen(SYSTEM_PATH), -strlen($file));
-
-						//If we are only getting the file names/paths
-						if(!$data['light']) {
-							$files[$path]['ext'] = 'dir';
-							$files[$path]['level'] = $level;
-							$files[$path]['size'] = 0;//@disk_total_space($path);
-						}
-					}
-
-					//If the dir is NOT deeper than the limit && 'recursive' is set to true
-					if($data['limit'] > $level){
-
-						//Run this function on on the directory to see what is in it (this is where the recursive part starts)
-						$files2 = directory(array('start_dir' => $path. '/', 'good_ext' => $data['good_ext'],
-                                                  'skip_files' => $data['skip_files'], 'limit' => $data['limit'],
-                                                  'type' => $data['type'], 'light' => $data['light']), $level + 1);
-
-						//then combine the output with the current $files array
-						if(is_array($files2)) { $files = array_merge($files, $files2); }
-						$files2 = null;
-					}
-
-					//Else if it is a file
-				} else {
-
-					//get the extension of the file
-					$ext = preg_replace('/(.+)\.([a-z0-9]{2,4})/i', '\\2', $file);
-
-					//And if it is in the GOOD file extension list OR if the list is set to allow ALL files
-					if( (($data['good_ext'][0] == "all") || (array_search($ext, $data['good_ext']) > -1)) && (!$data['type'] || $data['type'] == 'file') ) {
-
-						//Add the file to our list
-						$files[$path]['file'] = $file;
-						$files[$path]['dir'] = substr($path, strlen(SYSTEM_PATH), -strlen($file));
-						//Get the LAST "." followed by 2-4 letters/numbers
-						$files[$path]['ext'] = $ext;
-
-						//If we are only getting the file names/paths
-						if(!$data['light']) {
-							$files[$path]['level'] = $level;
-							$files[$path]['size'] = filesize($path);
-						}
-
-					}
-				}
-			}
-		}
-
-		//Close the dir handle
-		closedir($handle);
-
-		//If there ARE files to sort
-		if($files) {
-			//sort by KEYS
-			ksort($files);
-		}
-
-		//Return the result
-		return $files;
-
-	}
-
-	trigger_error($data['start_dir']. " is not a valid directory.");
-	return FALSE;
-}
-
-
-/**
- * Checks that a directory exists and is writable. If the directory does
- * not exist, the function will try to create it and/or change the
- * CHMOD settings on it.
- *
- * @param string $dir	directory you want to check
- * @param string $chmod	he CHMOD value you want to make it
- * @return unknown
- */
-function directory_usable($dir, $chmod='0777') {
-
-	//If it doesn't exist - make it!
-	if(!is_dir($dir)) {
-		if(!mkdir($dir, $chmod, true)) {
-			trigger_error('Could not create the directory: <b>'. $dir. '</b>', E_USER_WARNING);
-			return;
-		}
-	}
-
-	//Make it writable
-	if(!is_writable($dir)) {
-		if(!chmod($dir, $chmod)) {
-			trigger_error('Could not CHMOD 0777 the directory: <b>'. $dir. '</b>', E_USER_WARNING);
-			return;
-		}
-	}
-
-	return true;
-}
-
-
-
-/**
- * A function to recursively delete files and folders
- * @thanks: dev at grind [[DOT]] lv
- *
- * @param string	$dir	The path of the directory you want deleted
- * @param boolean	$remove	Remove Files (false) or Folder and Files (true)
- * @return boolean
- */
-function destroy_directory($dir='', $remove=true) {
-
-	//Try to open the directory handle
-	if(!$dh = opendir($dir)) {
-		trigger_error('<b>'. $dir. '</b> cannot be opened or does not exist', E_USER_WARNING);
-		return;
-	}
-
-	//While there are files and directories in this directory
-	while (false !== ($obj = readdir($dh))) {
-
-		//Skip the object if it is the linux current (.) or parent (..) directory
-		if($obj=='.' || $obj=='..') continue;
-
-		$obj = $dir. $obj;
-
-		//If the object is a directory
-		if(is_dir($obj)) {
-
-			//If we could NOT delete this directory
-			if(!destroy_directory($obj, $remove)) {
-				return;
-			}
-
-			//Else it must be a file
-		} else {
-			unlink($obj) or trigger_error('Could not remove file <b>'. $obj. '</b>', E_USER_WARNING);
-		}
-
-	}
-
-	//Close the handle
-	closedir($dh);
-
-	if ($remove){
-		rmdir($dir) or trigger_error('Could not remove directory <b>'. $dir. '</b>');
-	}
-
-	return true;
-}
-
-
-/**
  * Gzip/Compress Output
  * Original function came from wordpress.org
  * @return void
@@ -733,7 +455,7 @@ function gzip_compression() {
 		ob_start('ob_gzhandler');
 	}
 
-	/*
+	/* Debug Data
 	 print $_SERVER['HTTP_ACCEPT_ENCODING']. '<br />'.
 	 'extension_loaded("zlib") = '. extension_loaded( 'zlib' ). '<br />'.
 	 'ini_get("zlib.output_compression") = '. ini_get('zlib.output_compression'). '<br />'.

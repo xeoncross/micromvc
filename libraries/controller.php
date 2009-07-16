@@ -17,20 +17,22 @@
 class controller {
 
 	//Data for final site layout
-	public $views = array();
+	public $views	= array();
 	//Name of final site layout file
-	public $layout = 'layout';
+	public $layout	= 'layout';
 	//Singleton instance object
 	private static $instance;
 	//Config array
-	public $config = array();
+	public $config	= array();
+	//Language array
+	public $lang	= array();
 
 
 	/**
 	 * Setup some basic controller items on load
 	 * @param array $config
 	 */
-	public function __construct($config=null) {
+	public function __construct($config = null) {
 
 		//Set singleton instance
 		self::$instance =& $this;
@@ -142,7 +144,9 @@ class controller {
 
 	/**
 	 * Load a config file
-	 * @param string $config
+	 * @param string $name
+	 * @param string $module
+	 * @return array
 	 */
 	public function load_config($name=null, $module = FALSE) {
 
@@ -163,6 +167,33 @@ class controller {
 		//Return new config array
 		return $this->config[$name];
 
+	}
+
+
+	/**
+	 * Load a language file
+	 * @param string $name
+	 * @param string $module
+	 * @return array
+	 */
+	public function load_lang($name=null, $module = FALSE) {
+
+		//If this lang file was already loaded
+		if( ! empty($this->lang[$name])) {
+			return $this->lang[$name];
+		}
+
+		//Is this a module's config -or a site config?
+		$path = $module ? MODULE_PATH. $module. DS : SITE_PATH;
+
+		//Add the rest of the path
+		$path .= 'lang'. DS. $this->config['config']['language']. DS. $name. '.php';
+
+		//include the config
+		require($path);
+
+		//Set the values in our config array and return a copy too
+		return $this->lang[$name] = $lang;
 	}
 
 

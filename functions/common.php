@@ -132,7 +132,7 @@ function load_class($class = NULL, $path = NULL, $params = NULL, $instantiate = 
 		return TRUE;
 	}
 
-	return $objects[$class] = new $class(($params ? $params : ''));
+	return $objects[$class] = new $class($params);
 }
 
 
@@ -177,13 +177,10 @@ function _error_handler($level='', $message='', $file='', $line='', $variables='
 	//Get Human-safe error title
 	$error = $error_levels[$level];
 
-	//If we only show simple error data
-	if(DEBUG_MODE == FALSE) {
+	if(DEBUG_MODE) {
 
 		//Create sentence
 		$line_info = 'On line '. $line. ' in '. $file;
-
-	} else {
 
 		//If the database class is loaded - get the queries run (if any)
 		if(class_exists('db')) {
@@ -551,7 +548,7 @@ function pagination($options=null) {
  */
 function log_message($message = '') {
 
-	$filepath = LOG_PATH. 'log-'. date('Y-m-d'). '.php';
+	$filepath = LOG_PATH. DOMAIN. '_log-'. date('Y-m-d'). '.php';
 
 	//Add a exit header to the file
 	if ( ! file_exists($filepath)) {
@@ -573,3 +570,75 @@ function log_message($message = '') {
 	return TRUE;
 }
 
+
+/**
+ * Header redirection for both location and refresh types.
+ *
+ * @param	string	the URL
+ * @param	string	the method: location or redirect
+ * @return	void
+ */
+function redirect($uri = '', $method = 'location', $http_response_code = 302) {
+
+	//Do we need to add the site URL prefix?
+	$uri = strpos($uri, '://') !== FALSE ? $uri : 'http://'. DOMAIN. SITE_URL . $uri;
+
+	if($method == 'refresh') {
+		header("Refresh:0;url=". $uri);
+	} else {
+		header("Location: ". $uri, TRUE, $http_response_code);
+	}
+	exit;
+}
+
+
+/**
+ * Return the site url prefixed to the uri path
+ * @param $uri
+ * @return unknown_type
+ */
+function site_url($uri = '') {
+	return SITE_URL. trim($uri, '/'). '/';
+}
+
+
+/**
+ * Fetch a $_POST value (or the default if not found)
+ * @param	string	$key
+ * @param	mixed	$value
+ * @return	mixed
+ */
+function post($key, $value = NULL) {
+	return isset($_POST[$key]) ? $_POST[$key] : $value;
+}
+
+
+/**
+ * Fetch the $_SESSION value (or default if not found)
+ * @param	string	$key
+ * @param	mixed	$value
+ * @return	mixed
+ */
+function session($key, $value = NULL) {
+	return isset($_SESSION[$key]) ? $_SESSION[$key] : $value;
+}
+
+
+/**
+ * Encode a string so it is safe to pass through the URI
+ * @param	string	$string
+ * @return	string
+ */
+function base64_url_encode($string=null){
+  return strtr(base64_encode($string), '+/=', '-_~');
+}
+
+
+/**
+ * Decode a string passed through the URI
+ * @param	string	$string
+ * @return	string
+ */
+function base64_url_decode($string=null) {
+  return base64_decode(strtr($string, '-_~','+/='));
+}

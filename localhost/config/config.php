@@ -8,6 +8,8 @@ $config['default_controller'] = 'welcome';
 $config['default_method'] = 'index';
 //Characters to allow in the URI string ($_GET data)
 $config['permitted_uri_chars'] = 'a-z 0-9~%.:_\-';
+//Language
+$config['language'] = 'english';
 
 //Enable error reporting?
 //error_reporting(E_ALL|E_STRICT);

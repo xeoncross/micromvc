@@ -280,18 +280,37 @@ function mime_type($type = NULL) {
  * @param	string	$ext
  * @return	void
  */
-function download_document($content = '', $ext = ''){
+function download_file($content = '', $ext = '', $filename = NULL){
 
 	//Try to get the mime type
 	if( ! $mime = mime_type($ext)) {
 		$mime = 'application/octet-stream';
 	}
 
-	//Send header data
-	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-	header('Content-Disposition: attachment; filename='.time(). $ext);
-	header("Content-Length: " . mb_strlen($content));
-	header("Content-Type: $mime");
+	//Create a random filename
+	if( ! $filename) {
+		$filename = time(). '.'. $ext;
+	}
+
+	// Generate the server headers
+	if (strstr($_SERVER['HTTP_USER_AGENT'], "MSIE")) {
+		header('Content-Type: "'.$mime.'"');
+		header('Content-Disposition: attachment; filename="'.$filename.'"');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header("Content-Transfer-Encoding: binary");
+		header('Pragma: public');
+		header("Content-Length: ".strlen($data));
+
+	} else {
+		header('Content-Type: "'.$mime.'"');
+		header('Content-Disposition: attachment; filename="'.$filename.'"');
+		header("Content-Transfer-Encoding: binary");
+		header('Expires: 0');
+		header('Pragma: no-cache');
+		header("Content-Length: ".strlen($data));
+	}
+
 
 	//Send file
 	exit($content);

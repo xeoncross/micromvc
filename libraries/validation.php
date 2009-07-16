@@ -17,7 +17,7 @@
 class validation {
 
 	//The Parent Controller Instance
-	public $instance		= NULL;
+	public $mvc				= NULL;
 	//An array of error messages
 	public $error_messages	= array();
 	//The array to hold form errors (if any)
@@ -25,14 +25,20 @@ class validation {
 	//The text to put before an error
 	public $error_prefix	= '<p>';
 	//The text to put after an error
-	public $error_sufix		= '</p>';
+	public $error_suffix	= '</p>';
 
 
 	/*
-	 * Get the Controller instance on load
+	 * Get the Controller mvc on load
 	 */
-	public function __construct() {
-		$this->instance = get_instance();
+	public function __construct($config = NULL) {
+
+		//Get the instance
+		$this->mvc = get_instance();
+
+		if($config) {
+			$this->setup($config);
+		}
 
 		//Set error messages
 		$this->error_messages = array(
@@ -52,6 +58,27 @@ class validation {
 	}
 
 
+	/**
+	 * Set the config for the validation run
+	 * @param	array	$config
+	 * @return	void
+	 */
+	public function setup($config) {
+		$this->config = $config;
+	}
+
+
+	/**
+	 * Add a field and the matching rules to our config
+	 * @param	string	$field
+	 * @param	string	$rules
+	 * @return	void
+	 */
+	public function set_rule($field = NULL, $rules = '') {
+		$this->config[$field] = $rules;
+	}
+
+
 	/*
 	 * Check and Filter the $_POST data submited to us.
 	 *
@@ -60,13 +87,18 @@ class validation {
 	 * first in the controller, then in this class, and
 	 * finally as just a function.
 	 */
-	public function run($config=null) {
+	public function run($config = NULL) {
 
 		//Reset error array
 		$this->errors = array();
 
+		//If the rules were not passed, then see if they are pre-set
+		if( ! $config) {
+			$config = $this->config;
+		}
+
 		//No rules?
-		if(! $config) {
+		if( ! $config) {
 			$this->errors['no_rules'] = $this->error_messages['no_rules'];
 			return FALSE;
 		}
@@ -131,8 +163,8 @@ class validation {
 				}
 
 				//Look for it in the current controller
-				if(method_exists($this->instance, $rule)) {
-					$result = $this->instance->$rule($field, $data, $params);
+				if(method_exists($this->mvc, $rule)) {
+					$result = $this->mvc->$rule($field, $data, $params);
 
 					//Look for it in this class
 				} elseif(method_exists($this, $rule)) {
@@ -193,7 +225,7 @@ class validation {
 		$output = '';
 		//Format each error
 		foreach($this->errors as $error) {
-			$output .= $this->error_prefix. $error. $this->error_sufix. "\n\n";
+			$output .= $this->error_prefix. $error. $this->error_suffix. "\n\n";
 		}
 
 		//Return the full errors string

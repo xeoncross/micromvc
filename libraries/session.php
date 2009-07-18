@@ -270,8 +270,9 @@ class session_handler_db extends base {
 		$result = $this->db->select('data')->where('session_id', $id)->get($this->session_table);
 
 		//Check to see if there is a result
-		if($result && $row = $result->fetch(PDO::FETCH_ASSOC)) {
-			return $row['data'];
+		if($result && $row = $result[0]) {
+			//Return the data whether the result type is an array or object
+			return is_array($row) ? $row['data'] : $row->data;
 		}
 
 		return '';

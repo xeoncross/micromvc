@@ -115,6 +115,8 @@ class db {
 	public $last_table			= NULL;
 	//Use the row class?
 	public $row_class			= 'ORM_Row';
+	//Array of error messages
+	public $errors				= array();
 
 	//Active Record Clauses
 	public $orm_select			= '*';
@@ -893,8 +895,8 @@ class db {
 
 		$string = '';
 		foreach($select as $value) {
-			//If this is a string without quotes (or without a function like COUNT() or MAX())
-			if(strpos($value, $qi) === FALSE && strpos($value, '(') === FALSE) {
+			//If this is a string without quotes, without a function like COUNT() or MAX()), or without a star
+			if(strpos($value, $qi) === FALSE && strpos($value, '(') === FALSE && strpos($value, '*') === FALSE) {
 				//Then quote the value
 				$string .= $qi. trim($value). $qi. ',';
 			} else {
@@ -915,9 +917,10 @@ class db {
 	 * Generates a query string based on which functions were used.
 	 * Should not be called directly.  The get() function calls it.
 	 *
+	 * @param	boolean		save the ORM data?
 	 * @return	string
 	 */
-	public function compile_select() {
+	public function compile_select($save = FALSE) {
 
 		// Write the "select" portion of the query
 		$sql = ( ! $this->orm_distinct) ? 'SELECT ' : 'SELECT DISTINCT ';
@@ -992,6 +995,16 @@ class db {
 			$sql .= $this->orm_limit;
 		}
 
+		//Quote all of the fields/columns
+		if($this->quote_fields) {
+			$sql = $this->quote_fields($sql);
+		}
+
+		//Remove the AR data?
+		if(! $save) {
+			$this->clear();
+		}
+
 		return $sql;
 	}
 
@@ -1011,40 +1024,66 @@ class db {
 	 *
 	 * @param	string	the table
 	 * @param	boolean	return the query?
-	 * @param	boolean	save the query?
+	 * @param	boolean	save the ORM data?
 	 * @return	object
 	 */
-	public function get($table = NULL, $return_query = NULL, $save = FALSE) {
+	public function get($table = NULL, $save = FALSE, $auto_count = FALSE) {
 
 		//If they passed the table
 		if($table) {
 			$this->from($table);
 		}
 
-		//If we are passing a save option
-		if($return_query != null) {
-			$this->return_query = $return_query;
+		//Run query
+		$this->query(NULL, $save, $auto_count);
+
+		//If the query was successful
+		if($this->result) {
+			return $this->result->fetchAll();
+		}
+	}
+
+
+	/*
+	 * Run the PDO::query() method and return results
+	 */
+	public function query($sql = '', $save = FALSE, $auto_count = FALSE) {
+
+		//Build the query if not given
+		if(empty($sql)) {
+			$sql = $this->compile_select($save);
 		}
 
-		//Build the query
-		$sql = $this->compile_select();
-
-		//Quote the fields
-		if($this->quote_fields) {
-			$sql = $this->quote_fields($sql);
+		//Add the query to the list
+		if($this->log_queries) {
+			$this->queries[] = $sql;
 		}
 
-		//Remove the AR data?
-		if(! $save) {
-			$this->clear();
+		//Fetch and store the PDOStatement Object (overwritting last one)
+		$this->result = $this->pdo->query($sql);
+
+		//If there was an error - add it to our array and return FALSE
+		if( ! $this->result) {
+			$this->errors[] = end($this->pdo->errorInfo());
+			return;
 		}
 
-		//If we are just returning the query
-		if($this->return_query) {
-			return $sql;
+		//If this is NOT a class fetch
+		if($this->fetch_mode != PDO::FETCH_CLASS) {
+			//Set default fetch method
+			$this->result->setFetchMode($this->fetch_mode);
+
+		} else {
+			//Set default fetch method to a row class
+			$this->result->setFetchMode(PDO::FETCH_CLASS, $this->row_class);
 		}
 
-		return $this->query($sql);
+		if($auto_count) {
+			$this->auto_count($sql);
+		}
+
+		//return the object
+		return $this->result;
 	}
 
 
@@ -1064,44 +1103,50 @@ class db {
 	}
 
 
-	/*
-	 * Run the PDO::query() method and return results
+	/**
+	 * Perform another query to auto-count the rows that should be in the query
+	 * if there had not been a LIMIT or OFFSET added. This is useful for pagination.
+	 * @param	string	$sql
+	 * @return	int
 	 */
-	public function query($sql=null) {
+	public function auto_count($sql = '') {
+		//If this is not a SELECT OR there is no valid result - skip this
+		if(substr($sql, 0, 6) !== 'SELECT' OR ! $this->result) {
+			return;
+		}
+
+		//Remove the limit and/or offset from the query
+		$sql = preg_replace('/(limit\s+\d+\s*)?((,|(offset))\s+\d+)?/i', '', $sql);
 
 		//Add the query to the list
 		if($this->log_queries) {
 			$this->queries[] = $sql;
 		}
 
-		//Fetch and store the PDOStatement Object
-		$this->result = $this->pdo->query($sql);
-
-		if(!$this->result) { return; }
-
-		//If this is NOT a class fetch
-		if($this->fetch_mode != PDO::FETCH_CLASS) {
-			//Set default fetch method
-			$this->result->setFetchMode($this->fetch_mode);
-
-		} else {
-			//Set default fetch method to our Row class
-			$this->result->setFetchMode(PDO::FETCH_CLASS, $this->row_class);
+		//Run the query
+		if($result = $this->pdo->query($sql)) {
+			//Set the total number of rows from result
+			$this->result->total_rows = $result->fetchColumn();
 		}
-
-		//return the object
-		return $this->result;
 	}
 
 
 	/**
-	 * Creates a SELECT COUNT query from the current AR Clauses
-	 * Use this to figure out the number of rows for a query.
+	 * Creates a SELECT COUNT query from the current ORM Clauses.
+	 * Use this to figure out the number of rows for pagination.
+	 * $this->query() method resets this->result so we don't use
+	 * it just encase the user still wants access to the last
+	 * query result.
 	 *
 	 * @param string	COUNT(*) statement
 	 * @param boolean	save the AR clauses
 	 */
 	 public function count($table = NULL, $select = 'COUNT(*)', $save = FALSE) {
+
+	 	//If they passed the table
+		if($table) {
+			$this->from($table);
+		}
 
 	 	//We don't want to erase the current select statement
 	 	$temp = $this->orm_select;
@@ -1109,12 +1154,21 @@ class db {
 	 	//Set the new SELECT COUNT statement
 		$this->select($select);
 
-		//Fetch the result and save(?) the AR Clauses.
-		$result = $this->get($table,NULL,$save);
+		//Build query
+		$sql = $this->compile_select($save);
 
-	 	//If we are just returning the query
-		if($this->return_query) {
-			return $result;
+		//Add the query to the list
+		if($this->log_queries) {
+			$this->queries[] = $sql;
+		}
+
+		//Fetch and store the PDOStatement Object (overwritting last one)
+		$result = $this->pdo->query($sql);
+
+		//If there was an error - add it to our array and return FALSE
+		if( ! $result) {
+			$this->errors[] = end($this->pdo->errorInfo());
+			return NULL;
 		}
 
 		//Restore the old select statement

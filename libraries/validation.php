@@ -79,6 +79,10 @@ class validation {
 	}
 
 
+	public function set_message($field, $error) {
+		$this->errors[$field] = $error;
+	}
+
 	/*
 	 * Check and Filter the $_POST data submited to us.
 	 *
@@ -133,7 +137,7 @@ class validation {
 
 				//No rules? Skip this field (should we allow this?)
 				if(! $rule) {
-					break;
+					//break;
 				}
 
 				$params = NULL;

@@ -1186,6 +1186,16 @@ class db {
 	 */
 
 
+	/**
+	 * Close a PDOStatement cursor, enabling other queries to be run.
+	 * Some PDO drivers require that this is called after each query.
+	 */
+	public function close_cursor() {
+		if($this->result) {
+			$this->result->closeCursor();
+		}
+	}
+
 
 	/**
 	 * Alias for get and where

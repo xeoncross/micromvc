@@ -26,6 +26,8 @@ class controller {
 	public $config	= array();
 	//Language array
 	public $lang	= array();
+	//Is this a module? (changes default load path for views and models)
+	public $module = FALSE;
 
 
 	/**
@@ -81,8 +83,12 @@ class controller {
 	 */
 	public function model($class = NULL, $params = NULL, $name = NULL, $module = FALSE) {
 
-		//Is this a module's model -or a site model?
-		$path = ($module ? MODULE_PATH. $module. DS : SITE_PATH). 'models'. DS;
+		//Is this a module's model - or a site model?
+		if($module OR $module = $this->module) {
+			$path = MODULE_PATH. $module. DS. 'models'. DS;
+		} else {
+			$path = SITE_PATH. 'models'. DS;
+		}
 
 		//Try to load the class
 		return $this->object($class, $name, $path, $params);
@@ -192,8 +198,11 @@ class controller {
 		//include the config
 		require($path);
 
-		//Set the values in our config array and return a copy too
-		return $this->lang[$name] = $lang;
+		//Add these language options to our language array
+		$this->lang = array_merge($this->lang, $lang);
+
+		//Return a copy too
+		return $lang;
 	}
 
 
@@ -231,8 +240,8 @@ class controller {
 		//If no file is given - just return false
 		if(!$__file) { return; }
 
-		//Is this a module's library -or a global system library?
-		$__path = ($__module ? MODULE_PATH. $__module. DS : SITE_PATH);
+		//Is this a module's view - or a site view?
+		$__path = $__module ? MODULE_PATH. $__module. DS : SITE_PATH;
 
 		//Add the path
 		$__path .= 'views'. DS. $__file. '.php';

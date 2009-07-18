@@ -642,3 +642,23 @@ function base64_url_encode($string=null){
 function base64_url_decode($string=null) {
   return base64_decode(strtr($string, '-_~','+/='));
 }
+
+
+/**
+ * Fetch the following line from the loaded language array
+ * @param	$line
+ * @return	mixed
+ */
+function lang($line = NULL) {
+	static $mvc = NULL;
+
+	if($mvc == NULL) {
+		$mvc = get_instance();
+	}
+
+	if(isset($mvc->lang[$line])) {
+		return $mvc->lang[$line];
+	}
+}
+
+

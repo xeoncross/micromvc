@@ -471,26 +471,31 @@ function get_instance(){
 
 
 /**
- * Creates pagination links for the number of pages given
- *
- * @param array $options
- * @return array
+ * Creates pagination links for the total number of pages
+ * @param	array	$options
+ * @param	bool	$load_view
+ * @return	mixed
  */
-function pagination($options=null) {
+function pagination($options=null, $load_view = FALSE) {
 
 	/** [Options]
 	 * total		Total number of items
 	 * per_page		Items to show each page
-	 * current_page	The current page that the user is on
+	 * current		The current page that the user is on
+	 * num_links	The number of links to show before and after the current page
 	 * url			URI value to place in the links (must include "[[page]]")
 	 * 				Example: /home/blog/page/[[page]]/
 	 */
 
-	//Don't allow page 0 or lower
-	if($options['current_page'] < 0) {
-		$options['current_page'] = 0;
+	//Max links to show
+	if(empty($options['num_links'])) {
+		$options['num_links'] = 2;
 	}
 
+	//Don't allow page 0 or lower
+	if($options['current'] < 1) {
+		$options['current'] = 1;
+	}
 
 	//Initialize
 	$data = array(
@@ -502,30 +507,51 @@ function pagination($options=null) {
 	);
 
 	//The offset to start from. This is useful if you are running a DB query
-	if($options['current_page'] > 1) {
-		$data["offset"] = (($options['per_page'] * $options['current_page']) - $options['per_page']);
-	}
+	//$data["offset"] = (($options['per_page'] * $options['current']) - $options['per_page']);
 
 	//The Number of pages based on the total number of items and the number to show each page
 	$data['total'] = ceil($options['total'] / $options['per_page']);
 
-	//If there is more than one page...
-	if($data['total'] > 1) {
-
-		//If this is NOT the first page - show a previous link
-		if($options['current_page'] > 1) {
-			$data['previous'] = str_replace('[[page]]', ($options['current_page'] - 1), $options['url']);
-		}
-
-		//If this isn't the last page - add a "next" link
-		if($options['current_page'] + 1 < $data['total']) {
-			$data["next"] = str_replace('[[page]]', ($options['current_page'] + 1), $options['url']);
-		}
+	//Current page should NOT be past last page
+	if($options['current'] > $data['total']) {
+		$options['current'] = $data['total'];
 	}
 
+	//If there is only one (or less) pages
+	if($data['total'] <= 1) {
+		return;
+	}
+
+	//If this is NOT the first page - show a previous link
+	if($options['current'] > 1) {
+		$data['previous'] = str_replace('[[page]]', ($options['current'] - 1), $options['url']);
+	}
+
+	//If this isn't the last page - add a "next" link
+	if($options['current'] + 1 < $data['total']) {
+		$data["next"] = str_replace('[[page]]', ($options['current'] + 1), $options['url']);
+	}
+
+	//Show first page?
+	if($options['current'] > $options['num_links'] + 1) {
+		$data['first'] = str_replace('[[page]]', 1, $options['url']);
+	}
+
+	//Show last page?
+	if($options['current'] + $options['num_links'] < $data['total']) {
+		$data['last'] = str_replace('[[page]]', $data['total'], $options['url']);
+	}
+
+
+	//Only if we have more pages than links to show
+	$start = (($options['current'] - $options['num_links']) > 0) ? $options['current'] - ($options['num_links']) : 1;
+	$end   = (($options['current'] + $options['num_links']) < $data['total']) ? $options['current'] + $options['num_links'] : $data['total'];
+
+	//print 'Total Rows: '. $options['total']. ' Pages: '. $data['total']. ' End: '. $end. ' Start: '. $start;
+
 	//For each page, create the URL
-	for($i = 0; $i < $data['total']; $i++) {
-		if($options['current_page'] == $i) {
+	for($i = $start; $i <= $end; $i++) {
+		if($options['current'] == $i) {
 			$data['links'][$i] = '';
 		} else {
 			//Replace [[page]] with the page number
@@ -533,7 +559,16 @@ function pagination($options=null) {
 		}
 	}
 
-	return $data;
+	//If we should just return the array
+	if( ! $load_view) {
+		return $data;
+	}
+
+	//Fetch the Controller instance
+	$mvc = get_instance();
+
+	//Place it in the view
+	return $mvc->view('pagination', $data, TRUE);
 }
 
 

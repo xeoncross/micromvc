@@ -886,6 +886,7 @@ class db {
 	 * @param	string
 	 */
 	public function select($select = '*', $escape = NULL){
+
 		$qi = $this->quote_identifier();
 
 		//If string - convert to an array
@@ -895,18 +896,31 @@ class db {
 
 		$string = '';
 		foreach($select as $value) {
+
+			//If there is no column...
+			if( ! $value = trim($value)) {	continue; }
+
 			//If this is a string without quotes, without a function like COUNT() or MAX()), or without a star
 			if(strpos($value, $qi) === FALSE && strpos($value, '(') === FALSE && strpos($value, '*') === FALSE) {
+
+				//If they are using table.field values...
+				if(strpos($value, '.') !== FALSE) {
+					$value = explode('.', $value);
+					$value = implode($qi. '.'. $qi, $value);
+				}
+
 				//Then quote the value
 				$string .= $qi. trim($value). $qi. ',';
 			} else {
 				$string .= trim($value). ',';
 			}
+
 		}
 
 		//Register the select and remove last comma
 		$this->orm_select = rtrim($string, ',');
 
+		//print_pre($select, $string);
 		return $this;
 	}
 
@@ -1179,6 +1193,62 @@ class db {
 	}
 
 
+	/**
+	 * Fetch infomation about the fields in a given table. Performs a
+	 * SELECT of one row in order to find column data.
+	 *
+	 * @param	string	$table
+	 * @return	array
+	 */
+	public function field_data($table = NULL) {
+
+		//Select any example row
+		$sql = 'SELECT * FROM '. $this->quote_table($table). ' LIMIT 1';
+
+		//If we are loggin queries
+		if($this->log_queries) {
+			$this->queries[] = $sql;
+		}
+
+		$result = $this->pdo->query($sql);
+
+		//PDO data types
+		$types = array(
+			PDO::PARAM_BOOL => 'bool',
+			PDO::PARAM_NULL	=> 'null',
+			PDO::PARAM_INT	=> 'int',
+			PDO::PARAM_STR	=> 'string',
+			PDO::PARAM_LOB	=> 'blob',
+			PDO::PARAM_STMT	=> 'statement'	//Not used right now
+		);
+
+		$columns = array();
+
+		if($result && $number = $result->columnCount()) {
+			for($x=0;$x<$number;$x++) {
+
+				//Get meta
+				$column = $result->getColumnMeta($x);
+
+				//If the column lenght isn't set - default to ZERO
+				$column['len'] = isset($column['len']) ? $column['len'] : 0;
+
+				//HACK: If it is longer than 255 chars then it is a text area
+				if($column['len'] > 255) {
+					$column['type'] = 'text';
+				} else {
+					$column['type'] = $types[$column['pdo_type']];
+				}
+
+				//Save type information
+				$columns[$column['name']] = $column;
+			}
+		}
+
+		return $columns;
+	}
+
+
 	/*
 	 ------------------------------------------
 	 Alias Functions
@@ -1233,7 +1303,7 @@ class db {
 
 	/*
 	 * Access PDO methods as it we were the PDO object
-	 */
+	 *
 	public function __call($name, $arguments) {
 		//return call_user_func(array($this->pdo, $name), $arguments);
 		return $this->pdo->$name($arguments);
@@ -1242,7 +1312,7 @@ class db {
 
 	/*
 	 * Access PDO properties as if we were the PDO object
-	 */
+	 *
 	public function __get($name) {
 		return $this->pdo->$name;
 	}
@@ -1325,6 +1395,7 @@ class mysql extends db {
 		}
 		return $tables;
 	}
+
 
 	/**
 	 * Explain all columns within a table

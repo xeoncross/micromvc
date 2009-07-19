@@ -23,10 +23,10 @@ class session {
 	public $session_name		= 'mvc_session';	//What should the session be called?
 	public $session_id			= NULL;				//Specify a custom ID to use instead of default cookie ID
 
-	public $cookie_path			= NULL;				//Path to set in session_cookie
+	public $cookie_path			= '/';				//Path to set in session_cookie
 	public $cookie_domain		= NULL;				//The domain to set in session_cookie
 	public $cookie_secure		= NULL;				//Should cookies only be sent over secure connections?
-	public $cookie_httponly		= NULL;				//Only accessible through the HTTP protocol?
+	public $cookie_httponly		= NULL;				//Only accessible through the HTTP protocol? PHP 5.2+
 
 	public $regenerate			= 300;				//Update the session every five minutes (FALSE to disable)
 	public $expiration			= 7200;				//The session expires after 2 hours of non-use

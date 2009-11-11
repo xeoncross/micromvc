@@ -29,7 +29,7 @@ DirectoryIndex index.php index.html
     RewriteEngine on
 
     # The RewriteBase of the system (change if you are using this sytem in a sub-folder).
-    RewriteBase /MicroMVC/
+    RewriteBase /
 
     #Error messages (via the "request_error" method of the core)
     # ErrorDocument 400 /index.php?method=request_error&data=400

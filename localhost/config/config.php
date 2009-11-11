@@ -38,7 +38,7 @@ define('DEBUG_MODE', TRUE);
  */
 
 // Absolute URL path to the site root. Leave blank unless this site is in a subfolder.
-define('SITE_URL', '/MicroMVC/');
+define('SITE_URL', '/');
 
 // Absolute URL path to the themes directory
 define('THEME_URL', SITE_URL. DOMAIN. '/views/');

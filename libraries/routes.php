@@ -78,7 +78,7 @@ class routes {
 		foreach($segments as $key => $segment) {
 
 			//Delete Bad Charaters from URI
-			$segment = preg_replace('/[^'. preg_quote($this->permitted_uri_chars). ']+/i', '', $segment);
+			$segment = preg_replace('/[^a-z0-9'. preg_quote($this->permitted_uri_chars). ']+/i', '', $segment);
 
 			//If anything is left - add it to our array (allow elements that are ZERO)
 			if($segment || $segment === 0) {

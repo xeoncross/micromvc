@@ -7,7 +7,7 @@ $config['default_controller'] = 'welcome';
 //Default method to run
 $config['default_method'] = 'index';
 //Characters to allow in the URI string ($_GET data)
-$config['permitted_uri_chars'] = 'a-z 0-9~%.:_\-';
+$config['permitted_uri_chars'] = '~ %.:_-';
 //Language
 $config['language'] = 'english';
 

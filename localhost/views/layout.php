@@ -5,55 +5,102 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>MicroMVC PHP Framework</title>
 
-<link rel="stylesheet" href="<?php print THEME_URL; ?>style.css" type="text/css" media="screen" />
-<?php if(!empty($header_files)) { print $header_files; } ?>
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>960.gs/reset.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>960.gs/text.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>960.gs/960.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>style.css" />
+
+
+<?php
+//Print all CSS files
+if( ! empty($css_files))
+{
+	foreach($css_files as $file)
+	{
+		print css($file);
+	}
+}
+
+//Print all JS files
+if( ! empty($js_files))
+{
+	foreach($js_files as $file)
+	{
+		print js($file);
+	}
+}
+
+//Print head data
+if( ! empty($head_data))
+{
+	print $head_data;
+}
+?>
 
 </head>
 <body>
 
-<div id="container">
-	<div id="menu">
-		<ul>
-			<?php
-			//Get the URI of this page
-			$uri = $this->routes->fetch();
+<div id="header" class="clearfix">
 
-			//Create a list of the menu links
-			$links = array(
-				'Welcome' => 'welcome/index',
-				'Hooks' => 'hook_test',
-				'URI' => 'hook_test/say',
-				'Twitter' => 'twitter',
-				'SQLite' => 'posts',
-			);
-
-			//For each link
-			foreach($links as $name => $link) {
-				//If this this link is the current one in the URI
-				if(stripos($uri, $link) !== FALSE) {
-					print '<li class="selected">';
-				} else {
-					print '<li>';
-				}
-				print '<a href="'. SITE_URL. $link. '">'. $name. '</a></li>';
-			}
-			?>
-		</ul>
-	</div>
-
-	<div id="main">
-		<div class="wrapper">
-			<?php print $content; ?>
+	<div class="container_12">
+	
+		<div class="grid_3">
+			<h1><?php print DOMAIN; ?></h1>
 		</div>
-	</div>
 
-	<div id="footer">
-		<div class="wrapper">
+		<div class="grid_9">
+			<ul id="sub_nav">
+				<?php
+				// Get the URI of this page
+				$uri = routes::fetch();
+
+				// Header links
+				$links = array(
+					'Welcome' => 'welcome',
+					'Form Test' => 'formtest',
+					'Upload Test' => 'uploadtest'
+				);
+
+				foreach($links as $name => $link)
+				{
+					// If this this link is the current one in the URI
+					print '<li'. ($uri === $link ? ' class="selected"' : ''). '>'
+						. '<a href="'. site_url($link). '">'. $name. '</a></li>';
+				}
+				?>
+			</ul>
+		</div>
+		
+	</div>
+	
+</div>
+
+
+<div id="main" class="clearfix">
+
+	<div class="container_12">
+		<?php print $content; ?>
+	</div>
+	
+</div>
+
+
+<div id="footer" class="clearfix">
+
+	<div class="container_12">
+
+		<div class="grid_4">
+			Powered by <a href="http://micromvc.com">MicroMVC PHP Framework</a>
+		</div>
+
+		<div class="grid_7 prefix_1">
 			<p>Page rendered in <?php print round((microtime(true) - START_TIME), 5); ?> seconds
 			taking <?php print round((memory_get_usage() - START_MEMORY_USAGE) / 1024, 2); ?> KB
 			(<?php print (memory_get_usage() - START_MEMORY_USAGE); ?> Bytes).</p>
 		</div>
+		
 	</div>
+	
 </div>
 
 </body>

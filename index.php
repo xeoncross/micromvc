@@ -1,18 +1,19 @@
 <?php
 /**
- * INDEX BOOTSTRAP
+ * INDEX
  *
  * This is the starting point (index) for the system. Here we check cached files
  * and then precede to load the system and finally run the controller.
  *
  * @package		MicroMVC
  * @author		David Pennington
- * @copyright	Copyright (c) 2009 MicroMVC
- * @license		http://www.gnu.org/licenses/gpl-3.0.html
- * @link		http://micromvc.com
- * @version		1.1.0 <7/7/2009>
+ * @copyright	(c) 2010 MicroMVC Framework
+ * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
+
+// Not needed..?
+//unset($GLOBALS, $_REQUEST);
 
 //Log current time so we can tell how long it takes to run this script
 define('START_TIME', microtime(true));
@@ -20,178 +21,218 @@ define('START_TIME', microtime(true));
 //Log starting memory useage
 define('START_MEMORY_USAGE', memory_get_usage());
 
-//Set the unique name of the current page (for the cache)
-$var = preg_replace("/([^a-z0-9_\-\.]+)/i", '_', $_SERVER["REQUEST_URI"]);
-define('PAGE_NAME', ($var ? $var : 'index'));
+//Define the OS file path separator as *NIX style
+define('DS', '/'); //DIRECTORY_SEPARATOR);
 
-//Define the OS file path separator
-define('DS', DIRECTORY_SEPARATOR);
-
+//Is this sever a windows machine?
+define('WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 //Define the base file system path to MicroMVC
 define('SYSTEM_PATH', realpath(dirname(__FILE__)). DS);
 
-//Define the base file system path to libraries
-define('LIBRARY_PATH', SYSTEM_PATH. 'libraries'. DS);
-
-//Define the base file system path to functions
-define('FUNCTION_PATH', SYSTEM_PATH. 'functions'. DS);
-
 //Define the base file system path to modules
-define('MODULE_PATH', SYSTEM_PATH. 'modules'. DS);
+define('REQUIRED_PATH', SYSTEM_PATH. 'required'. DS);
 
-//Define the base file system path to logs
-define('LOG_PATH', SYSTEM_PATH. 'logs'. DS);
+// In order to know which domain directory to use we need to fetch the site domain (i.e. "www.site.com")
+$domain = empty($_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
 
+// Match the name
+preg_match('/((([a-z0-9\-]{1,70}\.){1,5}[a-z]{2,4})|localhost)/ui', $domain, $match);
 
-//Include the common file to continue loading
-require_once(FUNCTION_PATH. 'common.php');
+//MUST HAVE A HOST!
+if(empty($match[0]))
+{
+	header("HTTP/1.0 400 Bad Request");
+	die('Sorry, the host site not set. Please check your browser.');
+}
 
-//Discover whether this is an AJAX request or not
-define('AJAX_REQUEST', is_ajax_request());
+// Save the domain
+define('DOMAIN', $match[0]);
 
-//Discover the current domain for the whole script
-define('DOMAIN', current_domain());
+// Remove values
+unset($match, $domain);
 
-
-//Define the file system path to the current site
+// Define the file system path to the current site
 define('SITE_PATH', SYSTEM_PATH. DOMAIN. DS);
 
-//The file system path of the site's cache folder
-define('CACHE_PATH', SITE_PATH. 'cache'. DS);
-
-//The file system path of the site's config folder
-define('CONFIG_PATH', SITE_PATH. 'config'. DS);
-
-//The file system path of the site's models folder
-define('MODEL_PATH', SITE_PATH. 'models'. DS);
-
-//The file system path of the site's uploads folder
-define('UPLOAD_PATH', SITE_PATH. 'uploads'. DS);
-
-//The file system path of the site's views folder
-define('VIEW_PATH', SITE_PATH. 'views'. DS);
+//Is this an AJAX request?
+define('AJAX_REQUEST', (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+	&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
 
 
-//Override the PHP error handler
-set_error_handler('_error_handler');
-
-//Require the config file for this site name
-require(SITE_PATH. 'config/config.php');
-
-//Require the config file for the hooks
-require(SITE_PATH. 'config/hooks.php');
-
-//Load the caching class
-$cache = load_class('cache', LIBRARY_PATH);
-
-//Load the hooks class
-$hooks = load_class('hooks', LIBRARY_PATH, $hooks);
-
-//Call first hook
-$hooks->call('system_startup');
-
-/**
- * Check for cached version -die if found
+/*
+ * Setup system to handle multibyte unicode strings in UTF-8
  */
-if($output = $cache->fetch(md5(PAGE_NAME. AJAX_REQUEST), null, null)) {
 
-	print $output;
-
-	//If debuging is enabled
-	if(DEBUG_MODE) {
-		$time = round((microtime(true) - START_TIME), 5);
-		$memory = round((memory_get_usage() - START_MEMORY_USAGE) / 1024);
-
-		die('<!-- Rendered in '. $time. ' seconds using '. $memory. ' kb of memory -->');
-	}
-
+// Check whether PCRE has been compiled with UTF-8 support
+if ( ! preg_match('/^.$/u', 'ñ'))
+{
+	trigger_error (
+		'<a href="http://php.net/pcre">PCRE</a> has not been compiled with UTF-8 support. '.
+		'See <a href="http://php.net/manual/reference.pcre.pattern.modifiers.php">PCRE Pattern Modifiers</a> '.
+		'for more information. This application cannot be run without UTF-8 support.',
+		E_USER_ERROR
+	);
 }
 
 
 /**
- * strip the slashes that have been added to our POST/GET data!
- */
-if (ini_get('magic_quotes_gpc')) {
+* If string overloading is active, it will break many of the
+* native implementations. mbstring.func_overload must be set
+* to 0, 1 or 4 in php.ini (string overloading disabled).
+* Also need to check we have the correct internal mbstring
+* encoding
+*/
+if ( extension_loaded('mbstring'))
+{
 
-	function array_clean(&$value) {
+	if ( ini_get('mbstring.func_overload') & MB_OVERLOAD_STRING )
+	{
+        trigger_error('String functions are overloaded by mbstring', E_USER_ERROR);
+    }
+
+    // Set the default mb encoding
+    mb_internal_encoding('UTF-8');
+}
+else
+{
+	// load the drop-in MB replacement library
+	require(REQUIRED_PATH. 'mb_strings.php');
+}
+
+
+// Include core classes
+require_once(REQUIRED_PATH. 'classes.php');
+
+// Include the common system functions
+require_once(REQUIRED_PATH. 'common.php');
+
+// Load the bootstrap file
+require(SITE_PATH. 'bootstrap.php');
+
+// Load the hook config
+hook::$hooks = config::get(NULL, 'hooks');
+
+// Remove the hook config
+config::clear('hooks');
+
+// Parse the URI route
+routes::parse();
+
+// Call first hook
+hook::call('system_startup');
+
+/*
+ * Guests to our site *should* not have a "logged_in" cookie set.
+ * Therefore it is safe to show them cached pages instead of wasting
+ * our valuable server resources re-rendering the whole page.
+ */
+
+// If cookie checking is disabled (or the cookie is not found)
+if( ! config::get('caching_check_cookie') OR empty($_COOKIE[config::get('caching_check_cookie')]) )
+{
+	// If Caching is enabled - and a cached page is found
+	if($output = cache::get('routes::get_uri()'. routes::get_uri(). AJAX_REQUEST))
+	{
+		// Get content type from start of the output
+		list($content_type, $output) = explode('::', $output, 2);
+		
+		// If a content type is set - let the useragent know what type this is
+		if($content_type)
+		{
+			header('Content-Type: '.$content_type.'; charset=utf-8');
+		}
+		
+		// Allow a hook call - then print the output
+		print hook::call('system_shutdown_cache', $output);
+
+		// If debuging is enabled
+		if( config::get('debug_mode') )
+		{
+			load::view('cache_debug', NULL, NULL);
+		}
+
+		die();
+	}
+}
+
+
+// strip the slashes that have been added to our POST/GET data!
+if (ini_get('magic_quotes_gpc'))
+{
+	function array_stripslashes(&$value)
+	{
 		$value = stripslashes($value);
 	}
-	//php 5+ only
-	array_walk_recursive($_GET, 'array_clean');
-	array_walk_recursive($_POST, 'array_clean');
-	array_walk_recursive($_COOKIE, 'array_clean');
+
+	array_walk_recursive($_GET, 'array_stripslashes');
+	array_walk_recursive($_POST, 'array_stripslashes');
+	array_walk_recursive($_COOKIE, 'array_stripslashes');
 }
 
 
-//Include the controller class file
-load_class('controller', LIBRARY_PATH, NULL, FALSE);
-
-//Include the base class file
-load_class('base', LIBRARY_PATH, NULL, FALSE);
-
 /**
- * Get the controller from the URI
+ * Convert all global variables to proper UTF-8
+ * while removing invalid character sequences.
  */
-$routes = load_class('routes', LIBRARY_PATH);
-
-//Set default controller/method if none is set in URL
-$routes->set_defaults(
-$config['default_controller'],
-$config['default_method'],
-$config['permitted_uri_chars']
-);
-
-//Parse the URI
-$routes->parse();
-
-//Fetch the controller/method
-$controller	= $routes->fetch(0);
-$method		= $routes->fetch(1);
-
-
-/**
- * START-UP THE SYSTEM!
- */
-
-//Try to load the controller from the site directory first
-if(file_exists(SITE_PATH. 'controllers'. DS. $controller. '.php')) {
-	$path = SITE_PATH. 'controllers'. DS;
-
-	//Then try to see if there is a module
-} elseif(file_exists(MODULE_PATH. $controller. DS. 'controllers'. DS. $controller. '.php')) {
-	$path = MODULE_PATH. $controller. DS. 'controllers'. DS;
-
-} else {
-	//Show a 404 error and exit the script
-	request_error();
+if( config('encoding') == 'utf-8' && config('encode_globals') )
+{
+	$_GET    = string::array_to_utf8($_GET);
+	$_POST   = string::array_to_utf8($_POST);
+	$_COOKIE = string::array_to_utf8($_COOKIE);
+	$_SERVER = string::array_to_utf8($_SERVER);
 }
 
-//Load the controller and pass the $config
-$controller = load_class($controller, $path, $config);
 
-//Make sure someone isn't trying to access core or private functions
-if($method != 'request_error' && $controller != 'core') {
-	//Make sure this method exists (and is public)
-	if(method_exists('core', $method) OR ! in_array($method, get_class_methods($controller))) {
-		//Show a 404 error and exit the script
-		request_error();
+// Allow a hook call now that everything is loaded
+hook::call('system_loaded');
+
+// Build controller name
+$controller = 'Controller_'. routes::fetch(0);
+
+// If this controller is found
+if( load::autoload($controller) )
+{
+	// Get the method name
+	$method = routes::fetch(1);
+
+	// Make sure this method exists, is not a method of controller, and it doesn't start with an underscore
+	if(method_exists($controller, $method) AND ! method_exists('controller', $method) AND substr($method, 0, 1) !== '_')
+	{
+
+		// Save controller name
+		define('CONTROLLER', $controller);
+
+		// Everythings good, so load the controller
+		$controller = load::singleton($controller);
 	}
+
 }
 
-//Call the startup hook
-$controller->hooks->call('post_constructor');
+// If any of the above checks fail, then load the default class
+if( ! is_object($controller))
+{
+	// Save controller name
+	define('CONTROLLER', 'Controller');
+
+	// Load the controller class
+	$controller = load::singleton('Controller');
+
+	// Call the 404 method instead
+	$method = 'show_404';
+}
+
+// Call the startup hook
+hook::call('system_pre_method');
 
 // Call the requested method.
-// Any URI segments present (besides the class/function)
+// Any URI segments present (besides the class/method)
 // will be passed to the method for convenience
-call_user_func_array(array(&$controller, $method), array_slice($routes->fetch(true), 2));
+call_user_func_array(array($controller, $method), array_slice(routes::fetch(true), 2));
 
-//Call the post-controller hook
-$controller->hooks->call('post_method');
+// Call the post-controller hook
+hook::call('system_post_method');
 
 // And we're done!
 $controller->render();
 
-//Call the finish hook
-$controller->hooks->call('system_shutdown');

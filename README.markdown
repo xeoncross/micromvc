@@ -16,6 +16,6 @@ In addition, full multi-byte string support is built into the system. No more pr
 * Apache mod_rewrite (or similar for other servers)
 * PDO if using the Database
 
-[MicroMVC](http://github.com/Xeoncross/micromvc) is licensed under the Open Source <a href="<?php print site_url('license.txt');?>">MIT license</a>, so you can use it for any personal or corporate projects totally free!</p>
+[MicroMVC](http://github.com/Xeoncross/micromvc) is licensed under the Open Source MIT license, so you can use it for any personal or corporate projects totally free!</p>
 
 Built by [David](http://xeoncross.com) of [Code2Design](http://code2design.com). Git 'r done!

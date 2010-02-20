@@ -9,7 +9,7 @@
 #DirectorySlash Off
 
 # Hide the following filesfrom the world
-<FilesMatch "\.(htaccess|htpasswd|ini|php|log|sh|sql|cache)$">
+<FilesMatch "\.(htaccess|htpasswd|ini|php|log|sh|sql|cache|git|svn)$">
 	Order Allow,Deny
 	Deny from all
 </FilesMatch>
@@ -34,7 +34,7 @@ DirectoryIndex index.php index.html
     RewriteEngine on
 
     # The RewriteBase of the system (change if you are using this sytem in a sub-folder).
-    RewriteBase /micromvc/
+    RewriteBase /
 
     # Force error messages to load site pages? (optional)
     #ErrorDocument 400 /

@@ -3,3 +3,6 @@ Thumbs.db
 *~
 *.cache
 *.log
+.settings/
+.project
+.buildpath

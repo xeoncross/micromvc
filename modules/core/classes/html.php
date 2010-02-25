@@ -71,7 +71,8 @@ class html
 	 * @param $extra
 	 * @return string
 	 */
-	public static function select($name = '', $options = array(), $selected = array(), array $attributes = NULL) {
+	public static function select($name = '', $options = array(), $selected = array(), array $attributes = NULL)
+	{
 
 		if ( ! is_array($selected)) {
 			$selected = array($selected);
@@ -115,6 +116,37 @@ class html
 		return $form;
 	}
 
+
+	/**
+	 * Convert a multidimensional array to an HTML UL. You can
+	 * pass attributes such as id, class, or start.
+	 * 
+	 * @param array $array the array of elements
+	 * @param array $attributes the array of HTML attributes
+	 * @param int $site_url prefix string keys with the site url?
+	 * @return string
+	 */
+	function ul_from_array(array $array, array $attributes = NULL, $site_url = TRUE)
+	{
+		$output = '<ul'. self::attributes($attributes).'>';
+		foreach($array as $key => $value)
+		{
+			if(is_array($value))
+			{
+				$output .= '<li class="group">'.h($key).array_to_ul($value)."</li>\n";
+			}
+			elseif(is_int($key))
+			{
+				$output .= '<li>'.h($value)."</li>\n";
+			}
+			else
+			{
+				$output .= '<li><a href="'. $site_url ? site_url($key) : h($key).'">'.h($value)."</a></li>\n";
+			}
+		}
+		return "\n$output</ul>\n";
+	}
+	
 
 	/**
 	 * Creates a style sheet link.

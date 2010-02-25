@@ -288,7 +288,7 @@ function redirect($uri = '', $method = 'location', $http_response_code = 302)
  */
 function site_url($uri = NULL)
 {
-	return 'http://'.DOMAIN.SITE_URL.($uri ? trim($uri, '/') : '');
+	return 'http://'.DOMAIN.SITE_URL.h($uri ? trim($uri, '/') : '');
 }
 
 

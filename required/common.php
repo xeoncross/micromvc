@@ -316,6 +316,21 @@ function module_url($module)
 
 
 /**
+ * Return the URL to a file (Like CSS for example) taking the module folders
+ * into account to retrieve the right copy of the file.
+ *
+ * @param string $file the path/file name
+ * @param string $dir the folder to look for the file in
+ * @param string $ext the file extension
+ * @return string
+ */
+function file_url($file, $dir = 'views', $ext = 'css')
+{
+	return 'http://'.DOMAIN.'/'.substr(load::find_file($file, $dir, $ext), strlen(SYSTEM_PATH));
+}
+
+
+/**
  * Safely fetch a $_POST key's value, defaulting to the value
  * provided if the key is not found.
  *

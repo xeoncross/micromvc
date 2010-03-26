@@ -55,6 +55,13 @@ unset($match, $domain);
 // Define the file system path to the current site
 define('SITE_PATH', SYSTEM_PATH. DOMAIN. DS);
 
+// Make sure the site exists
+if( ! file_exists(SITE_PATH))
+{
+	header("HTTP/1.0 400 Bad Request");
+	die('Sorry, we could not find the site directory.');
+}
+
 //Is this an AJAX request?
 define('AJAX_REQUEST', (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
 	&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));

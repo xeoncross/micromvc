@@ -278,75 +278,62 @@ function mime_type($type = NULL) {
  * @param	string	$ext
  * @return	void
  */
-function download_file($content = '', $ext = '', $filename = NULL){
+function download_file($content = '', $ext = NULL, $filename = NULL){
 
 	//If no ext was given - try to figure it out
-	if( !$ext && $filename ) {
+	if( ! $ext AND $filename )
+	{
 		$ext = substr($filename, -3);
 
 		//Remove dot from extensions like ".gz"
-		if( strpos($ext, '.') !== FALSE) {
+		if( strpos($ext, '.') !== FALSE)
+		{
 			$ext = substr($ext, 1);
 		}
 	}
 
-	//Try to get the mime type
-	if( ! $mime = mime_type($ext)) {
+	//Try to get the mime type (or use default)
+	if( ! $mime = mime_type($ext))
+	{
 		$mime = 'application/octet-stream';
 	}
 
 	//If the content was given to us
-	if( $content ) {
-
+	if( $content )
+	{
 		//Create a random filename if needed
-		if( ! $filename) {
+		if( ! $filename)
+		{
 			$filename = time(). '.'. $ext;
 		}
 
 		$length = mb_strlen($content);
 
-	} else {
+	}
+	else
+	{
 		//This is a file
 		$length = filesize($filename);
 	}
+	
+	// Send proper headers
+	header('Content-Description: File Transfer');
+	header('Content-Type: '.$mime);
+	header('Content-Disposition: attachment; filename='.basename($filename));
+	header('Content-Transfer-Encoding: binary');
+	header('Expires: 0');
+	header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+	header('Pragma: public');
+	header('Content-Length: ' . $length);
 
-
-	//Get filename
-	$name = pathinfo($filename);
-
-	//Make directory slashes and other things safe
-	$name = filename_safe($name['basename']);
-
-
-
-	// Generate the server headers
-	if (strstr($_SERVER['HTTP_USER_AGENT'], "MSIE")) {
-		header('Content-Type: "'.$mime.'"');
-		header('Content-Disposition: attachment; filename="'.$name.'"');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header("Content-Transfer-Encoding: binary");
-		header('Pragma: public');
-		header("Content-Length: ". $length);
-
-	} else {
-		header('Content-Type: "'.$mime.'"');
-		header('Content-Disposition: attachment; filename="'.$name.'";');
-		header('Content-Transfer-Encoding: binary');
-		header('Expires: 0;');
-		header('Pragma: no-cache;');
-		header('Content-Length: '. $length);
-	}
-
-	if( $contnet ) {
+	if( $content )
+	{
 		print $content;
-	} else {
+	}
+	else
+	{
 		readfile($filename);
 	}
-
-
-	//print_pre($length, floor($length / 1024), $content, $ext, $filename, $name);
-
+	
 	exit();
 }
-

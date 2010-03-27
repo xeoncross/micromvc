@@ -40,8 +40,11 @@ Lately a lot of people have been using it for twitter updates or flickr feeds.</
 		<span> - come visit!</span></li>
 		<li><a href="http://code2design.com">Code 2 Design</a>
 		<span> - PHP Videos</span></li>
-		<li><a href="http://960.gs/">960.gs</a>
-		<span> - The included grid system</span></li>
+		<li><a href="http://github.com/Xeoncross/microcssgrid">Micro CSS Grid</a>
+		<span> - Grid system</span></li>
+		<li><a href="http://github.com/Xeoncross/microtheme">Micro Theme</a>
+		<span> - HTML Template</span></li>
+		
 		<li><a href="http://us2.php.net/manual/en/intro.pdo.php">PDO</a>
 		<span> - PHP Data Objects (PDO)</span></li>
 		<li><a href="http://github.com/Xeoncross/micromvc">github</a>

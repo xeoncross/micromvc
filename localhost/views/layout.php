@@ -5,10 +5,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>MicroMVC PHP Framework</title>
 
-<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>960.gs/reset.css" />
-<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>960.gs/text.css" />
-<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>960.gs/960.css" />
-<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>style.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>css/reset.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>css/text.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>css/grid.css" />
+<link rel="stylesheet" type="text/css" media="all" href="<?php print VIEW_URL; ?>css/style.css" />
 
 
 <?php
@@ -40,68 +40,84 @@ if( ! empty($head_data))
 </head>
 <body>
 
-<div id="header" class="clearfix">
 
-	<div class="container_12">
+<div id="container">
+
+	<div id="top">
+		<div class="container">
+			<div class="grid_4">
+				<h1><?php print DOMAIN; ?></h1>
+			</div>
 	
-		<div class="grid_3">
-			<h1><?php print DOMAIN; ?></h1>
+			<div class="grid_7">
+				<ul id="sub_nav">
+					<?php
+					// Get the URI of this page
+					$uri = routes::fetch();
+	
+					// Header links
+					$links = array(
+						'Welcome' => 'welcome',
+						'Form Test' => 'formtest',
+						'Upload Test' => 'uploadtest'
+					);
+	
+					foreach($links as $name => $link)
+					{
+						// If this this link is the current one in the URI
+						print '<li'. ($uri === $link ? ' class="selected"' : ''). '>'
+							. '<a href="'. site_url($link). '">'. $name. '</a></li>';
+					}
+					?>
+				</ul>
+			</div>
 		</div>
-
-		<div class="grid_9">
-			<ul id="sub_nav">
-				<?php
-				// Get the URI of this page
-				$uri = routes::fetch();
-
-				// Header links
-				$links = array(
-					'Welcome' => 'welcome',
-					'Form Test' => 'formtest',
-					'Upload Test' => 'uploadtest'
-				);
-
-				foreach($links as $name => $link)
-				{
-					// If this this link is the current one in the URI
-					print '<li'. ($uri === $link ? ' class="selected"' : ''). '>'
-						. '<a href="'. site_url($link). '">'. $name. '</a></li>';
-				}
-				?>
-			</ul>
-		</div>
+	</div>
+	
+	<div id="middle">
+		<div class="container">
 		
-	</div>
-	
-</div>
-
-
-<div id="main" class="clearfix">
-
-	<div class="container_12">
-		<?php print $content; ?>
-	</div>
-	
-</div>
-
-
-<div id="footer" class="clearfix">
-
-	<div class="container_12">
-
-		<div class="grid_4">
-			Powered by <a href="http://micromvc.com">MicroMVC PHP Framework</a>
+			<?php if( ! empty($headline)) { print $headline; } ?>
+			
+			
+			<?php if( ! empty($sidebar)) { ?>
+			
+				<div class="grid_8">
+					<div id="content">
+						<?php print $content; ?>
+					</div>
+				</div>
+				
+				<div class="grid_4">
+					<div id="sidebar">
+						<?php print $sidebar; ?>
+					</div>
+				</div>
+			
+			<?php } else { // Else they want to do the content layout themselves... ?>
+			
+				<?php print $content; ?>
+				
+			<?php } ?>
 		</div>
-
-		<div class="grid_7 prefix_1">
-			<p>Page rendered in <?php print round((microtime(true) - START_TIME), 5); ?> seconds
-			taking <?php print round((memory_get_usage() - START_MEMORY_USAGE) / 1024, 2); ?> KB
-			(<?php print (memory_get_usage() - START_MEMORY_USAGE); ?> Bytes).</p>
+	</div>
+	
+	<div id="bottom">
+		<div class="container">
+			<div class="grid_4">
+				Powered by <a href="http://micromvc.com">MicroMVC PHP Framework</a>
+			</div>
+	
+			<div class="grid_7 prefix_1">
+				<p>Page rendered in <?php print round((microtime(true) - START_TIME), 5); ?> seconds
+				taking <?php print round((memory_get_usage() - START_MEMORY_USAGE) / 1024, 2); ?> KB
+				(<?php print (memory_get_usage() - START_MEMORY_USAGE); ?> Bytes).</p>
+			</div>
 		</div>
-		
 	</div>
 	
 </div>
+
 
 </body>
 </html>

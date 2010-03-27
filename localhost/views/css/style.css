@@ -6,9 +6,9 @@ h2 {font-size:2.2em;}
 h3 {font-size:1.6em;}
 h1,h2,h3 { text-transform:uppercase; font-weight: normal;}
 
-#header { border-bottom: 1px solid #ddd; line-height: 90px; margin-bottom: 2em; }
+#top { border-bottom: 1px solid #ddd; line-height: 90px; margin-bottom: 2em; }
 
-#header h1 {
+#top h1 {
 font-weight: normal;
 font-size: 50px;
 color: #ddd;
@@ -47,7 +47,7 @@ line-height: 2em;
 }
 
 
-#footer { 
+#bottom { 
 border-top: 1px solid #ddd; 
 margin: 3em 0;
 padding: 1em 0;
@@ -55,7 +55,7 @@ color: #999;
 font-size: 11px;
 }
 
-#footer p {text-align: right;}
+#bottom p {text-align: right;}
 
 
 

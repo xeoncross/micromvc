@@ -42,7 +42,7 @@ class load {
 		{
 			foreach($modules as $module)
 			{
-				self::$paths[] = SYSTEM_PATH. 'modules'. DS. $module;
+				self::$paths[] = MODULE_PATH. $module. DS;
 			}
 		}
 
@@ -98,7 +98,7 @@ class load {
 		foreach(self::$paths as $path)
 		{
 			// Build the path
-			$path .= DS. $dir. DS;
+			$path .= $dir. DS;
 
 			// Look for this file
 			if(is_file($path. $file))

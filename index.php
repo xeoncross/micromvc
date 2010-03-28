@@ -27,11 +27,18 @@ define('DS', '/'); //DIRECTORY_SEPARATOR);
 //Is this sever a windows machine?
 define('WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
+//Is this an AJAX request?
+define('AJAX_REQUEST', (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+	AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
+
 //Define the base file system path to MicroMVC
 define('SYSTEM_PATH', realpath(dirname(__FILE__)). DS);
 
 //Define the base file system path to modules
 define('REQUIRED_PATH', SYSTEM_PATH. 'required'. DS);
+
+//Define the base file system path to modules
+define('MODULE_PATH', SYSTEM_PATH. 'modules'. DS);
 
 // In order to know which domain directory to use we need to fetch the site domain (i.e. "www.site.com")
 $domain = empty($_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
@@ -64,8 +71,11 @@ foreach($domains as $regex => $alias)
 	}
 }
 
-// Define the file system path to the current site
-define('SITE_PATH', SYSTEM_PATH. $domain. DS);
+// Site folder name
+define('DOMAIN_FOLDER', $domain);
+
+// Define the file system path to the site folder
+define('SITE_PATH', SYSTEM_PATH. DOMAIN_FOLDER. DS);
 
 // Get site mode
 $mode = file_get_contents(SYSTEM_PATH. '.mode') or die('<b>.mode file is missing</b>');
@@ -76,18 +86,12 @@ define('SITE_MODE', $mode);
 // Remove values
 unset($match, $domain, $domains, $alias, $mode);
 
-
 // Make sure the site exists
 if( ! file_exists(SITE_PATH))
 {
 	header("HTTP/1.0 400 Bad Request");
 	die('Sorry, we could not find the site directory.');
 }
-
-//Is this an AJAX request?
-define('AJAX_REQUEST', (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-	&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'));
-
 
 /*
  * Setup system to handle multibyte unicode strings in UTF-8

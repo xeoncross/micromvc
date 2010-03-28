@@ -90,8 +90,8 @@ foreach (array('_SESSION', '_GET', '_POST', '_FILES', '_COOKIE', '_SERVER') as $
 	print dump($GLOBALS[$var]);
 }
 
-/* Extra info as needed:
-
+/* Extra info if needed! */
+if(config::get('debug_mode_excessive')) { ?>
 
 <b>Constants Defined:</b>
 <pre>
@@ -123,13 +123,12 @@ foreach( lang::$lang as $group => $lang ) {
 ?>
 </pre>
 
-
-
-// Insane debug info!
+<?php
+// More Insane debug info!
+//print '<b>Defined Variables</b>';
 //$vars = get_defined_vars(); unset($vars['constants']); print dump($vars);
-//phpinfo(); 
 
-*/
+}
 ?>
 
 </div>

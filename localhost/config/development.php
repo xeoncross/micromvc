@@ -19,7 +19,10 @@ $config['permitted_uri_chars'] = '~ %.:_/-';
 $config['language'] = 'english';
 
 // Should debug info be shown at the bottom of each page?
-$config['debug_mode'] = 1;
+$config['debug_mode'] = TRUE;
+
+// Show extra infomation like config and language values? (dangerous!)
+$config['debug_mode_excessive'] = FALSE;
 
 // Default controller to call
 $config['default_controller'] = 'welcome';
@@ -298,14 +301,14 @@ date_default_timezone_set("America/Chicago");
  * URL address paths
  */
 
-// Absolute URL path to the site root.
+// Absolute URL path to the site root. Default ("/")
 define('SITE_URL', '/micromvc/');
 
 // Absolute URL path to the themes directory
-define('VIEW_URL', SITE_URL. DOMAIN. '/views/');
+define('VIEW_URL', SITE_URL. DOMAIN_FOLDER. '/views/');
 
 // Absolute URL path to the upload directory
-define('UPLOAD_URL', SITE_URL. DOMAIN. '/uploads/');
+define('UPLOAD_URL', SITE_URL. DOMAIN_FOLDER. '/uploads/');
 
 // Absolute URL path to the shared javascript directory
 define('JAVASCRIPT_URL', SITE_URL. 'js/');

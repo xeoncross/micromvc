@@ -10,7 +10,7 @@ $domains = array(
 
 	/* 
 	 * Making all example TLD's use the example.com folder
-	 * 
-	'(.*\.)?example\.(com|info|net|loc)' => 'example.com'
+	 * www.example.com, sub.example.net, example.org, etc...
+	'(.*\.)?example\.([a-z]{2,4})' => 'example.com'
 	*/
 );

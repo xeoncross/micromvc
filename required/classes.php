@@ -28,7 +28,7 @@ class load {
 	public static $objects = array();
 
 	// The locations to look for files
-	public static $paths = array(DOMAIN, 'system');
+	public static $paths = array(SITE_PATH);
 
 	/**
 	 * On startup, set the modules loaded and load the files cache if enabled.
@@ -42,7 +42,7 @@ class load {
 		{
 			foreach($modules as $module)
 			{
-				self::$paths[] = 'modules'. DS. $module;
+				self::$paths[] = SYSTEM_PATH. 'modules'. DS. $module;
 			}
 		}
 
@@ -98,7 +98,7 @@ class load {
 		foreach(self::$paths as $path)
 		{
 			// Build the path
-			$path = SYSTEM_PATH. $path. DS. $dir. DS;
+			$path .= DS. $dir. DS;
 
 			// Look for this file
 			if(is_file($path. $file))

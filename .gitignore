@@ -3,8 +3,6 @@ Thumbs.db
 *~
 *.cache
 *.log
-.settings
-.buildpath
-.project
+.*
 # Also ignore uploads to the site folder (www.site.com/uploads/)
 /[a-z0-9.]*/uploads

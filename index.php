@@ -67,11 +67,15 @@ foreach($domains as $regex => $alias)
 // Define the file system path to the current site
 define('SITE_PATH', SYSTEM_PATH. $domain. DS);
 
+// Get site mode
+$mode = file_get_contents(SYSTEM_PATH. '.mode') or die('<b>.mode file is missing</b>');
+
 // Define the current site mode (production, staging, development, etc...)
-define('SITE_MODE', file_get_contents(SYSTEM_PATH. '.mode'));
+define('SITE_MODE', $mode);
 
 // Remove values
-unset($match, $domain, $domains, $alias);
+unset($match, $domain, $domains, $alias, $mode);
+
 
 // Make sure the site exists
 if( ! file_exists(SITE_PATH))

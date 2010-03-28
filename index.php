@@ -37,23 +37,41 @@ define('REQUIRED_PATH', SYSTEM_PATH. 'required'. DS);
 $domain = empty($_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
 
 // Match the name
-preg_match('/((([a-z0-9\-]{1,70}\.){1,5}[a-z]{2,4})|localhost)/ui', $domain, $match);
+preg_match('/^((([a-z0-9\-]{1,70}\.){1,6}[a-z]{2,4})|localhost)$/ui', $domain, $match);
 
 //MUST HAVE A HOST!
 if(empty($match[0]))
 {
 	header("HTTP/1.0 400 Bad Request");
-	die('Sorry, the host site not set. Please check your browser.');
+	die('Sorry, the host site not set. Please check the URL entered.');
 }
 
-// Save the domain
+// Save the current domain name
 define('DOMAIN', $match[0]);
 
-// Remove values
-unset($match, $domain);
+// Default domain is the one given
+$domain = DOMAIN;
+
+// Include domain settings
+require('domains.php');
+
+// If an alias is found - then use that instead!
+foreach($domains as $regex => $alias)
+{
+	if(preg_match('/^'. $regex. '$/i', DOMAIN))
+	{
+		$domain = $alias;
+	}
+}
 
 // Define the file system path to the current site
-define('SITE_PATH', SYSTEM_PATH. DOMAIN. DS);
+define('SITE_PATH', SYSTEM_PATH. $domain. DS);
+
+// Define the current site mode (production, staging, development, etc...)
+define('SITE_MODE', file_get_contents(SYSTEM_PATH. '.mode'));
+
+// Remove values
+unset($match, $domain, $domains, $alias);
 
 // Make sure the site exists
 if( ! file_exists(SITE_PATH))
@@ -107,21 +125,29 @@ else
 	require(REQUIRED_PATH. 'mb_strings.php');
 }
 
-
 // Include core classes
 require_once(REQUIRED_PATH. 'classes.php');
 
 // Include the common system functions
 require_once(REQUIRED_PATH. 'common.php');
 
-// Load the bootstrap file
-require(SITE_PATH. 'bootstrap.php');
+// We must load the cache library by hand (since Load neededs it!)
+require(SYSTEM_PATH. config::get('cache_library'));
 
-// Load the hook config
-hook::$hooks = config::get(NULL, 'hooks');
+// Set the class loader
+spl_autoload_register(array('load', 'autoload'));
 
-// Remove the hook config
-config::clear('hooks');
+// Load modules
+load::init(config::get('modules'));
+
+// Set custom exception handling
+set_exception_handler(array('controller', 'exception_handler'));
+
+// Set custom error handler
+set_error_handler(array('controller', 'error_handler'));
+
+// Set the hook config
+hook::$hooks = config::get('hooks');
 
 // Parse the URI route
 routes::parse();
@@ -182,7 +208,7 @@ if (ini_get('magic_quotes_gpc'))
  * Convert all global variables to proper UTF-8
  * while removing invalid character sequences.
  */
-if( config('encoding') == 'utf-8' && config('encode_globals') )
+if( config('encoding') === 'utf-8' AND config('encode_globals') )
 {
 	$_GET    = string::array_to_utf8($_GET);
 	$_POST   = string::array_to_utf8($_POST);
@@ -206,7 +232,6 @@ if( load::autoload($controller) )
 	// Make sure this method exists, is not a method of controller, and it doesn't start with an underscore
 	if(method_exists($controller, $method) AND ! method_exists('controller', $method) AND substr($method, 0, 1) !== '_')
 	{
-
 		// Save controller name
 		define('CONTROLLER', $controller);
 

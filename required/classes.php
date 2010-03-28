@@ -307,7 +307,7 @@ class config {
 	 * @param string $group the name of the group to find the $key in
 	 * @return mixed
 	 */
-	public static function get($key = NULL, $group = 'config')
+	public static function get($key = NULL, $group = SITE_MODE)
 	{
 		// Load the config if needed
 		if( empty(self::$config[$group]))
@@ -327,7 +327,7 @@ class config {
 	 * @param string $group the name of the group to find the $key in
 	 * @param mixed $value the new value to set the $key to
 	 */
-	public static function set($key = NULL, $group = 'config', $value = NULL)
+	public static function set($key = NULL, $group = SITE_MODE, $value = NULL)
 	{
 
 		// Load the config if needed
@@ -355,7 +355,7 @@ class config {
 	 * @param string $group the name of the config file
 	 * @param bool $overwrite if true, overwrite current values if set
 	 */
-	public static function load($group = 'config', $overwrite = FALSE)
+	public static function load($group, $overwrite = FALSE)
 	{
 
 		// If the config is already loaded

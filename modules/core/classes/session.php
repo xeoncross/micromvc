@@ -194,7 +194,6 @@ class Session
 	 */
 	public function destroy()
 	{
-
 		//If there is no session to delete (not started)
 		if ( ! session_id())
 		{
@@ -204,21 +203,21 @@ class Session
 		// Get the session name
 		$name = session_name();
 
-		// Destroy the session
-		session_destroy();
-
 		// Delete the session cookie (if exists)
-		if (isset($_COOKIE[$name]))
+		if ( ! empty($_COOKIE[$name]))
 		{
 			//Get the current cookie config
 			$params = session_get_cookie_params();
 
 			// Delete the cookie from globals
-			unset($_COOKIE[$name]);
+			unset($_COOKIE[$name], $_SESSION);
 
 			//Delete the cookie on the user_agent
 			setcookie($name, '', time()-43200, $params['path'], $params['domain'], $params['secure']);
 		}
+		
+		// Destroy the session
+		session_destroy();
 	}
 
 
@@ -438,7 +437,10 @@ class session_handler_db
 	 */
 	public function __destruct()
 	{
-		session_write_close();
+		if( ! empty($_SESSION))
+		{
+			session_write_close();
+		}
 	}
 
 }

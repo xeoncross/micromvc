@@ -237,9 +237,12 @@ function log_message($message = '')
 		return FALSE;
 	}
 
+	// Add a date and IP address to the error
+	$message = date('[d-M-Y H:i:s] '). ip_address(). " | $message\n";
+	
 	// Lock the file and write
 	flock($fp, LOCK_EX);
-	fwrite($fp, date("[d-M-Y H:i:s]"). " $message\n");
+	fwrite($fp, $message);
 	flock($fp, LOCK_UN);
 	fclose($fp);
 

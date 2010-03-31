@@ -81,7 +81,7 @@ define('SITE_PATH', SYSTEM_PATH. DOMAIN_FOLDER. DS);
 $mode = file_get_contents(SYSTEM_PATH. '.mode') or die('<b>.mode file is missing</b>');
 
 // Define the current site mode (production, staging, development, etc...)
-define('SITE_MODE', $mode);
+define('SITE_MODE', trim($mode));
 
 // Remove values
 unset($match, $domain, $domains, $alias, $mode);

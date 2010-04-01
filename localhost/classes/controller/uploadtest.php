@@ -37,6 +37,8 @@ class Controller_UploadTest extends Controller {
 		//Else show the upload form
 		$this->views['content'] = load::view('uploadtest/form', array('upload' => $uploads));
 
+		// Load the sidebar
+		$this->views['sidebar'] = load::view('sidebar');
 	}
 
 }

@@ -17,7 +17,7 @@ if( ! empty($css_files))
 {
 	foreach($css_files as $file)
 	{
-		print css($file);
+		print HTML::style($file);
 	}
 }
 
@@ -26,7 +26,7 @@ if( ! empty($js_files))
 {
 	foreach($js_files as $file)
 	{
-		print js($file);
+		print HTML::script($file);
 	}
 }
 
@@ -59,7 +59,8 @@ if( ! empty($head_data))
 					$links = array(
 						'Welcome' => 'welcome',
 						'Form Test' => 'formtest',
-						'Upload Test' => 'uploadtest'
+						'Upload Test' => 'uploadtest',
+						'RSS Feed' => 'feedtest/create',
 					);
 	
 					foreach($links as $name => $link)

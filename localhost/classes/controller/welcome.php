@@ -18,6 +18,10 @@ class Controller_Welcome extends Controller {
 	// Load a view that shows a welcome message
 	function index()
 	{
+		// Load the content
 		$this->views['content'] = load::view('welcome/welcome');
+		
+		// Load the sidebar
+		$this->views['sidebar'] = load::view('sidebar');
 	}
 }

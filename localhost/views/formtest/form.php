@@ -34,7 +34,7 @@ foreach($fields as $name => $title) {
 <br />
 
 <b>Type your comment:</b>
-<textarea name="text" style="display: block; width: 100%; height: 100px;"><?php print post('text'); ?></textarea>
+<textarea name="text" style="display: block; width: 90%; height: 100px;"><?php print post('text'); ?></textarea>
 
 <input type="submit" value="submit" />
 </form>

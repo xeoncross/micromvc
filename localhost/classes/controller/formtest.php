@@ -20,6 +20,9 @@ class Controller_FormTest extends Controller {
 	public function index()
 	{
 
+		// Load the sidebar
+		$this->views['sidebar'] = load::view('sidebar');
+		
 		//Load the validation library
 		$this->validation = load::singleton('validation');
 		

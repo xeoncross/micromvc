@@ -13,64 +13,71 @@
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
-class Controller_FeedText extends Controller
+class Controller_FeedTest extends Controller
 {
-	public function feed($type = 'rss')
+	/**
+	 * Creates an RSS or ATOM feed
+	 * @param string $type set to rss or atom
+	 */
+	public function create($type = 'rss')
 	{
 		
+		$type = $type === 'rss' ? 'rss' : 'atom';
+		
 		$feed = new Feed();
-		$feed->title		= "RSS Feed Title";
-		$feed->link			= "http://website.com";
+		$feed->title		= $type." Feed Title";
+		$feed->link			= site_url();
 		$feed->description	= "Recent articles on your website.";
 		$feed->published	= time();
-		$feed->copyright	= 'Copyright my site';
+		$feed->copyright	= 'Copyright '. DOMAIN;
 		
-		$description = '<b>This is <i>so cool!</i></b>. <p>yesterday <a href="#">google</a> did it!</p>';
+		$description = '<b>This is <i>so cool!</i></b>. <p>Yesterday <a href="#">google</a> did it!</p>';
 		
 	 	for($x=0;$x<10;$x++)
 	 	{
 			$item = new Feed_Item();
 			$item->id			= 'http://'. DOMAIN. '/'. rand(100, 10000);
-			$item->title		= random_charaters(19);
-			$item->link			= 'http://helloworld.com';
+			$item->title		= String::random_charaters(19);
+			$item->link			= site_url();
 			$item->published	= time();
 			$item->description	= $description;
-			$item->author		= array('name' => random_charaters(5), 'email' => 'user@site.com');
+			$item->author		= array('name' => String::random_charaters(5), 'email' => 'user@'. DOMAIN);
 			
 			$feed->add($item);
 		}
 		
 		$this->layout = FALSE;
 		$this->content_type = 'xml';
-		print $feed->$type();
+		$this->views['content'] = $feed->$type();
 		
 	}
 	
 	
 	
-	
-	public function index()
+	/**
+	 * Parses the Google RSS feed and displays it as RSS or ATOM
+	 * @param string $type set to rss or atom
+	 */
+	public function reprocess($type = 'rss')
 	{
+		$type = $type === 'rss' ? 'rss' : 'atom';
 		
 		// Create a new feed object
 		$feed = new Feed();
 		
-		// Fetch a feed 
-		$xml = file_get_contents('C:\wamp\www\feeds\reader\wp.atom');
+		// Fetch a feed (google's)
+		$xml = file_get_contents('http://feeds.feedburner.com/blogspot/MKuf');
 		
 		// Parse the ATOM feed
 		$xml = $feed->parse($xml);
 		
 		// If this feed was valid, well-formed, and had entries
-		if($xml AND !empty($xml['entry']))
+		if($xml AND ! empty($xml['entry']))
 		{
 			$xml = $xml['entry'];
 		}
 		
-		//print dump($xml);
-		//die();
-		
-		// Create a new RSS feed from the feed items
+		// Create a new feed from the feed items
 		foreach($xml as $entry)
 		{
 			$item = new Feed_Item();
@@ -87,7 +94,7 @@ class Controller_FeedText extends Controller
 		
 		$this->layout = FALSE;
 		$this->content_type = 'xml';
-		$this->views['content'] = $feed->rss();
+		$this->views['content'] = $feed->$type();
 		
 	}
 }

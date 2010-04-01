@@ -116,10 +116,16 @@ class Time
 		// Difference between now and then
 		$diff = time() - $time;
 
-		// If less than 3 hours ago
-		if( $diff < 10800 )
-			return self::time_difference($time, time()). ' ago';
-
+		// If less than 3 hours ago/from now
+		if($diff < 10800 AND $diff > -10800)
+		{
+			// Answer
+			$string = self::time_difference($time, time());
+			
+			// Past or future?
+			return ($time < time() ? $string. ' ago' : 'in '. $string);
+		}
+		
 		// If today
 		if($diff < 86400 AND date('j') === date('j', $time))
 			return 'today at '. date('g:ia', $time);

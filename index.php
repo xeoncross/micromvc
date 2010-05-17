@@ -87,57 +87,20 @@ define('SITE_MODE', trim($mode));
 unset($match, $domain, $domains, $alias, $mode);
 
 // Make sure the site exists
-if( ! file_exists(SITE_PATH))
+if( ! is_dir(SITE_PATH))
 {
 	header("HTTP/1.0 400 Bad Request");
 	die('Sorry, we could not find the site directory.');
 }
 
-/*
- * Setup system to handle multibyte unicode strings in UTF-8
- */
-
-// Check whether PCRE has been compiled with UTF-8 support
-if ( ! preg_match('/^.$/u', 'ñ'))
-{
-	trigger_error (
-		'<a href="http://php.net/pcre">PCRE</a> has not been compiled with UTF-8 support. '.
-		'See <a href="http://php.net/manual/reference.pcre.pattern.modifiers.php">PCRE Pattern Modifiers</a> '.
-		'for more information. This application cannot be run without UTF-8 support.',
-		E_USER_ERROR
-	);
-}
-
-
-/**
-* If string overloading is active, it will break many of the
-* native implementations. mbstring.func_overload must be set
-* to 0, 1 or 4 in php.ini (string overloading disabled).
-* Also need to check we have the correct internal mbstring
-* encoding
-*/
-if ( extension_loaded('mbstring'))
-{
-
-	if ( ini_get('mbstring.func_overload') & MB_OVERLOAD_STRING )
-	{
-        trigger_error('String functions are overloaded by mbstring', E_USER_ERROR);
-    }
-
-    // Set the default mb encoding
-    mb_internal_encoding('UTF-8');
-}
-else
-{
-	// load the drop-in MB replacement library
-	require(REQUIRED_PATH. 'mb_strings.php');
-}
+// Setup system to handle multibyte unicode strings in UTF-8
+require(REQUIRED_PATH. 'utf8.php');
 
 // Include core classes
-require_once(REQUIRED_PATH. 'classes.php');
+require(REQUIRED_PATH. 'classes.php');
 
 // Include the common system functions
-require_once(REQUIRED_PATH. 'common.php');
+require(REQUIRED_PATH. 'common.php');
 
 // We must load the cache library by hand (since Load neededs it!)
 require(SYSTEM_PATH. config::get('cache_library'));

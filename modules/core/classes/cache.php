@@ -89,7 +89,32 @@ class cache {
 		return TRUE;
 	}
 
+	
+	/**
+	 * Fetch an item's age
+	 * @param string $id of the cache
+	 * @return int|bool
+	 */
+	public static function age($id)
+	{
+		//The full cache path
+		$file = CACHE_PATH. sha1($id). '.cache';
+		
+		return file_exists($file) ? (time() - filemtime($file)) : NULL;
+	}
 
+
+	/**
+	 * Check for the existance of a cache file
+	 * @param string $id
+	 * @return bool
+	 */
+	public static function exists($id)
+	{
+		return (bool) file_exists(CACHE_PATH. sha1($id). '.cache');
+	}
+	
+	
 	/**
 	 * Delete an item from the cache
 	 * @return boolean

@@ -5,9 +5,18 @@
  * Class for adding extra session security protection as well as new ways to
  * store sessions (such as databases). For flash uploaders and other non-browser
  * agents you should disable "regenerate", "match_fingerprint", and "match_ip"
- * when loading this class. Also make sure to call the token methods if using
- * forms to help prevent CSFR.
- *
+ * when loading this class. 
+ * 
+ * CREATE TABLE IF NOT EXISTS `session` (
+ *   `session_id` varchar(40) NOT NULL,
+ *   `timestamp` int(10) unsigned NOT NULL,
+ *   `data` text,
+ *   PRIMARY KEY (`session_id`)
+ * ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ * 
+ * Also make sure to call the token methods if using forms to help prevent CSFR.
+ * <input value="<?php print session('token'); ?>" name="token" />
+ * 
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
@@ -16,49 +25,35 @@
  */
 class Session
 {
-
-	public $match_ip			= NULL;
-	public $match_fingerprint	= NULL;
-	public $session_handler		= NULL;
-	public $session_table		= NULL;
-	public $regenerate			= NULL;
-	public $expiration			= NULL;		
-
-	// These values can be changed at runtime for session work-arounds
-	public $session_id			= NULL;
-	public $token				= NULL;
-
+	public static $table		= 'session';
+	public static $db			= NULL;
+	public static $expiration	= NULL;
+	
 	/**
-	 * Configure some default session setting and then start the session.
+	 * Configure the session settings, check for problems, and then start the session.
 	 * 
 	 * @param array $config an optional configuration array
 	 */
-	public function __construct(array $config = NULL)
+	public static function start(array $config = NULL)
 	{
-
-		//Set the config
-		if(is_array($config))
+		/*
+		die('Need to create a $_POST[remember_me] feature that turns the session from a session cookie
+		to a long lasting cookie. This new value should also be the session expariation since nothing
+		will be lasting longer than it.');
+		*/
+		
+		// All sessions require a user agent - only bad bots don't use them
+		if(empty($_SERVER['HTTP_USER_AGENT']))
 		{
-			foreach($config as $key => $value)
-			{
-				$this->$key = $value;
-			}
+			exit('No User Agent Sent');
 		}
 		
 		// Get the session
 		$config = (array) $config + config::get('session');
 		
-		// Save regenerate time
-		$this->regenerate = $config['regenerate'];
-		$this->expiration = $config['expiration'];
-		$this->session_table = $config['table'];
-		$this->session_handler = $config['handler'];
-		$this->match_fingerprint = $config['match_fingerprint'];
-		$this->match_ip = $config['match_ip'];
-		
 		// Configure garbage collection
 		ini_set('session.gc_probability', $config['gc_probability']);
-		ini_set('session.gc_divisor', 100);
+		ini_set('session.gc_divisor', $config['gc_divisor']);
 		ini_set('session.gc_maxlifetime', $config['expiration']);
 
 		// Set the session cookie parameters
@@ -72,127 +67,94 @@ class Session
 
 		// Name the session, this will also be the name of the cookie
 		session_name($config['name']);
-
-		//Create a session (or get existing session)
-		$this->create();
-
-	}
-
-
-	/**
-	 * Start the current session, if already started - then destroy and create a new session!
-	 * @return void
-	 */
-	function create()
-	{
-
-		//If this was called to destroy a session (only works after session started)
-		$this->destroy();
-
-		//If we were told to use a specific ID instead of what PHP might find
-		if($this->session_id)
+		
+		// Register non-native driver as the session handler
+		session_set_save_handler (
+			array('Session', '_open'),
+			array('Session', '_close'),
+			array('Session', '_read'),
+			array('Session', '_write'),
+			array('Session', '_destroy'),
+			array('Session', '_gc')
+		);
+	
+		// Allow the user to start a session manually by passing the ID to use
+		if($config['session_id'])
 		{
-			session_id($this->session_id);
-			$this->session_id = FALSE;
-		}
-
-		//If there is a class to handle CRUD of the sessions
-		if($this->session_handler)
-		{
-			//Load the session handler class
-			//$handler = load::singleton($this->session_handler);
-			$handler = new $this->session_handler();
-
-			//Set the expiration and table name for the model
-			$handler->expiration = $this->expiration;
-			$handler->session_table = $this->session_table;
-
-			// Register non-native driver as the session handler
-			session_set_save_handler (
-				array($handler, 'open'),
-				array($handler, 'close'),
-				array($handler, 'read'),
-				array($handler, 'write'),
-				array($handler, 'destroy'),
-				array($handler, 'gc')
-			);
+			session_id($config['session_id']);
 		}
 		
-		// Start the session!
+		// Set the database instance to use below
+		self::$db = Database::instance($config['database']);
+		
+		// How long do sessions last?
+		self::$expiration = $config['expiration'];
+		
+		// Start the session
 		session_start();
-
-		//Check the session to make sure it is valid
-		if( ! $this->check())
+		
+		// Different browser using another browsers session!?
+		if($config['match_fingerprint'])
 		{
-			//Destroy invalid session and create a new one
-			return $this->create();
-		}
-
-	}
-
-
-	/**
-	 * Check the current session to make sure the user is the same (or else create a new session)
-	 * @return boolean
-	 */
-	function check()
-	{
-
-		//On creation store the useragent fingerprint
-		if(empty($_SESSION['fingerprint']))
-		{
-			$_SESSION['fingerprint'] = $this->generate_fingerprint();
-
-		} //If we should verify user agent fingerprints (and this one doesn't match!)
-		elseif($this->match_fingerprint AND $_SESSION['fingerprint'] != $this->generate_fingerprint())
-		{
-			return FALSE;
-		}
-
-		//If an IP address is present and we should check to see if it matches
-		if(isset($_SESSION['ip_address']) AND $this->match_ip)
-		{
-			//If the IP does NOT match
-			if($_SESSION['ip_address'] != ip_address())
+			// Create a fingerprint
+			$fingerprint = md5($_SERVER['HTTP_USER_AGENT']);
+			
+			if(empty($_SESSION['fingerprint']))
 			{
-				return FALSE;
+				$_SESSION['fingerprint'] = $fingerprint;
+			}
+			elseif($_SESSION['fingerprint'] !== $fingerprint)
+			{
+				// Kill this session!
+				destroy_session();
+		
+				// Start the session again
+				return self::start();
 			}
 		}
-
-		//Set the users IP Address
-		$_SESSION['ip_address'] = ip_address();
-
-		//If we are required to make sure a token matches
-		if($this->token AND $this->token != session('token'))
+		
+		// Different IP using another IP's session!?
+		if($config['match_ip'])
 		{
-			$this->token = FALSE;	// Remove token check
-			return FALSE;			// Reset the session
+			if(empty($_SESSION['ip_address']))
+			{
+				$_SESSION['ip_address'] = ip_address();
+			}
+			elseif($_SESSION['ip_address'] !== ip_address())
+			{
+				// Kill this session!
+				destroy_session();
+		
+				// Start the session again
+				return self::start();
+			}
+		}
+		
+		// If we regenerate the session after so many pages (disabled by default)
+		if ($config['regenerate'])
+		{
+			if(empty($_SESSION['regenerate']))
+			{
+				$_SESSION['regenerate'] = 0;
+			}
+			elseif(($_SESSION['regenerate'] % $config['regenerate']) === 0)
+			{
+				// Regenerate session id and update session cookie
+				session_regenerate_id(TRUE);
+					
+				// Reset the counter
+				$_SESSION['regenerate'] = 0;
+			}
+			$_SESSION['regenerate']++;
 		}
 
-		//Set the session start time so we can track when to regenerate the session
-		if(empty($_SESSION['regenerate']))
-		{
-			$_SESSION['regenerate'] = time();
-
-		} //Check to see if the session needs to be regenerated
-		elseif($this->regenerate AND $_SESSION['regenerate'] + $this->regenerate < time())
-		{
-			//Generate a new session id and a new cookie with the updated id
-			session_regenerate_id();
-
-			//Store new time that the session was generated
-			$_SESSION['regenerate'] = time();
-		}
-
-		return TRUE;
 	}
 
-
+	
 	/**
-	 * Destroys the current session and user agent cookie
-	 * @return  void
+	 * Destroys the current session, session data, and user agent cookie
 	 */
-	public function destroy()
+	public static function destroy()
 	{
 		//If there is no session to delete (not started)
 		if ( ! session_id())
@@ -220,26 +182,7 @@ class Session
 		session_destroy();
 	}
 
-
-	/**
-	 * Generates key as protection against Session Hijacking & Fixation. This
-	 * works better than IP based checking for most sites due to constant user
-	 * IP changes (although this method is not as secure as IP checks).
-	 * @return string
-	 */
-	function generate_fingerprint()
-	{
-		//We don't use the ip-adress, because it is subject to change in most cases
-		foreach(array('ACCEPT_CHARSET', 'ACCEPT_ENCODING', 'ACCEPT_LANGUAGE', 'USER_AGENT') as $name)
-		{
-			$key[] = empty($_SERVER['HTTP_'. $name]) ? NULL : $_SERVER['HTTP_'. $name];
-		}
-
-		//Create an MD5 hash and return it
-		return md5(implode("\0", $key));
-	}
-
-
+	
 	/**
 	 * Create a fairly complex random token for use in forms.
 	 */
@@ -248,7 +191,7 @@ class Session
 		return $_SESSION['token'] = token();
 	}
 
-
+	
 	/**
 	 * Check that the given token matches the one in the users session.
 	 * If not token is given we will look for one in the $_POST data.
@@ -270,198 +213,79 @@ class Session
 	}
 
 
-}
-
-
-/**
- * Default session handler for storing sessions in the database. Can use
- * any type of database from SQLite to MySQL. If you wish to use your own
- * class instead of this one please set session::$session_handler to
- * the name of your class (see session class). If you wish to use memcache
- * then then set the session::$session_handler to FALSE and configure the
- * settings shown in http://php.net/manual/en/memcache.examples-overview.php
- */
-class session_handler_db
-{
-
-	//Store the starting session ID so we can check against current id at close
-	public $session_id		= NULL;
-
-	//Table to look for session data in
-	public $session_table	= NULL;
-
-	// How long are sessions good?
-	public $expiration		= NULL;
-
-	//The database handle
-	public $db				= NULL;
-
-	// Store data
-	public $data			= NULL;
-
-
 	/**
-	 * Record the current session_id for later
-	 * @return boolean
+	 * Superfluous open/close functions
 	 */
-	public function open()
-	{
-		// Load the DB connection
-		$this->db = Database::instance();
-
-		// Store the current ID so if it is changed we will know!
-		$this->session_id = session_id();
-
-		return TRUE;
-	}
-
-
-	/**
-	 * Superfluous close function
-	 * @return boolean
-	 */
-	public function close()
-	{
-		return TRUE;
-	}
-
+	public static function _open() { return TRUE; }
+	public static function _close() { return TRUE; }
+	
 
 	/**
 	 * Attempt to read a session from the database.
-	 * @param string $id
+	 * @param string $id of the session
 	 */
-	public function read($id = NULL)
+	public static function _read($id = NULL)
 	{
-		// Prepare the statement
-		//$statement = $this->db->select('data')->where('session_id')->from($this->session_table)->prepare();
-		$statement = $this->db->prepare('SELECT "data" FROM "'.$this->session_table.'" WHERE "session_id" = ?');
-		
-		// Disable caching!!!
-		$statement->cache_results = FALSE;
-		
-		// Bind params
-		$statement->execute(array($id));
+		$sql = 'SELECT "data" FROM "'.self::$table.'" WHERE "session_id" = ?';
 
-		// Fetch the data column
-		if($data = $statement->fetchColumn())
+		if($result = self::$db->fetch($sql, array($id)))
 		{
-			return $this->data = $data;
+			return $result[0]->data;
 		}
-
-		return '';
 	}
 
 
 	/**
-	 * Attempt to create or update a session in the database.
-	 * The $data is already serialized by PHP.
+	 * Attempt to create or update a session in the database. The $data is already 
+	 * serialized by PHP. Note that we do not need to update the old row if the session
+	 * id changed during the script because session_regenerate_id() already removed it.
 	 *
-	 * @param string $id
-	 * @param string $data
+	 * @param string $id of the session
+	 * @param string $data the session data
 	 */
-	public function write($id = NULL, $data = '')
+	public static function _write($id = NULL, $data = '')
 	{
-
 		// Setup session data
 		$row = array(
-			'last_activity' => time(),
-			'session_id'	=> $id
+			'timestamp'	=> time(),
+			'session_id'=> $id,
+			'data'		=> $data
 		);
 
-		// If the data has changed since it was read - update it too!
-		if($this->data != $data)
+		// Update the row with the new data
+		if(self::$db->count('SELECT COUNT(*) FROM "'.self::$table.'" WHERE "session_id" = ?', array($id)))
 		{
-			$row['data'] = $data;
-		}
-
-
-		/*
-		 * Case 1: The session we are now being told to write does not match
-		 * the session we were given at the start. This means that the ID was
-		 * regenerated sometime during the script and we need to update that
-		 * old session id to this new value. (The other choice is to delete
-		 * the old session first - but that wastes resources!)
-		 */
-		if($this->session_id AND $this->session_id != $id)
-		{
-
-			//Then we need to update the row with the new session id (and data)
-			$this->db->update($this->session_table, $row, array('session_id' => $this->session_id));
-
-		}
-		elseif($this->db->where('session_id = ?')->from($this->session_table)->count(array($id)))
-		{
-
-			// A session already exists - so update it!
-			$this->db->update($this->session_table, $row, array('session_id' => $id));
-
+			self::$db->update(self::$table, $row, array('session_id' => $id));
 		}
 		else
 		{
-			// Create a new session
-			$this->db->insert($this->session_table, $row);
+			self::$db->insert(self::$table, $row);
 		}
-
 	}
 
 
 	/**
 	 * Delete a session from the database
 	 *
-	 * @param string $id
+	 * @param string $id of the session
 	 * @return boolean
 	 */
-	public function destroy($id)
+	public static function _destroy($id = NULL)
 	{
-		$this->db->where('session_id =?')->delete($this->session_table, array($id));
-		return TRUE;
+		return DB::delete('DELETE FROM "'.self::$table.'" WHERE "session_id" = ?', array($id));
 	}
 
 
 	/**
 	 * Garbage collector method to remove old sessions
 	 */
-	public function gc()
+	public static function _gc()
 	{
 		//The max age of a session
-		$time = (time() - $this->expiration);
+		$time = time() + self::$expiration;
 
-		//Remove all old sessions
-		$this->db->where('last_activity < ?')->delete($this->session_table, array($time));
-		return TRUE;
+		// Remove all old sessions
+		return DB::delete('DELETE FROM "'.self::$table.'" WHERE "timestamp" < ?', array($time));
 	}
-
-
-	/**
-	 * PHP 5.0.5 needs to call the write before this object is destroyed!
-	 */
-	public function __destruct()
-	{
-		if( ! empty($_SESSION))
-		{
-			session_write_close();
-		}
-	}
-
+	
 }
-
-/** TOKENS **
- * Each time a form is shown we need to include a token with it to prevent
- * CSFR (i.e. submission of forms by a third party attacker). To do this
- * we should check for a POST/GET token on each page load. If found it means
- * that the form was sent with that token and if it matches the one in the
- * session then we know the author sent that form request and it is not an
- * attack.
- *
- * By only creating a token when there is no POST/GET data we can insure
- * that the same token can be used several times from one form with AJAX.
- * If a form submit fails, a token should be regenerated as well.
- *
- * We can't build auto-token checking into the session class because there
- * is no way to notify outside code of invalid tokens -other than to reset
- * the session. While being a secure method this has the side effect of
- * logging people out when we should instead show an error message.
- *
- * If using tokens please make sure to place a matching input in your form:
- * <input value="<?php print session('token'); ?>" name="token" />
- */

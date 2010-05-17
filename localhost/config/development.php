@@ -120,20 +120,23 @@ $config['log_errors'] = TRUE;
 $config['session'] = array(
 	// The name of the session
 	'name'				=> 'mvc_session',
-	// Session storage class, FALSE for native php temp files
-	'handler'			=> FALSE, //'session_handler_db',
-	// If using a DB, what is the table name?
-	'table'				=> 'sessions',
+	// The name of the database instance to use
+	'database'			=> 'default', 
 	// Require user agent fingerprint to match?
 	'match_fingerprint'	=> TRUE,
 	// Require the users IP to match (dangerous!)
 	'match_ip'			=> FALSE,
-	// Update the session ID every two hours (FALSE to disable)
-	'regenerate'		=> 7200,
+	// Change the session ID every ####(seconds) (FALSE to disable)
+	'regenerate'		=> FALSE,
 	// How long before the session expires (604800 = 7 days)
 	'expiration'		=> 604800,
 	// Chance (in 100) that old sessions will be removed
-	'gc_probability'	=> 100,
+	// Probability that the garbage collection routine is started
+	'gc_probability'	=> 1,
+	// gc_probability in gc_divisor chance of removing old sessions (1 in 100)
+	'gc_divisor'		=> 100,
+	// Session ID to use instead of Cookie passed (for flash uploads...)
+	'session_id'		=> NULL,
 	// The path it is accessible
 	'cookie_path'		=> '/',
 	// The domain the cookie works on
@@ -152,33 +155,11 @@ $config['session'] = array(
  */
 $config['database'] = array(
 	'default' => array(
-		'type'       => 'mysql',
-		'connection' => array(
-			'dsn'        => 'mysql:host=localhost;dbname=database_1',
-			'username'   => 'root',
-			'password'   => '',
-			'persistent' => FALSE,
-		),
-		'table_prefix'		=> '',
-		'charset'			=> 'utf8',
-		'cache_results'		=> FALSE,
-		'cache_statements'	=> TRUE,
-		'log_queries'		=> TRUE
-	),
-	'backup' => array(
-		'type'       => 'mysql',
-		'connection' => array(
-			'dsn'        => 'mysql:host=localhost;dbname=database_2',
-			'username'   => 'root',
-			'password'   => '',
-			'persistent' => FALSE,
-		),
-		'table_prefix'		=> '',
-		'charset'			=> 'utf8',
-		'cache_results'		=> 0,
-		'cache_statements'	=> TRUE,
-		'log_queries'		=> TRUE
-	),
+		'dsn'        => 'mysql:host=localhost;dbname=database_1',
+		'username'   => 'root',
+		'password'   => '',
+		'persistent' => FALSE,
+	)
 );
 
 
@@ -263,6 +244,7 @@ $config['modules'] = array(
 	//'memcache',
 	//'recaptcha',
 	//'disqus',
+	'database',
 	'core',
 );
 

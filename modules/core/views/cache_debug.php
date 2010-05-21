@@ -87,7 +87,9 @@ foreach (array('_SESSION', '_GET', '_POST', '_FILES', '_COOKIE', '_SERVER') as $
 
 	//Dump out the values
 	print '<b>$'. $var. '</b>';
-	print dump($GLOBALS[$var]);
+	print '<pre>';
+	print_r($GLOBALS[$var]);
+	print '</pre>';
 }
 ?>
 

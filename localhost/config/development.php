@@ -62,28 +62,23 @@ $config['routes'] = array(
  */
 $config['caching_check_cookie'] = 'logged_in';
 
-
-/**
- * Cache Life
- *
- * Here you can enable or disable the *default* setting for caching.
- * Set this to the number in seconds you want the cache to last 
- * (120 = 2 minutes). Setting this to FALSE will disable caching. 
- * Controllers can still override this individually if needed!
- */
-$config['cache_life'] = 0;
+// The location of the cache library to use (PHP > 5.3 use sqlite3)
+$config['cache_library'] = 'modules/cache/classes/cache/sqlite3.php';
 
 /**
  * Some cache divers need additional options which can be provided here.
- * For example, the memcache class needs the severs to connect too.
+ * For example, the memcache cache class needs the severs to connect too.
+ * 
+ * Here you can set the *default* life of cached objects (in seconds).
+ * Setting this to FALSE will disable caching but controllers can still 
+ * override this individually if needed!
  */
-$config['cache_options'] = array(
-	'servers' => array('localhost' => 11211),
-	'compress' => FALSE
+$config['cache'] = array(
+	'expires' => 0
+	//'servers' => array('localhost' => 11211),
+	//'compress' => FALSE
 );
 
-// The location of the cache library to use
-$config['cache_library'] = 'modules/core/classes/cache.php';
 
 
 /**
@@ -240,7 +235,6 @@ $config['hooks']['system_shutdown'] = array();
  * listed is the order they will be scanned for files.
  */
 $config['modules'] = array(
-	//'database',
 	//'memcache',
 	//'recaptcha',
 	//'disqus',

@@ -2,8 +2,8 @@
 /**
  * String
  *
- * This class contains extra string functions for everything from working with 
- * UTF-8 and unicode to spliting strings at certain characters.
+ * This class contains extra string functions for doing complex things with 
+ * UTF-8 and unicode strings such as spliting strings at certain characters.
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -13,133 +13,6 @@
  */
 class String
 {
-
-	/**
-	 * Convert all array values to the UTF-8 encoding
-	 * @param $array
-	 * @return array
-	 */
-	public static function array_to_utf8($array = array()) {
-
-		if ( is_array($array) ) {
-
-			// Recursively convert array elements to UTF-8
-			foreach ($array as $key => $val) {
-				$array[$key] = self::array_to_utf8($val);
-			}
-
-		} elseif ( is_scalar($array) AND $array !== '') {
-
-			// Remove control characters
-			$array = self::strip_ascii_ctrl($array);
-
-			//If not already ascii
-			if ( ! self::is_ascii($array)) {
-				$array = self::to_utf8($array);
-			}
-
-		} else {
-			return;
-		}
-
-		return $array;
-	}
-
-
-	/**
-	 * Convert all array values to the ISO-8859-1 (Latin-1) encoding
-	 * @param $array
-	 * @return array
-	 */
-	public static function array_to_ascii($array = array()) {
-
-		if ( is_array($array) ) {
-
-			// Recursively convert array elements to UTF-8
-			foreach ($array as $key => $val) {
-				$array[$key] = self::array_to_ascii($val);
-			}
-
-		} elseif ( is_scalar($array) AND $array !== '') {
-
-			// Remove control characters
-			$array = self::strip_ascii_ctrl($array);
-
-			//If not already ascii
-			if ( ! self::is_ascii($array)) {
-				$array = self::to_ascii($array);
-			}
-
-		} else {
-			return;
-		}
-
-		return $array;
-	}
-
-
-	/**
-	 * Encode the given string to unicode UTF-8 format
-	 * Auto-detect the format it came from.
-	 *
-	 * @param	$string the string to convert
-	 * @return	string
-	 */
-	public static function to_utf8($string = '') {
-		if( $string ) {
-			$encoding = mb_detect_encoding($string, "UTF-8, ISO-8859-1, ISO-8859-15", true);
-			return mb_convert_encoding($string, "UTF-8", $encoding);
-		}
-	}
-
-
-	/**
-	 * Convert a string to the ISO-8859-1 (Latin-1) encoding use by The Americas,
-	 * Western Europe, Oceania, and much of Africa.
-	 *
-	 * @param	$string the string to convert
-	 * @return	string
-	 */
-	public static function to_ascii($string = '') {
-		if( $string ) {
-			$encoding = mb_detect_encoding($string, "UTF-8, ISO-8859-1, ISO-8859-15", true);
-			return mb_convert_encoding($string, "ISO-8859-1", $encoding);
-		}
-	}
-
-
-	/**
-	 * HTML encode each value to make it safe to display.
-	 * Use with array_walk()
-	 *
-	 * @param $item
-	 * @param $key
-	 */
-	public static function array_walk_h( &$item, $key) {
-		$item = h($item);
-	}
-
-
-	/**
-	 * Convert a string to the file/URL safe "slug" form
-	 *
-	 * @param string $string the string to clean
-	 * @return string
-	 */
-	public static function slug($string = '')
-	{
-		// Convert accents to normal US characters
-		$string = self::remove_accents(trim($string));
-
-		// Remove non-file/URL safe characters
-		$string = preg_replace("/([^a-zA-Z0-9_\-\.]+)/u", '-', $string);
-
-		// Only allow one dash separator at a time and make string lowercase
-		return strtolower(preg_replace('/--+/u', '-', $string));
-
-	}
-
-
 	/**
 	 * split_text
 	 *
@@ -151,7 +24,8 @@ class String
 	 * @param	String  End break item
 	 * @return	Array
 	 */
-	public static function split_text($text='', $start='<code>', $end='</code>') {
+	public static function split_text($text='', $start='<code>', $end='</code>')
+	{
 		$tokens = explode($start, $text);
 		$outside[] = $tokens[0];
 
@@ -175,7 +49,8 @@ class String
 	 * @param $escape
 	 * @return array
 	 */
-	public static function split_string($text = '', $start = '"', $escape = '\\') {
+	public static function split_string($text = '', $start = '"', $escape = '\\')
+	{
 
 		//If the separator is not found
 		if(stripos($text, $start) === FALSE) {
@@ -247,7 +122,8 @@ class String
 	 * @param $escape
 	 * @return array
 	 */
-	public static function regex_split_string($text = '', $start = '"', $escape = '\\\\') {
+	public static function regex_split_string($text = '', $start = '"', $escape = '\\\\')
+	{
 		return preg_split('/(?:[^'. $escape. '])'. $start. '/u', $text);
 	}
 
@@ -258,7 +134,8 @@ class String
 	 * @param $with
 	 * @return unknown_type
 	 */
-	public static function join_text($inside = NULL, $outside = NULL, $with = '"') {
+	public static function join_text($inside = NULL, $outside = NULL, $with = '"')
+	{
 		if (empty($inside) OR empty($outside)) {
 			return $outside;
 		}
@@ -288,9 +165,11 @@ class String
 	 * @param	bool	$only_letters if true
 	 * @return	Array
 	 */
-	public static function random_charaters($number, $only_letters = FALSE) {
+	public static function random_charaters($number, $only_letters = FALSE)
+	{
 		$chars = '';
-		for($i=0; $i<$number; $i++) {
+		for($i=0; $i<$number; $i++)
+		{
 			$chars .= ( $only_letters ? chr(rand(33, 126)) : chr(rand(65, 90)) );
 		}
 		return $chars;
@@ -302,7 +181,8 @@ class String
 	 * @param	$url
 	 * @return	string
 	 */
-	public static function prep_url($url = '') {
+	public static function prep_url($url = '')
+	{
 
 		if ($url == 'http://' OR $url == '') {
 			return '';
@@ -321,7 +201,8 @@ class String
 	 * @param	string	email to check
 	 * @return	boolean
 	 */
-	public static function valid_email($text){
+	public static function valid_email($text)
+	{
 		return ( ! preg_match("/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i", $text)) ? FALSE : TRUE;
 	}
 
@@ -336,9 +217,11 @@ class String
 	 * @param	boolean	$css
 	 * @return	string
 	 */
-	public static function highlight_code($code='', $css = TRUE, $trim = TRUE) {
+	public static function highlight_code($code='', $css = TRUE, $trim = TRUE)
+	{
 
-		if( $trim ) {
+		if($trim)
+		{
 			$code = trim($code);
 		}
 
@@ -349,19 +232,22 @@ class String
 		 */
 
 		//If there is no opening tag
-		if (mb_strpos($code, '<?php') === false) {
+		if (mb_strpos($code, '<?php') === false)
+		{
 			$added_to_start = TRUE;
 			$code = '<?php'. $code;
 		}
 
 		//If there is no closing PHP tag
-		if (mb_strpos($code, '?>') === false) {
+		if (mb_strpos($code, '?>') === false)
+		{
 			$added_to_end = TRUE;
 			$code .= '?>';
 		}
 
 		//If we have not already changed the default color codes to CSS names
-		if($css && ini_get('highlight.default') != 'code_default') {
+		if($css && ini_get('highlight.default') != 'code_default')
+		{
 			ini_set('highlight.default', 'code_default');
 			ini_set('highlight.comment', 'code_comment');
 			ini_set('highlight.keyword', 'code_keyword');
@@ -379,12 +265,14 @@ class String
 		}
 
 		// Remove start PHP tag we added
-		if(isset($added_to_start)) {
+		if(isset($added_to_start))
+		{
 			$code = str_replace('&lt;?php', '', $code);
 		}
 
 		// Remove end PHP tags we added
-		if(isset($added_to_end)) {
+		if(isset($added_to_end))
+		{
 			$code = str_replace('?&gt;', '', $code);
 		}
 
@@ -400,18 +288,6 @@ class String
 	 *
 	 * Functions may have additionally editing by wordpress.org or kohanaphp.com
 	 */
-
-
-
-	/**
-	 * Tests whether a string contains only 7bit ASCII bytes.
-	 *
-	 * @param   str	string to check
-	 * @return  bool
-	 */
-	public static function is_ascii($str) {
-		return ! preg_match('/[^\x00-\x7F]/S', $str);
-	}
 
 
 	/**
@@ -435,174 +311,7 @@ class String
 		return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $str);
 	}
 
-
-	/**
-	 * Checks to see if a string is utf8 encoded.
-	 *
-	 * NOTE: This public static function checks for 5-Byte sequences, UTF8
-	 *       has Bytes Sequences with a maximum length of 4.
-	 *
-	 * @author	bmorel at ssi dot fr (modified)
-	 * @param	string $str The string to be checked
-	 * @return	bool True if $str fits a UTF-8 model, false otherwise.
-	 */
-	public static function seems_utf8($Str) {
-		for ($i=0; $i<strlen($Str); $i++) {
-			if (ord($Str[$i]) < 0x80) continue; # 0bbbbbbb
-			elseif ((ord($Str[$i]) & 0xE0) == 0xC0) $n=1; # 110bbbbb
-			elseif ((ord($Str[$i]) & 0xF0) == 0xE0) $n=2; # 1110bbbb
-			elseif ((ord($Str[$i]) & 0xF8) == 0xF0) $n=3; # 11110bbb
-			elseif ((ord($Str[$i]) & 0xFC) == 0xF8) $n=4; # 111110bb
-			elseif ((ord($Str[$i]) & 0xFE) == 0xFC) $n=5; # 1111110b
-			else return false; # Does not match any model
-			for ($j=0; $j<$n; $j++) { # n bytes matching 10bbbbbb follow ?
-				if ((++$i == strlen($Str)) || ((ord($Str[$i]) & 0xC0) != 0x80))
-				return false;
-			}
-		}
-		return true;
-	}
-
-
-	/**
-	 * Converts all accent characters to ASCII characters.
-	 *
-	 * If there are no accent characters, then the string given is just returned.
-	 *
-	 * @param string $string Text that might have accent characters
-	 * @return string Filtered string with replaced "nice" characters.
-	 */
-	public static function remove_accents($string) {
-		if ( !preg_match('/[\x80-\xff]/', $string) )
-		return $string;
-
-		if (self::seems_utf8($string)) {
-			$chars = array(
-			// Decompositions for Latin-1 Supplement
-			chr(195).chr(128) => 'A', chr(195).chr(129) => 'A',
-			chr(195).chr(130) => 'A', chr(195).chr(131) => 'A',
-			chr(195).chr(132) => 'A', chr(195).chr(133) => 'A',
-			chr(195).chr(135) => 'C', chr(195).chr(136) => 'E',
-			chr(195).chr(137) => 'E', chr(195).chr(138) => 'E',
-			chr(195).chr(139) => 'E', chr(195).chr(140) => 'I',
-			chr(195).chr(141) => 'I', chr(195).chr(142) => 'I',
-			chr(195).chr(143) => 'I', chr(195).chr(145) => 'N',
-			chr(195).chr(146) => 'O', chr(195).chr(147) => 'O',
-			chr(195).chr(148) => 'O', chr(195).chr(149) => 'O',
-			chr(195).chr(150) => 'O', chr(195).chr(153) => 'U',
-			chr(195).chr(154) => 'U', chr(195).chr(155) => 'U',
-			chr(195).chr(156) => 'U', chr(195).chr(157) => 'Y',
-			chr(195).chr(159) => 's', chr(195).chr(160) => 'a',
-			chr(195).chr(161) => 'a', chr(195).chr(162) => 'a',
-			chr(195).chr(163) => 'a', chr(195).chr(164) => 'a',
-			chr(195).chr(165) => 'a', chr(195).chr(167) => 'c',
-			chr(195).chr(168) => 'e', chr(195).chr(169) => 'e',
-			chr(195).chr(170) => 'e', chr(195).chr(171) => 'e',
-			chr(195).chr(172) => 'i', chr(195).chr(173) => 'i',
-			chr(195).chr(174) => 'i', chr(195).chr(175) => 'i',
-			chr(195).chr(177) => 'n', chr(195).chr(178) => 'o',
-			chr(195).chr(179) => 'o', chr(195).chr(180) => 'o',
-			chr(195).chr(181) => 'o', chr(195).chr(182) => 'o',
-			chr(195).chr(182) => 'o', chr(195).chr(185) => 'u',
-			chr(195).chr(186) => 'u', chr(195).chr(187) => 'u',
-			chr(195).chr(188) => 'u', chr(195).chr(189) => 'y',
-			chr(195).chr(191) => 'y',
-			// Decompositions for Latin Extended-A
-			chr(196).chr(128) => 'A', chr(196).chr(129) => 'a',
-			chr(196).chr(130) => 'A', chr(196).chr(131) => 'a',
-			chr(196).chr(132) => 'A', chr(196).chr(133) => 'a',
-			chr(196).chr(134) => 'C', chr(196).chr(135) => 'c',
-			chr(196).chr(136) => 'C', chr(196).chr(137) => 'c',
-			chr(196).chr(138) => 'C', chr(196).chr(139) => 'c',
-			chr(196).chr(140) => 'C', chr(196).chr(141) => 'c',
-			chr(196).chr(142) => 'D', chr(196).chr(143) => 'd',
-			chr(196).chr(144) => 'D', chr(196).chr(145) => 'd',
-			chr(196).chr(146) => 'E', chr(196).chr(147) => 'e',
-			chr(196).chr(148) => 'E', chr(196).chr(149) => 'e',
-			chr(196).chr(150) => 'E', chr(196).chr(151) => 'e',
-			chr(196).chr(152) => 'E', chr(196).chr(153) => 'e',
-			chr(196).chr(154) => 'E', chr(196).chr(155) => 'e',
-			chr(196).chr(156) => 'G', chr(196).chr(157) => 'g',
-			chr(196).chr(158) => 'G', chr(196).chr(159) => 'g',
-			chr(196).chr(160) => 'G', chr(196).chr(161) => 'g',
-			chr(196).chr(162) => 'G', chr(196).chr(163) => 'g',
-			chr(196).chr(164) => 'H', chr(196).chr(165) => 'h',
-			chr(196).chr(166) => 'H', chr(196).chr(167) => 'h',
-			chr(196).chr(168) => 'I', chr(196).chr(169) => 'i',
-			chr(196).chr(170) => 'I', chr(196).chr(171) => 'i',
-			chr(196).chr(172) => 'I', chr(196).chr(173) => 'i',
-			chr(196).chr(174) => 'I', chr(196).chr(175) => 'i',
-			chr(196).chr(176) => 'I', chr(196).chr(177) => 'i',
-			chr(196).chr(178) => 'IJ',chr(196).chr(179) => 'ij',
-			chr(196).chr(180) => 'J', chr(196).chr(181) => 'j',
-			chr(196).chr(182) => 'K', chr(196).chr(183) => 'k',
-			chr(196).chr(184) => 'k', chr(196).chr(185) => 'L',
-			chr(196).chr(186) => 'l', chr(196).chr(187) => 'L',
-			chr(196).chr(188) => 'l', chr(196).chr(189) => 'L',
-			chr(196).chr(190) => 'l', chr(196).chr(191) => 'L',
-			chr(197).chr(128) => 'l', chr(197).chr(129) => 'L',
-			chr(197).chr(130) => 'l', chr(197).chr(131) => 'N',
-			chr(197).chr(132) => 'n', chr(197).chr(133) => 'N',
-			chr(197).chr(134) => 'n', chr(197).chr(135) => 'N',
-			chr(197).chr(136) => 'n', chr(197).chr(137) => 'N',
-			chr(197).chr(138) => 'n', chr(197).chr(139) => 'N',
-			chr(197).chr(140) => 'O', chr(197).chr(141) => 'o',
-			chr(197).chr(142) => 'O', chr(197).chr(143) => 'o',
-			chr(197).chr(144) => 'O', chr(197).chr(145) => 'o',
-			chr(197).chr(146) => 'OE',chr(197).chr(147) => 'oe',
-			chr(197).chr(148) => 'R',chr(197).chr(149) => 'r',
-			chr(197).chr(150) => 'R',chr(197).chr(151) => 'r',
-			chr(197).chr(152) => 'R',chr(197).chr(153) => 'r',
-			chr(197).chr(154) => 'S',chr(197).chr(155) => 's',
-			chr(197).chr(156) => 'S',chr(197).chr(157) => 's',
-			chr(197).chr(158) => 'S',chr(197).chr(159) => 's',
-			chr(197).chr(160) => 'S', chr(197).chr(161) => 's',
-			chr(197).chr(162) => 'T', chr(197).chr(163) => 't',
-			chr(197).chr(164) => 'T', chr(197).chr(165) => 't',
-			chr(197).chr(166) => 'T', chr(197).chr(167) => 't',
-			chr(197).chr(168) => 'U', chr(197).chr(169) => 'u',
-			chr(197).chr(170) => 'U', chr(197).chr(171) => 'u',
-			chr(197).chr(172) => 'U', chr(197).chr(173) => 'u',
-			chr(197).chr(174) => 'U', chr(197).chr(175) => 'u',
-			chr(197).chr(176) => 'U', chr(197).chr(177) => 'u',
-			chr(197).chr(178) => 'U', chr(197).chr(179) => 'u',
-			chr(197).chr(180) => 'W', chr(197).chr(181) => 'w',
-			chr(197).chr(182) => 'Y', chr(197).chr(183) => 'y',
-			chr(197).chr(184) => 'Y', chr(197).chr(185) => 'Z',
-			chr(197).chr(186) => 'z', chr(197).chr(187) => 'Z',
-			chr(197).chr(188) => 'z', chr(197).chr(189) => 'Z',
-			chr(197).chr(190) => 'z', chr(197).chr(191) => 's',
-			// Euro Sign
-			chr(226).chr(130).chr(172) => 'E',
-			// GBP (Pound) Sign
-			chr(194).chr(163) => '');
-
-			$string = strtr($string, $chars);
-		} else {
-			// Assume ISO-8859-1 if not UTF-8
-			$chars['in'] = chr(128).chr(131).chr(138).chr(142).chr(154).chr(158)
-			.chr(159).chr(162).chr(165).chr(181).chr(192).chr(193).chr(194)
-			.chr(195).chr(196).chr(197).chr(199).chr(200).chr(201).chr(202)
-			.chr(203).chr(204).chr(205).chr(206).chr(207).chr(209).chr(210)
-			.chr(211).chr(212).chr(213).chr(214).chr(216).chr(217).chr(218)
-			.chr(219).chr(220).chr(221).chr(224).chr(225).chr(226).chr(227)
-			.chr(228).chr(229).chr(231).chr(232).chr(233).chr(234).chr(235)
-			.chr(236).chr(237).chr(238).chr(239).chr(241).chr(242).chr(243)
-			.chr(244).chr(245).chr(246).chr(248).chr(249).chr(250).chr(251)
-			.chr(252).chr(253).chr(255);
-
-			$chars['out'] = "EfSZszYcYuAAAAAACEEEEIIIINOOOOOOUUUUYaaaaaaceeeeiiiinoooooouuuuyy";
-
-			$string = strtr($string, $chars['in'], $chars['out']);
-			$double_chars['in'] = array(chr(140), chr(156), chr(198), chr(208), chr(222), chr(223), chr(230), chr(240), chr(254));
-			$double_chars['out'] = array('OE', 'oe', 'AE', 'DH', 'TH', 'ss', 'ae', 'dh', 'th');
-			$string = str_replace($double_chars['in'], $double_chars['out'], $string);
-		}
-
-		return $string;
-	}
-
-
+	
 	/**
 	 * UTF-8 aware alternative to ord
 	 * Returns the unicode ordinal for a character
@@ -805,30 +514,6 @@ class String
 
 
 	/**
-	 * UTF-8 aware alternative to str_split
-	 * Convert a string to an array
-	 * @param string UTF-8 encoded
-	 * @param int number to characters to split string by
-	 * @return string characters in string reverses
-	 * @see http://www.php.net/str_split
-	 */
-	public static function utf8_str_split($str, $split_len = 1) {
-
-		if ($split_len = to_int($split_len) < 1){
-			return FALSE;
-		}
-
-		if ( mb_strlen($str) <= $split_len ) {
-			return array($str);
-		}
-
-		preg_match_all('/.{'.$split_len.'}|[^\x00]{1,'.$split_len.'}$/us', $str, $ar);
-		return $ar[0];
-
-	}
-
-
-	/**
 	 * UTF-8 aware alternative to strcasecmp
 	 * A case insensivite string comparison
 	 * @param string
@@ -900,18 +585,6 @@ class String
 
 
 	/**
-	 * UTF-8 aware alternative to strrev
-	 * Reverse a string
-	 * @param string UTF-8 encoded
-	 * @return string characters in string reverses
-	 */
-	public static function utf8_strrev($str){
-		preg_match_all('/./us', $str, $ar);
-		return implode('',array_reverse($ar[0]));
-	}
-
-
-	/**
 	 * UTF-8 aware alternative to strspn
 	 * Find length of initial segment matching mask
 	 * @param string
@@ -935,24 +608,6 @@ class String
 		return 0;
 
 	}
-
-
-	/**
-	 * UTF-8 aware substr_replace.
-	 * @see http://www.php.net/substr_replace
-	 */
-	public static function mb_substr_replace($str, $replacement, $start, $length = NULL ) {
-		return mb_substr($str, 0, $start) . $replacement . mb_substr($str, $length + 1);
-		/*
-		 $length = ($length === NULL) ? mb_strlen($str) : (int) $length;
-		 preg_match_all('/./us', $str, $str_array);
-		 preg_match_all('/./us', $replacement, $replacement_array);
-
-		 array_splice($str_array[0], $offset, $length, $replacement_array[0]);
-		 return implode('', $str_array[0]);
-		 */
-	}
-
 
 	/**
 	 * UTF-8 aware replacement for ltrim()

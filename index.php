@@ -93,29 +93,20 @@ if( ! is_dir(SITE_PATH))
 	die('Sorry, we could not find the site directory.');
 }
 
-// Setup system to handle multibyte unicode strings in UTF-8
-require(REQUIRED_PATH. 'utf8.php');
-
 // Include core classes
 require(REQUIRED_PATH. 'classes.php');
 
-// Include the common system functions
-require(REQUIRED_PATH. 'common.php');
-
 // We must load the cache library by hand (since Load neededs it!)
 require(SYSTEM_PATH. config::get('cache_library'));
+
+// Start the cache driver
+new cache(config::get('cache'));
 
 // Set the class loader
 spl_autoload_register(array('load', 'autoload'));
 
 // Load modules
 load::init(config::get('modules'));
-
-// Set custom exception handling
-set_exception_handler(array('controller', 'exception_handler'));
-
-// Set custom error handler
-set_error_handler(array('controller', 'error_handler'));
 
 // Set the hook config
 hook::$hooks = config::get('hooks');
@@ -150,8 +141,8 @@ if( ! config::get('caching_check_cookie') OR empty($_COOKIE[config::get('caching
 		// Allow a hook call - then print the output
 		print hook::call('system_shutdown_cache', $output);
 
-		// If debuging is enabled
-		if( config::get('debug_mode') )
+		// If debuging is enabled and it is safe to show (only HTML!)
+		if($content_type === 'text/html' AND config::get('debug_mode') )
 		{
 			load::view('cache_debug', NULL, NULL);
 		}
@@ -160,6 +151,17 @@ if( ! config::get('caching_check_cookie') OR empty($_COOKIE[config::get('caching
 	}
 }
 
+// Set custom exception handling
+set_exception_handler(array('controller', 'exception_handler'));
+
+// Set custom error handler
+set_error_handler(array('controller', 'error_handler'));
+
+// Setup system to handle multibyte unicode strings in UTF-8
+require_once(REQUIRED_PATH. 'utf8.php');
+
+// Include the common system functions
+require_once(REQUIRED_PATH. 'common.php');
 
 // strip the slashes that have been added to our POST/GET data!
 if (ini_get('magic_quotes_gpc'))
@@ -181,10 +183,11 @@ if (ini_get('magic_quotes_gpc'))
  */
 if( config('encoding') === 'utf-8' AND config('encode_globals') )
 {
-	$_GET    = string::array_to_utf8($_GET);
-	$_POST   = string::array_to_utf8($_POST);
-	$_COOKIE = string::array_to_utf8($_COOKIE);
-	$_SERVER = string::array_to_utf8($_SERVER);
+	throw new Exception("Please manually UTF-8 encode user data.");
+	//array_walk_recursive($_GET, 'encode');
+	//array_walk_recursive($_POST, 'encode');
+	//array_walk_recursive($_COOKIE, 'encode');
+	//array_walk_recursive($_SERVER, 'encode');
 }
 
 

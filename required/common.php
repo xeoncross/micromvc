@@ -453,7 +453,7 @@ function lang($line = NULL, $group = 'system', $value = NULL)
  * @param mixed $value the optional new value
  * @return mixed
  */
-function config($key = NULL, $group = SITE_MODE, $value = NULL)
+function config($key = NULL, $group = 'config', $value = NULL)
 {
 
 	//If we are setting the value

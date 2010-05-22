@@ -77,12 +77,6 @@ define('DOMAIN_FOLDER', $domain);
 // Define the file system path to the site folder
 define('SITE_PATH', SYSTEM_PATH. DOMAIN_FOLDER. DS);
 
-// Get site mode
-$mode = file_get_contents(SYSTEM_PATH. '.mode') or die('<b>.mode file is missing</b>');
-
-// Define the current site mode (production, staging, development, etc...)
-define('SITE_MODE', trim($mode));
-
 // Remove values
 unset($match, $domain, $domains, $alias, $mode);
 

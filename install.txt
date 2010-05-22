@@ -1,0 +1,11 @@
+--- Installing MicroMVC ---
+
+To get the MicroMVC framework up and running you must make a couple changes to some files to suite your environment.
+
+First, if you are using the Apache web server you must rename "sample.htaccess" to ".htaccess" and edit the file to match your requirements. The most important thing to set is the "RewriteBase" base path on line 37. If micromvc is installed at http://micromvc.com then the base path can be left as-is ("RewriteBase /"). However, if you were installing in http://micromvc.com/framework/ then line 37 would read "RewriteBase /framework".
+
+Second, you must copy the entire "localhost" directory to the same name as your site. So if your site was http://micromvc.com then you would name the new directory "micromvc.com". 
+
+Third you must rename "[yoursitefolder]/config/config.sample.php" to "[yoursitefolder]/config/config.php" and edit the settings to match your server requirements. One very important setting is the "SITE_PATH" constant which (like RewriteBase) must be set to the folder path of your site. Again, if your site was hosted at http://micromvc.com/framework then the SITE_PATH needs to be set to "/framework/".
+
+Note: If you are using git to manage all files in your directory it is recommended that you keep the .htaccess and config.php files OUT of the repository since they will change for each new deploy environment (dev, staging, production, etc...).

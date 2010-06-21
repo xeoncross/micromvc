@@ -13,7 +13,7 @@
 
 
 // Characters allowed in the URI ($_GET data) (plus ASCII letters and numbers)
-$config['permitted_uri_chars'] = '~ %.:_/-';
+$config['permitted_uri_chars'] = '~ %._/-';
 
 // Language
 $config['language'] = 'english';
@@ -33,7 +33,7 @@ $config['default_method'] = 'index';
 // Global Site Encoding
 $config['encoding'] = 'utf-8';
 
-// Audo-encode global variables ($_POST/$_GET)
+// Auto-encode global variables ($_POST/$_GET)
 $config['encode_globals'] = FALSE;
 
 /*

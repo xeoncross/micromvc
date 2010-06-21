@@ -348,6 +348,20 @@ function post($key, $value = NULL)
 
 
 /**
+ * Safely fetch a $_GET key's value, defaulting to the value
+ * provided if the key is not found.
+ *
+ * @param string $key the post key
+ * @param mixed $value the default value if key is not found
+ * @return mixed
+ */
+function get($key, $value = NULL)
+{
+	return array_key_exists($key, $_GET) ? $_GET[$key] : $value;
+}
+
+
+/**
  * Validate and Type Cast the given variable into an integer.
  * On fail, return default value instead.
  *

@@ -272,7 +272,7 @@ class Session
 	 */
 	public static function _destroy($id = NULL)
 	{
-		return DB::delete('DELETE FROM "'.self::$table.'" WHERE "session_id" = ?', array($id));
+		return self::$db->delete('DELETE FROM "'.self::$table.'" WHERE "session_id" = ?', array($id));
 	}
 
 
@@ -285,7 +285,7 @@ class Session
 		$time = time() + self::$expiration;
 
 		// Remove all old sessions
-		return DB::delete('DELETE FROM "'.self::$table.'" WHERE "timestamp" < ?', array($time));
+		return self::$db->delete('DELETE FROM "'.self::$table.'" WHERE "timestamp" < ?', array($time));
 	}
 	
 }

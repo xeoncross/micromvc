@@ -1,3 +1,0 @@
-[submodule "modules/database"]
-	path = modules/database
-	url = git://github.com/Xeoncross/database.git

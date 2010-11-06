@@ -4,6 +4,6 @@ Thumbs.db
 *.cache
 *.log
 .*
-# Also ignore uploads to the site folder (www.site.com/uploads/)
-/[a-z0-9.]*/uploads
+uploads/
 config.php
+ignore

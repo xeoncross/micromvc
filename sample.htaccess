@@ -8,7 +8,7 @@
 # Do not add an ending slash to directories (/)
 #DirectorySlash Off
 
-# Hide the following filesfrom the world
+# Hide the following files from the world
 <FilesMatch "\.(htaccess|htpasswd|ini|php|log|sh|sql|cache)$">
 	Order Allow,Deny
 	Deny from all

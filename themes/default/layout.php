@@ -33,6 +33,7 @@
 				<li><a href="/">Welcome</a></li>
 				<li><a href="/welcome/form">Form</a></li>
 				<li><a href="/welcome/upload">Upload</a></li>
+				<li><a href="/school">School</a></li>
 			</ul>
 		</nav>
 	</header>

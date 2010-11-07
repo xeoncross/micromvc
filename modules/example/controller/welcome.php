@@ -29,7 +29,7 @@ class Controller_Welcome extends Controller
 	function index()
 	{
 		// Load the welcome view
-		$this->content = new View('welcome', 'welcome');
+		$this->content = new View('welcome', 'example');
 	}
 	
 	/**
@@ -75,7 +75,7 @@ class Controller_Welcome extends Controller
 	
 	/**
 	 * Show a simple upload form (dangerous)
-	 *
+	 */
 	public function upload()
 	{
 		// Check to see if we are uploading a new file
@@ -88,7 +88,7 @@ class Controller_Welcome extends Controller
 		}
 		
 		// Load form view ( or you can use the Form class like above )
-		$this->content = new View('upload', 'welcome');
+		$this->content = new View('upload', 'example');
 		
 		// Get all current files
 		$this->content->files = dir::contents(SP.'uploads/');
@@ -97,7 +97,7 @@ class Controller_Welcome extends Controller
 	
 	/**
 	 * Trigger a simple error
-	 *
+	 */
 	public function error()
 	{
 		trigger_error('Oops! You seem to have caused a problem!');
@@ -107,11 +107,11 @@ class Controller_Welcome extends Controller
 	
 	/**
 	 * Trigger an uncaught exception
-	 *
+	 */
 	public function exception()
 	{
 		throw new Exception('Not a flying toy');
 		$this->content = '';
 	}
-	*/
+	
 }

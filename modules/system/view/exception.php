@@ -29,7 +29,9 @@ code.source {
 	<p><?php echo $exception->getMessage(); ?></p>
 
 
-	<?php if(config('debug_mode') AND $backtrace = $exception->getTrace())
+	<?php if(config('debug_mode'))
+	{
+		if($backtrace = $exception->getTrace())
 		{
 
 			foreach($backtrace as $id => $line)
@@ -64,6 +66,7 @@ code.source {
 		{
 			print '<p><b>'.$exception->getFile().'</b> ('.$exception->getLine().')</p>';
 		}
+	}
 	?>
 
 </div>

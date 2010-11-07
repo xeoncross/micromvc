@@ -29,7 +29,9 @@ code.source {
 	<p><?php echo $error; ?></p>
 
 
-	<?php if(config('debug_mode') AND $backtrace = Error::backtrace(4))
+	<?php if(config('debug_mode'))
+	{
+		if($backtrace = Error::backtrace(4))
 		{
 
 			foreach($backtrace as $id => $line)
@@ -62,6 +64,7 @@ code.source {
 		{
 			print '<p><b>'. $file. '</b> ('. $line. ')</p>';
 		}
+	}
 	?>
 
 </div>

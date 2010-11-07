@@ -19,6 +19,8 @@ twitter updates or flickr feeds.</p>
 	<span> - PHP Data Objects (PDO)</span></li>
 	<li><a href="http://github.com/Xeoncross/micromvc">github</a>
 	<span> - Project Page</span></li>
+	<li><a href="http://github.com/Xeoncross/wnmp">WNMP</a>
+	<span> - Portable Nginx Server</span></li>
 </ul>
 
 <h3>Change me!</h3>

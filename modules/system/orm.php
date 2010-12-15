@@ -147,7 +147,7 @@ public function clear()
  */
 public function load()
 {
-	$t=$this;if($t->l)return 1;$k=static::$k;$id=$t->d[$k];if(!($r=static::cache_get($t::$t.$id)))if($r=self::select('row','*',$t,array($k=>$id)))static::cache_set($t::$t.$id,$r);if($r){$t->d=(array)$r;return$t->s=$t->l=1;}else$t->clear();
+	$t=$this;if($t->l)return 1;$k=static::$k;if(empty($t->d[$k]))return 0;$id=$t->d[$k];if(!($r=static::cache_get($t::$t.$id)))if($r=self::select('row','*',$t,array($k=>$id)))static::cache_set($t::$t.$id,$r);if($r){$t->d=(array)$r;return$t->s=$t->l=1;}else$t->clear();
 }
 
 

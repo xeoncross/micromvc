@@ -30,26 +30,13 @@ define('WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 require('bootstrap.php');
 
 //Is this an AJAX request?
-define('AJAX_REQUEST', (server('HTTP_X_REQUESTED_WITH')&&strtolower(server('HTTP_X_REQUESTED_WITH'))==='xmlhttprequest'));
+define('AJAX_REQUEST',strtolower(server('HTTP_X_REQUESTED_WITH'))==='xmlhttprequest');
 
 // What is the current domain?
 define('DOMAIN', (server('HTTPS')=='on'?'https://':'http://').h(server('SERVER_NAME')?server('HTTP_HOST'):server('SERVER_NAME')));
 
-
-/*
- * Set the server timezone
- * see: http://us3.php.net/manual/en/timezones.php
- */
-//date_default_timezone_set("America/Chicago");
-
-// Default Locale
-//setlocale(LC_ALL, 'en_US.utf-8');
-
-// Include basic MB String support if needed
-if( ! extension_loaded('mbstring'))
-{
-	require(SP.'modules/system/mb_string'.EXT);
-}
+// Custom init script?
+if(config('init')) require('init.php');
 
 // Get the current URL (defaulting to the index)
 $url = ((url() ? explode('/', url()) : array()) + explode('/', config('index')));
@@ -102,7 +89,8 @@ register_shutdown_function(array($controller, '_fatal_error_handler'));
 set_exception_handler(array($controller, '_exception_handler'));
 
 // One last check to make sure we can run this method
-if( ! method_exists($controller, $method) OR substr($method, 0, 1) === '_')
+if( ! in_array($method,get_class_methods($controller)))
+//if( ! method_exists($controller, $method) OR substr($method, 0, 1) === '_')
 {
 	$method = 'show_404';
 }

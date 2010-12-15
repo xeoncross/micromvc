@@ -3,7 +3,8 @@
 <b>Memory Usage</b>
 <pre>
 <?php print number_format(memory_get_usage() - START_MEMORY_USAGE); ?> bytes
-<?php print number_format(memory_get_peak_usage()); ?> bytes (peak process)
+<?php print number_format(memory_get_usage()); ?> bytes (process)
+<?php print number_format(memory_get_peak_usage(TRUE)); ?> bytes (process peak)
 </pre>
 
 <b>Execution Time</b>
@@ -34,7 +35,8 @@
 
 function highlight($string)
 {
-	return str_replace(array("&lt;?php", "?&gt;"),'',substr(substr(highlight_string('<?php '.$string.' ?>', TRUE),36),0,-20));
+	/*return str_replace(array("&lt;?php", "?&gt;"),'',substr(substr(highlight_string('<?php '.$string.' ?>', TRUE),36),0,-20));*/
+	return str_replace(array("&lt;?php", "?&gt;"),'',substr(highlight_string('<?php '.$string.' ?>', TRUE),36));
 }
 ?>
 
@@ -47,7 +49,6 @@ function highlight($string)
 <b><?php print count($included_files); ?> PHP Files Included:</b>
 <pre>
 <?php print implode("\n", $included_files); ?>
-</ul>
 </pre>
 
 </div>

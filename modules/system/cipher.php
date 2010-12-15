@@ -30,7 +30,7 @@ public static $base = 'abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ01234
  */
 public static function encrypt($text, $key, $algo = MCRYPT_RIJNDAEL_256, $mode = MCRYPT_MODE_CBC)
 {
-	$text=mcrypt_encrypt($algo,$key,$text,$mode,$iv=mcrypt_create_iv(mcrypt_get_iv_size($algo,$mode),MCRYPT_RAND)).$iv;return hash('sha256',$key.$text).$text;
+	$text=mcrypt_encrypt($algo,hash('sha256',$key,TRUE),$text,$mode,$iv=mcrypt_create_iv(mcrypt_get_iv_size($algo,$mode),MCRYPT_RAND)).$iv;return hash('sha256',$key.$text).$text;
 }
 
 
@@ -45,7 +45,7 @@ public static function encrypt($text, $key, $algo = MCRYPT_RIJNDAEL_256, $mode =
  */
 public static function decrypt($text, $key, $algo = MCRYPT_RIJNDAEL_256, $mode = MCRYPT_MODE_CBC)
 {
-	$h=substr($text,0,64);$t=substr($text,64);if(hash('sha256',$key.$t)!=$h)return;$iv=substr($t,-mcrypt_get_iv_size($algo,$mode));return mcrypt_decrypt($algo,$key,substr($t,0,-strlen($iv)),$mode,$iv); 
+	$h=substr($text,0,64);$t=substr($text,64);if(hash('sha256',$key.$t)!=$h)return;$iv=substr($t,-mcrypt_get_iv_size($algo,$mode));return mcrypt_decrypt($algo,hash('sha256',$key,TRUE),substr($t,0,-strlen($iv)),$mode,$iv); 
 }
 
 

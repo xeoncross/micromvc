@@ -59,7 +59,7 @@ public static function sanitize_filename($string)
  * @param bool $only_letters if true
  * @return array
  */
-public static function random_charaters($length, $only_letters = FALSE)
+public static function random_characters($length, $only_letters = FALSE)
 {
 	$s='';for($i=0;$i<$length; $i++)$s.=($only_letters?chr(mt_rand(33,126)):chr(mt_rand(65,90)));return$s;
 }

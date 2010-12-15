@@ -33,13 +33,6 @@ public static function exception(Exception $e)
 }
 
 
-public static function clean_ob()
-{
-	//while(ob_get_level())ob_end_flush();
-	ob_get_level()&&ob_clean();
-}
-
-
 /**
  * Fetch and HTML highlight serveral lines of a file.
  *

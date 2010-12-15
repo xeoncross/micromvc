@@ -34,24 +34,13 @@ public static function start(array $config = NULL)
 
 
 /**
- * Open a session manually (for use with flash uploaders or session masquerading)
- *
- * @param string $data of session to open
- *
-public static function open($data)
-{
-	if($d=unserialize(Cipher::decrypt(base64_decode($data),config('cookie_salt'))))return$_SESSION=array('u'=>md5($_SERVER['HTTP_USER_AGENT']),'ts'=>time())+$d;
-}
-*/
-
-/**
  * Called at end-of-page to save the current session data to the session cookie
  *
  * return boolean
  */
 public static function save()
 {
-	if(self::$saved)return FALSE;extract(self::$config);if(!empty($_SESSION))Cookie::set($name,serialize($_SESSION),$expire,$path,$domain,$secure,$httponly);return self::$saved=TRUE;
+	if(self::$saved)return FALSE;extract(self::$config);if(!empty($_SESSION))Cookie::set($name,$_SESSION,$expire,$path,$domain,$secure,$httponly);return self::$saved=TRUE;
 }
 
 

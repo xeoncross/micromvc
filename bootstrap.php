@@ -69,7 +69,7 @@ function event($k, $v = NULL, $callback = NULL)
  */
 function config($k,$m='system')
 {
-	static $c;$c[$m]=empty($c[$m])?require(SP.'modules/'.$m.'/config'.EXT):$c[$m];return($k?$c[$m][$k]:$c[$m]);
+	static $c;$c[$m]=empty($c[$m])?require(SP.($m!='system'?"modules/$m/":'').'config'.EXT):$c[$m];return($k?$c[$m][$k]:$c[$m]);
 }
 
 
@@ -88,6 +88,7 @@ function lang($k,$m='system')
 
 /**
  * Returns the current URL path string (if valid)
+ * PHP before 5.3.3 throws E_WARNING for bad uri in parse_url()
  *
  * @param int $k the key of URL segment to return
  * @param mixed $d the default if the segment isn't found
@@ -95,7 +96,7 @@ function lang($k,$m='system')
  */
 function url($k = NULL, $d = NULL)
 {
-	static$s;if(!$s)foreach(array('REQUEST_URI','PATH_INFO','ORIG_PATH_INFO')as$v)if(($p=parse_url(server($v),PHP_URL_PATH))&&!preg_match('/[^\w\-~\/\.+%]/',$p)){$s=explode('/',trim($p,'/'));break;}if($s)return($k!==NULL?(isset($s[$k])?$s[$k]:$d):implode('/',$s));
+	static$s;if(!$s){foreach(array('REQUEST_URI','PATH_INFO','ORIG_PATH_INFO')as$v){preg_match('/^\/[\w\-~\/\.+%]{1,600}/',server($v),$p);if(!empty($p)){$s=explode('/',trim($p[0],'/'));break;}}}if($s)return($k!==NULL?(isset($s[$k])?$s[$k]:$d):implode('/',$s));
 }
 
 
@@ -106,7 +107,7 @@ function url($k = NULL, $d = NULL)
  */
 function __autoload($class)
 {
-	require_once(mb_strtolower(SP.'modules/'.(strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
+	require(mb_strtolower(SP.'modules/'.(strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
 }
 
 
@@ -142,11 +143,12 @@ function v(&$v, $d = NULL)
  *
  * @param string $k the key name
  * @param mixed $d the default value if key is not found
+ * @param boolean $s true to require string type
  * @return mixed
  */
-function post($k, $d = NULL)
+function post($k, $d = NULL, $s = FALSE)
 {
-	return isset($_POST[$k])?$_POST[$k]:$d;
+	if(isset($_POST[$k]))return$s?str($_POST[$k],$d):$_POST[$k];return$d;
 }
 
 
@@ -156,11 +158,12 @@ function post($k, $d = NULL)
  *
  * @param string $k the key name
  * @param mixed $d the default value if key is not found
+ * @param boolean $s true to require string type
  * @return mixed
  */
-function get($k, $d = NULL)
+function get($k, $d = NULL, $s = FALSE)
 {
-	return isset($_GET[$k])?$_GET[$k]:$d;
+	if(isset($_GET[$k]))return$s?str($_GET[$k],$d):$_GET[$k];return$d;
 }
 
 
@@ -221,9 +224,9 @@ function log_message($m)
  * @param string $uri the URI string
  * @param string $method either location or redirect
  */
-function redirect($u,$m='location',$c=302)
+function redirect($u='',$m='location',$c=302)
 {
-	$u=site_url($u);header($m=='refresh'?"Refresh:0;url=$u":"Location: $u",TRUE,$c);exit;
+	$u=site_url($u);header($m=='refresh'?"Refresh:0;url=$u":"Location: $u",TRUE,$c);
 }
 
 
@@ -291,36 +294,18 @@ function module_url($uri = NULL, $module = 'system')
 }
 
 
-/*
- * Unicode-based String Functions
+/**
+ * Convert a string from one encoding to another encoding
+ * and remove invalid bytes sequences.
+ *
+ * @param string $string to convert
+ * @param string $to encoding you want the string in
+ * @param string $from encoding that string is in
+ * @return string
  */
-
-
-// Setup UTF-8 character encoding
-if(function_exists('iconv'))
+function encode($string,$to='UTF-8',$from='UTF-8')
 {
-	iconv_set_encoding("internal_encoding", "UTF-8");
-	/**
-	 * Convert a string from one encoding to another encoding
-	 * and remove invalid bytes sequences.
-	 *
-	 * @param string $string to convert
-	 * @param string $to encoding you want the string in
-	 * @param string $from encoding that string is in
-	 * @return string
-	 */
-	function encode($string,$to='UTF-8',$from='UTF-8')
-	{
-		if($to==='UTF-8'&&is_ascii($string))return$string;$ER=error_reporting(~E_NOTICE);$string=iconv($from,$to.'//TRANSLIT',$string);error_reporting($ER);return$string;
-	}
-}
-else
-{
-	mb_internal_encoding('UTF-8');
-	function encode($string,$to='UTF-8',$from='UTF-8')
-	{
-		if($to==='UTF-8'&&is_ascii($string))return$string;return mb_convert_encoding($string,$to,mb_detect_encoding($string,"auto",TRUE));
-	}
+	return$to==='UTF-8'&&is_ascii($string)?$string:@iconv($from,$to.'//TRANSLIT//IGNORE',$string);
 }
 
 
@@ -369,6 +354,21 @@ function base64_url_decode($string = NULL)
 function h($data)
 {
 	return htmlspecialchars($data,ENT_QUOTES,'utf-8');
+}
+
+
+/**
+ * Checks that the given IP address is not a bad bot listed in the Http:BL
+ * 
+ * @see http://www.projecthoneypot.org/
+ * @param string $ip address (IP4 only!)
+ * @param string $key Http:BL API key
+ * @param integer $threat_level bettween 0 and 255
+ * @param integer $max_age number of days since last activity
+ */
+function bad_bot($ip, $key, $threat_level = 20, $max_age = 30)
+{
+	if($ip=='127.0.0.1')return;$ip=implode('.',array_reverse(explode('.',$ip)));if($ip=gethostbyname("$key.$ip.dnsbl.httpbl.org")){$ip=explode('.',$ip);return$ip[0]==127&&$ip[3]&&$ip[2]>=$threat_level&&$ip[1]<=$max_age;}
 }
 
 

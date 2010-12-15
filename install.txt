@@ -8,6 +8,6 @@ If you are using Nginx then you must already know what your doing and you can us
 
 Sorry, but Lighttpd users will have to figure the rest out on their own until someone writes a sample vhost config.
 
-After that, you must rename /modules/system/sample.config.php to /modules/system/config.php and edit it to suit your requirements. This is the core configuration file for the micromvc system and stored global info like your database connection data.
+After that, you must rename sample.config.php to config.php and edit it to suit your requirements. This is the core configuration file for the micromvc system and stored global info like your database connection data.
 
 Note: If you are using git to manage all files in your directory it is recommended that you keep the .htaccess and config.php files OUT of the repository since they will change for each new deploy environment (dev, staging, production, etc...).

@@ -120,7 +120,7 @@ public static function select($name, array $options = array(), $selected = NULL,
  */
 public static function datetime($ts = NULL, $name = 'datetime', $class = 'datetime')
 {
-	$t=time::to_array($ts);$e[]=self::month_select($t['month'],$name);foreach(lang('time_units')as$k=>$v)$e[]=html::tag('input',0,array('name'=>"{$name}[$k]",'type'=>'text','value'=>is($t[$k])?$t[$k]:0,'class'=>$k));return vsprintf(lang('html_datetime'),$e);
+	$ts=new Time($ts);$t=$ts->getArray($ts);$e[]=self::month_select($t['month'],$name);foreach(lang('time_units')as$k=>$v)$e[]=html::tag('input',0,array('name'=>"{$name}[$k]",'type'=>'text','value'=>isset($t[$k])?$t[$k]:0,'class'=>$k));return vsprintf(lang('html_datetime'),$e);
 }
 
 

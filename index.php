@@ -42,63 +42,55 @@ if(config('init')) require('init.php');
 $url = ((url() ? explode('/', url()) : array()) + explode('/', config('index')));
 
 // Get the controller and page
-list($controller, $method) = array_slice($url, 0, 2);
-$params = array_slice($url, 2);
+list($module, $controller) = array_slice($url, 0, 2);
 
 // Routes allow custom URL
 foreach(config('routes') as $regex => $path)
 {
 	if(preg_match("/^$regex/", url()))
 	{
-		list($controller, $method) = explode('/',$path);
+		list($module, $controller) = explode('/',$path);
 		$params = $url;
 		break;
 	}
 }
 
-// Find the controller
-foreach(config('modules') as $m)
+// Register events
+foreach(config('events') as $event => $class)
 {
-	if(is_file(SP."modules/$m/controller/$controller".EXT))
-	{
-		require(SP."modules/$m/controller/$controller".EXT);
-		break;
-	}
+	event($event, '', $class);
 }
 
-// Add the controller prefix
-$controller = 'controller_'.$controller;
-
-// If the controller was not found - issue a 404
-if( ! class_exists($controller, FALSE))
+// Missing controller - or hidden module
+if(in_array($module, config('disabled_modules')) OR !is_file(SP. $module.'/controller/'.$controller.'.php'))
 {
-	$controller = 'controller';
-	$method = 'show_404';
+	$module = 'error';
+	$controller = '404';
 }
 
-// Load the controller
-$controller = new $controller;
-
-// Set the error handler
-set_error_handler(array($controller, '_error_handler'));
-
-// Catch E_FATAL errors too!
-register_shutdown_function(array($controller, '_fatal_error_handler'));
-
-// Set the exception handler
-set_exception_handler(array($controller, '_exception_handler'));
-
-// One last check to make sure we can run this method
-if( ! in_array($method,get_class_methods($controller)))
-//if( ! method_exists($controller, $method) OR substr($method, 0, 1) === '_')
+/*
+ * PHP's default error handling should only be overriden while in debug 
+ * mode since all the extra information is not needed in production nor 
+ * should be shown to users!
+ */
+if(config('debug_mode'))
 {
-	$method = 'show_404';
+	// Set the error handler
+	set_error_handler(array('error', 'handler'));
+	
+	// Catch E_FATAL errors too!
+	register_shutdown_function(function(){if($e=error_get_last())Error::exception(new ErrorException($e['message'],$e['type'],0,$e['file'],$e['line']));});
+	
+	// Set the exception handler
+	set_exception_handler(array('error', 'exception'));
 }
 
-// Call the page
-call_user_func_array(array($controller, $method), $params);
+event('pre_controller');
 
-// Render the page
-$controller->_render();
+$controller = new Controller(SP.$module.'/controller/'.$controller.EXT);
+
+event('post_controller', $controller);
+
+//print dump(get_defined_vars());
 
 // End

@@ -1,5 +1,7 @@
 --- Installing MicroMVC ---
 
+Copy "sample.config.php" to "config.php".
+
 To get the MicroMVC framework up and running you must setup the server vhost using Apache, Lighttpd, or Nginx.
 
 If you are using the Apache web server you must rename "sample.htaccess" to ".htaccess" and edit the file to match your requirements. The most important thing to set is the "RewriteBase" base path on line 37. If micromvc is installed at http://micromvc.com then the base path can be left as-is ("RewriteBase /"). However, if you were installing in http://micromvc.com/framework/ then line 37 would read "RewriteBase /framework".

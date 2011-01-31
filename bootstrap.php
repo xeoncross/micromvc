@@ -48,15 +48,15 @@ function message($type = NULL, $v = NULL)
 
 
 /**
- * Attach multiple callbacks to an event and trigger those callbacks when that event is called.
+ * Attach (or remove) multiple callbacks to an event and trigger those callbacks when that event is called.
  *
  * @param string $k the name of the event to run
  * @param mixed $v the optional value to pass to each callback
- * @param mixed $callback the method or function to call
+ * @param mixed $callback the method or function to call - FALSE to remove all callbacks for event
  */
 function event($k, $v = NULL, $callback = NULL)
 {
-	static$e;if($callback)$e[$k][]=$callback;elseif(isset($e[$k]))foreach($e[$k]as$f)$v=call_user_func($f,$v);return$v;
+	static$e;if($callback!==NULL)if($callback)$e[$k][]=$callback;else unset($e[$k]);elseif(isset($e[$k]))foreach($e[$k]as$f)$v=call_user_func($f,$v);return$v;
 }
 
 
@@ -69,7 +69,7 @@ function event($k, $v = NULL, $callback = NULL)
  */
 function config($k,$m='system')
 {
-	static $c;$c[$m]=empty($c[$m])?require(SP.($m!='system'?"modules/$m/":'').'config'.EXT):$c[$m];return($k?$c[$m][$k]:$c[$m]);
+	static $c;$c[$m]=empty($c[$m])?require(SP.($m!='system'?"$m/":'').'config'.EXT):$c[$m];return($k?$c[$m][$k]:$c[$m]);
 }
 
 
@@ -107,7 +107,7 @@ function url($k = NULL, $d = NULL)
  */
 function __autoload($class)
 {
-	require(mb_strtolower(SP.'modules/'.(strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
+	require(mb_strtolower(SP.(strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
 }
 
 
@@ -214,7 +214,7 @@ function token()
  */
 function log_message($m)
 {
-	if(!$fp=@fopen(SP.'modules/system/log/'.date('Y-m-d').'.log','a'))return 0;$m=date('H:i:s ').h(server('REMOTE_ADDR'))." $m\n";flock($fp,LOCK_EX);fwrite($fp,$m);flock($fp,LOCK_UN);fclose($fp);return 1;
+	if(!$fp=@fopen(SP.config('log_path').date('Y-m-d').'.log','a'))return 0;$m=date('H:i:s ').h(server('REMOTE_ADDR'))." $m\n";flock($fp,LOCK_EX);fwrite($fp,$m);flock($fp,LOCK_UN);fclose($fp);return 1;
 }
 
 
@@ -234,7 +234,7 @@ function redirect($u='',$m='location',$c=302)
  * Type cast a scalar variable into an a valid integer between the given min/max values.
  * If the value is not a valid numeric value then min will be returned.
  *
- * @param scalar $int the value to convert
+ * @param int $int the value to convert
  * @param int $default the default value to assign
  * @param int $min the lowest value allowed
  * @return int|null
@@ -271,14 +271,14 @@ function site_url($uri = NULL)
 
 
 /**
- * Return the full URL to a theme file
+ * Return the full URL to the theme folder
  *
  * @param string $uri
  * @return string
  */
 function theme_url($uri = NULL)
 {
-	return site_url('themes/'.config('theme').'/'. $uri);
+	return site_url(config('theme').'/'. $uri);
 }
 
 
@@ -287,12 +287,12 @@ function theme_url($uri = NULL)
  *
  * @param string $uri
  * @return string
- */
-function module_url($uri = NULL, $module = 'system')
+ *
+function module_url($uri, $module)
 {
-	return site_url("modules/$module/view/$uri");
+	return site_url("$module/view/$uri");
 }
-
+*/
 
 /**
  * Convert a string from one encoding to another encoding
@@ -378,6 +378,20 @@ function bad_bot($ip, $key, $threat_level = 20, $max_age = 30)
 
 
 /**
+ * Controller Class
+ */
+class Controller
+{
+
+public function __construct($f)
+{
+	require($f);
+}
+
+}
+
+
+/**
  * View Class
  * @author http://github.com/tweetmvc/tweetmvc-app
  */
@@ -388,11 +402,11 @@ class View
  * Returns a new view object for the given view.
  *
  * @param string $f the view file to load
- * @param string $m the module name
+ * @param string $m the module name (blank for current theme)
  */
-public function __construct($f, $m = 'system')
+public function __construct($f, $m = NULL)
 {
-	$this->__f=SP.($m?"modules/$m/view/":'themes/'.config('theme').'/').$f.EXT;
+	$this->__f=SP.($m?$m:config('theme'))."/view/".$f.EXT;
 }
 
 /**
@@ -412,75 +426,6 @@ public function set($a)
 public function __toString()
 {
 	ob_start();extract((array)$this);require$__f;return ob_get_clean();
-}
-
-}
-
-
-/**
- * Controller Class
- */
-class Controller
-{
-
-public $content_type = 'text/html';
-
-public $template = 'layout';
-
-/**
- * Show a 404 error page
- */
-public function show_404()
-{
-	headers_sent() OR header('HTTP/1.0 404 Page Not Found');$this->content=new View('404',0);
-}
-
-/**
- * Send the content type header
- */
-protected function _send_header()
-{
-	headers_sent() OR header('Content-Type: '.$this->content_type.'; charset=utf-8');
-}
-
-/**
- * Load the debug view
- */
-protected function _debug()
-{
-	$this->debug = config('debug_mode') ? new View('debug') : '';
-}
-
-/**
- * Render the final layout template
- */
-public function _render()
-{
-	$this->_send_header();$this->_debug();extract((array)$this);require SP.'themes/'.config('theme').'/'.$this->template.EXT;
-}
-
-/**
- * Error Handler
- */
-public function _error_handler($c,$e,$f=0,$l=0)
-{
-	return Error::handler($c,$e,$f,$l);
-}
-
-/**
- * Exception Handler
- */
-public function _exception_handler(Exception $e)
-{
-	return Error::exception($e);
-}
-
-/**
- * Fatal Error Handler
- */
-public function _fatal_error_handler()
-{
-	if($e=error_get_last())Error::exception(new ErrorException($e['message'],$e['type'],0,$e['file'],$e['line']));
 }
 
 }

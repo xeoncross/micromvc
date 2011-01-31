@@ -10,12 +10,27 @@
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
-$config['index'] = 'welcome/index';
+
+// Default controller to run
+$config['index'] = 'example/index';
+
+// Base site url
 $config['site_url'] = '/';
+
+// Enable debug mode?
 $config['debug_mode'] = TRUE;
-$config['theme'] = 'default';
-$config['cookie_salt'] = 'something-really-really-complex-and-long';
+
+// Current theme
+$config['theme'] = 'theme';
+
+// Load init file?
 $config['init'] = FALSE;
+
+// Path to log directory
+$config['log_path'] = 'log/';
+
+// Default language file
+$config['language'] = 'en';
 
 /**
  * Database
@@ -25,16 +40,16 @@ $config['init'] = FALSE;
  */
 $config['database'] = array(
 	'default' => array(
-		'dns' => "mysql:dbname=test;host=127.0.0.1;port=3306",
+		'dns' => "mysql:dbname=swiftlogin;host=127.0.0.1;port=3306",
 		'username' => 'root',
 		'password' => '',
 		'params' => array()
 	),
 );
 
-// Modules loaded
-$config['modules'] = array(
-	'example',
+// Disabled modules
+$config['disabled_modules'] = array(
+	'unittest',
 );
 
 /**
@@ -43,38 +58,39 @@ $config['modules'] = array(
  * Regex can also be used to define routes
  */
 $config['routes'] = array(
-	//'welcome' => 'controller/show_404' // Or hide pages
+	//'page/name' => 'error/404' // Or hide pages
 );
 
 /**
- * Session Handling
- * 
- * The two main values are timeout (server-side) and expire (client-side). Since
- * clients are not trustworth we must enforce a server-side timeout to insure
- * old sessions are not re-used.
- * 
- * @link http://php.net/setcookie
+ * System Events
  */
-$config['session'] = array(
-	'name'		=> 'session',
-	'timeout'	=> 3600,	// Max time in seconds between page requests
-	'expire'	=> 0,		// Cookie life in seconds (0 = deleted on browser close)
-	'path'		=> '/',
-	'domain'	=> '',
-	'secure'	=> FALSE,
-	'httponly'	=> TRUE,
+$config['events'] = array(
+	'post_controller' => 'Theme_Class::render',
 );
 
+/**
+ * Cookie Handling
+ * 
+ * To insure your cookies are secure, please choose a long, random key!
+ * @link http://php.net/setcookie
+ */
+$config['cookie'] = array(
+	'key' => 'key',
+	'expires' => time()+(60*60*4), // 4 hour cookie
+	'path' => '/',
+	'domain' => '',
+	'secure' => '',
+	'httponly' => '',
+);
 
 
 /**
  * API Keys and Secrets
  * 
- * Insert you API keys and other secrets here instead of creating
- * a new file. Use for Akismet, ReCaptcha, Twitter, and more!
+ * Insert you API keys and other secrets here.
+ * Use for Akismet, ReCaptcha, Facebook, and more!
  */
 
-//$config['api_key'] = '...';
-
+//$config['-----_api_key'] = '...';
 
 return $config;

@@ -43,6 +43,7 @@ $url = ((url() ? explode('/', url()) : array()) + explode('/', config('index')))
 
 // Get the controller and page
 list($module, $controller) = array_slice($url, 0, 2);
+$params = array_slice($url, 2);
 
 // Routes allow custom URL
 foreach(config('routes') as $regex => $path)
@@ -61,36 +62,22 @@ foreach(config('events') as $event => $class)
 	event($event, '', $class);
 }
 
-// Missing controller - or hidden module
-if(in_array($module, config('disabled_modules')) OR !is_file(SP. $module.'/controller/'.$controller.'.php'))
+// Disabled, non-word (unsafe), and missing controllers are not allowed
+if(in_array($module, config('disabled_modules')) OR preg_match('/\W/',$module.$controller) OR ! is_file(SP.$module.'/controller/'.$controller.'.php'))
 {
-	$module = 'error';
-	$controller = '404';
-}
-
-/*
- * PHP's default error handling should only be overriden while in debug 
- * mode since all the extra information is not needed in production nor 
- * should be shown to users!
- */
-if(config('debug_mode'))
-{
-	// Set the error handler
-	set_error_handler(array('error', 'handler'));
-	
-	// Catch E_FATAL errors too!
-	register_shutdown_function(function(){if($e=error_get_last())Error::exception(new ErrorException($e['message'],$e['type'],0,$e['file'],$e['line']));});
-	
-	// Set the exception handler
-	set_exception_handler(array('error', 'exception'));
+	list($module, $controller) = explode('/', config('404'));
 }
 
 event('pre_controller');
 
-$controller = new Controller(SP.$module.'/controller/'.$controller.EXT);
+// Load and run action
+$controller = $module. '_controller_'. $controller;
+$controller = new $controller();
+call_user_func_array(array($controller, 'action'), $params);
+
+// Render output
+$controller->render();
 
 event('post_controller', $controller);
-
-//print dump(get_defined_vars());
 
 // End

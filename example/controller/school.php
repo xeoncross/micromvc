@@ -1,23 +1,8 @@
 <?php
-/**
- * School Controller
- *
- * Shows an example of using the ORM
- *
- * @package		MicroMVC
- * @author		David Pennington
- * @copyright	Copyright (c) 2009 MicroMVC
- * @license		http://www.gnu.org/licenses/gpl-3.0.html
- * @link		http://micromvc.com
- * @version		1.1.0 <7/7/2009>
- ********************************** 80 Columns *********************************
- */
-class Controller_School extends Controller
+// Shows an example of using the ORM
+class Example_Controller_School extends Controller
 {
-	/*
-	 * Load a view that shows a welcome message
-	 */
-	function index()
+	public function action()
 	{
 		// Load config settings
 		$config = config('database');
@@ -104,8 +89,7 @@ class Controller_School extends Controller
 		$this->content .= new View('school', 'example');
 		
 		// Load global theme sidebar
-		$this->sidebar = new View('sidebar', FALSE);
+		$this->sidebar = new View('sidebar');
 	
 	}
-	
 }

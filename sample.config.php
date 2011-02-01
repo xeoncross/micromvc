@@ -11,8 +11,11 @@
  ********************************** 80 Columns *********************************
  */
 
-// Default controller to run
+// Default controller
 $config['index'] = 'example/index';
+
+// Default 404 controller
+$config['404'] = 'example/404';
 
 // Base site url
 $config['site_url'] = '/';
@@ -65,7 +68,7 @@ $config['routes'] = array(
  * System Events
  */
 $config['events'] = array(
-	'post_controller' => 'Theme_Class::render',
+	//'post_controller' => 'Class::method',
 );
 
 /**

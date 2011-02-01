@@ -383,9 +383,30 @@ function bad_bot($ip, $key, $threat_level = 20, $max_age = 30)
 class Controller
 {
 
-public function __construct($f)
+public $template = 'layout';
+
+/**
+ * Override PHP's default error handling if in debug mode
+ */
+public function __construct()
 {
-	require($f);
+	if(config('debug_mode')){set_error_handler(array('error','handler'));register_shutdown_function(array('error','fatal'));set_exception_handler(array('error','exception'));}
+}
+
+/**
+ * Show a 404 error page
+ */
+public function show_404()
+{
+	headers_sent()||header('HTTP/1.0 404 Page Not Found');$this->content=new View('404');
+}
+
+/**
+ * Render the final layout template
+ */
+public function render()
+{
+	headers_sent()||header('Content-Type: text/html; charset=utf-8');$l=new View($this->template);$l->set((array)$this);print$l;$l=0;if(config('debug_mode'))print new View('debug','system');
 }
 
 }

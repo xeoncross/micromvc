@@ -43,7 +43,7 @@ $config['language'] = 'en';
  */
 $config['database'] = array(
 	'default' => array(
-		'dns' => "mysql:dbname=swiftlogin;host=127.0.0.1;port=3306",
+		'dns' => "mysql:dbname=micromvc;host=127.0.0.1;port=3306",
 		'username' => 'root',
 		'password' => '',
 		'params' => array()

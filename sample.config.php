@@ -30,7 +30,7 @@ $config['theme'] = 'theme';
 $config['init'] = FALSE;
 
 // Path to log directory
-$config['log_path'] = 'log/';
+$config['log_path'] = 'system/log/';
 
 // Default language file
 $config['language'] = 'en';

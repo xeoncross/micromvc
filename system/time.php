@@ -101,7 +101,7 @@ public static function fromArray( array $data)
  */
 public static function show($time)
 {
-	$t=new Time($time);return$t->human_friendly();
+	$t=new Time($time);return$t->humanFriendly();
 }
 
 }

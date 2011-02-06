@@ -17,7 +17,7 @@
  * Set the server timezone
  * see: http://us3.php.net/manual/en/timezones.php
  */
-//date_default_timezone_set("America/Chicago");
+//date_default_timezone_set('GMT');
 
 // Default Locale
 setlocale(LC_ALL, 'en_US.utf-8');

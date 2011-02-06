@@ -372,6 +372,17 @@ function bad_bot($ip, $key, $threat_level = 20, $max_age = 30)
 }
 
 
+/** USE TIME CLASS
+ * Return a SQLite/MySQL/PostgreSQL datetime string
+ * 
+ * @param int $t timestamp
+ *
+function sql_date($t = NULL)
+{
+	return date('Y-m-d H:i:s',$t?$t:time());
+}
+*/
+
 /*
  * Core Classes
  */

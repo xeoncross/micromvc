@@ -222,9 +222,10 @@ function log_message($m)
  * Send a HTTP header redirect using "location" or "refresh".
  *
  * @param string $uri the URI string
+ * @param int $c the HTTP status code
  * @param string $method either location or redirect
  */
-function redirect($u='',$m='location',$c=302)
+function redirect($u='',$c=302,$m='location')
 {
 	$u=site_url($u);header($m=='refresh'?"Refresh:0;url=$u":"Location: $u",TRUE,$c);
 }

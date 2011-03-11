@@ -79,7 +79,8 @@ $config['events'] = array(
  */
 $config['cookie'] = array(
 	'key' => 'key',
-	'expires' => time()+(60*60*4), // 4 hour cookie
+	'timeout' => time()+(60*60*4), // Ignore submitted cookies older than 4 hours
+	'expires' => 0, // Expire on browser close
 	'path' => '/',
 	'domain' => '',
 	'secure' => '',

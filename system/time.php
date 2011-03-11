@@ -66,7 +66,7 @@ public function difference($d = 'NOW', $l = 1)
  */
 public function humanFriendly($format = 'M j, Y \a\t g:ia')
 {
-	$diff=$this->diff();$t=$this->getTimestamp();if(!$diff->d){$s=$this->difference();return$t>time()?"$s ago":"in $s";}return$this->format($format);
+	$diff=$this->diff();$t=$this->getTimestamp();if(!$diff->d){$s=$this->difference();return$t<time()?"$s ago":"in $s";}return$this->format($format);
 }
 
 

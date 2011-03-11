@@ -24,6 +24,8 @@ public static $queries = array();
 
 public static $last_query = NULL;
 
+public static $i = '"';
+
 /**
  * Set the database type and save the config for later.
  * 
@@ -31,7 +33,7 @@ public static $last_query = NULL;
  */
 public function __construct(array $config)
 {
-	$this->type=current(explode(':',$config['dns'],2));$this->config=$config;
+	$this->type=current(explode(':',$config['dns'],2));$this->config=$config;if($this->type=='mysql')static::$i='`';
 }
 
 
@@ -107,7 +109,7 @@ public function fetch($sql, array $params = NULL, $column = NULL)
  */
 public function query($sql, array $params = NULL)
 {
-	$this->type=='mysql'&&$sql=str_replace('"','`',$sql);benchmark();self::$last_query=$sql;$stmt=$this->_query($sql,$params);self::$queries[$this->type][]=(benchmark()+array(2=>$sql));return $stmt;
+	benchmark();self::$last_query=$sql;$stmt=$this->_query($sql,$params);self::$queries[$this->type][]=(benchmark()+array(2=>$sql));return $stmt;
 }
 
 
@@ -146,7 +148,19 @@ public function delete($sql, array $params = NULL)
  */
 public function insert($table, $data)
 {
-	$sql='INSERT INTO "'.$table.'" ("'.implode('","',array_keys($data)).'")VALUES('.rtrim(str_repeat('?,',count($data)),',').')';return$this->query($sql,array_values($data))?$this->pdo->lastInsertId():0;
+	$sql=$this->insert_sql($data);if($this->type=='pgsql'){$s=$this->query($sql.'RETURNING *',array_values($data));return$s?$s->fetchColumn(0):0;}return$this->query($sql,array_values($data))?$this->pdo->lastInsertId():0;
+}
+
+
+/**
+ * Create insert SQL
+ *
+ * @param array $data row data
+ * @return string
+ */
+public function insert_sql($data)
+{
+	$i=static::$i;return"INSERT INTO $i$table$i ($i".implode("$i,$i",array_keys($data))."$i)VALUES(".rtrim(str_repeat('?,',count($data)),',').')';
 }
 
 
@@ -158,11 +172,10 @@ public function insert($table, $data)
  * @param string $table the table name
  * @param array $data the column => value pairs
  * @return int
- *
  */
 public function update($table, $data, array $where = NULL)
 {
-	$q='UPDATE "'.$table.'" SET "'.implode('" = ?,"',array_keys($data)).'" = ? WHERE ';list($a,$b)=self::where($where);return(($stmt=$this->query($q.$a,array_merge(array_values($data),$b)))?$stmt->rowCount():NULL);
+	$i=static::$i;$q="UPDATE $i$table$i SET $i".implode("$i = ?,$i",array_keys($data))."$i = ? WHERE ";list($a,$b)=self::where($where);return(($stmt=$this->query($q.$a,array_merge(array_values($data),$b)))?$stmt->rowCount():NULL);
 }
 
 
@@ -177,9 +190,9 @@ public function update($table, $data, array $where = NULL)
  * @param array $ord array of order by conditions
  * @return array of SQL + values
  */
-public static function select($c, $t, $w = array(), $l = NULL, $o = 0, $ord = array())
+public function select($c, $t, $w = array(), $l = NULL, $o = 0, $ord = array())
 {
-	$s = "SELECT $c FROM \"$t\"";list($w,$v)=DB::where($w);if($w)$s.=" WHERE $w";return array($s.DB::order_by($ord).($l?" LIMIT $o,$l":''),$v);
+	$i=static::$i;$s="SELECT $c FROM $i$t$i";list($w,$v)=DB::where($w);if($w)$s.=" WHERE $w";return array($s.DB::order_by($ord).($l?($this->type!='pgsql'?" LIMIT $o,$l":" LIMIT $l OFFSET $o"):''),$v);
 }
 
 
@@ -191,7 +204,7 @@ public static function select($c, $t, $w = array(), $l = NULL, $o = 0, $ord = ar
  */
 public static function where(array $where = NULL)
 {
-	$a=$s=array();if($where){foreach($where as$c=>$v){if(is_int($c))$s[]=$v;else{$s[]="\"$c\" = ?";$a[]=$v;}}}return array(join(' AND ',$s),$a);
+	$i=static::$i;$a=$s=array();if($where){foreach($where as$c=>$v){if(is_int($c))$s[]=$v;else{$s[]="$i$c$i = ?";$a[]=$v;}}}return array(join(' AND ',$s),$a);
 }
 
 
@@ -202,7 +215,7 @@ public static function where(array $where = NULL)
  */
 public static function order_by(array $fields = NULL)
 {
-	if($fields){$s=' ORDER BY ';foreach($fields as$k=>$v)$s.="\"$k\" $v, ";return substr($s, 0, -2);}
+	if($fields){$i=static::$i;$s=' ORDER BY ';foreach($fields as$k=>$v)$s.="$i$k$i $v, ";return substr($s, 0, -2);}
 }
 
 
@@ -217,7 +230,7 @@ public static function order_by(array $fields = NULL)
  */
 public static function join($t1,$t2,$f=1,$j='LEFT')
 {
-	return" $j JOIN $t2 ON ".($f?"\"$t1\".\"id\" = \"$t2\".\".{$t1}_id\"":"\"$t1\".\"{$t2}_id\" = \"$t2\".\"id\"");
+	$i=static::$i;return" $j JOIN $t2 ON ".($f?"$id$t1$id.$i"."id$i = $id$t2$id.$id.{$t1}_id$i":"$i$t1$id.$i{$t2}_id$i = $i$t2$i.$i"."id$i");
 }
 
 

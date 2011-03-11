@@ -148,7 +148,7 @@ public function delete($sql, array $params = NULL)
  */
 public function insert($table, $data)
 {
-	$sql=$this->insert_sql($data);if($this->type=='pgsql'){$s=$this->query($sql.'RETURNING *',array_values($data));return$s?$s->fetchColumn(0):0;}return$this->query($sql,array_values($data))?$this->pdo->lastInsertId():0;
+	$sql=$this->insert_sql($table,$data);if($this->type=='pgsql'){$s=$this->query($sql.'RETURNING *',array_values($data));return$s?$s->fetchColumn(0):0;}return$this->query($sql,array_values($data))?$this->pdo->lastInsertId():0;
 }
 
 
@@ -158,7 +158,7 @@ public function insert($table, $data)
  * @param array $data row data
  * @return string
  */
-public function insert_sql($data)
+public function insert_sql($table,$data)
 {
 	$i=static::$i;return"INSERT INTO $i$table$i ($i".implode("$i,$i",array_keys($data))."$i)VALUES(".rtrim(str_repeat('?,',count($data)),',').')';
 }

@@ -3,29 +3,31 @@
  * Langauge
  *
  * Autoloads the correct language file based on cookie, useragent, and available 
- * module languages. The entire language system is based on country codes in ISO 
- * 3166-1 alpha-2.
+ * module languages . The entire language system is based on country codes in ISO 
+ * 3166-1 alpha-2 . 
  *
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc.com/license
+ * @license		http://micromvc . com/license
  ********************************** 80 Columns *********************************
  */
 class Lang
 {
 
-protected static $l;
+protected static $lang;
+
 
 /**
  * Load a language file for the given module
  *
- * @param string $l the language ISO
+ * @param string $lang the language ISO
  * @param string $m the module name
  */
-static function load($l,$m='system')
+static function load($lang, $m = 'system')
 {
-	self::$l[$m]=require(SP."$m/lang/$l".EXT);
+	self::$lang[$m] = require(SP . "$m/lang/$lang" . EXT);
+
 }
 
 
@@ -36,7 +38,13 @@ static function load($l,$m='system')
  */
 static function accepted()
 {
-	static $a;if($a)return$a;foreach(explode(',',server('HTTP_ACCEPT_LANGUAGE'))as$v){$a[]=substr($v,0,2);};return $a;
+	static $a;
+	if($a)return $a;
+	foreach(explode(',', server('HTTP_ACCEPT_LANGUAGE')) as $v)
+	{
+		$a[] = substr($v, 0, 2);
+	}
+	return $a;
 }
 
 
@@ -44,24 +52,39 @@ static function accepted()
  * Fetch a language key (loading the language file if needed)
  *
  * @param string $k the key name
- * @param string $m the module name
+ * @param string $module the module name
  * @return string
  */
-static function get($k, $m='system')
+static function get($k, $module = 'system')
 {
-	isset(self::$l[$m]) OR self::load(self::choose($m),$m);return self::$l[$m][$k];
+	if(empty(self::$lang[$module]))
+	{
+		self::load(self::choose($module), $module);
+	}
+	return self::$lang[$module][$k];
 }
 
 
 /**
  * Figure out which language file to load for this module
  *
- * @param string $m the module name
+ * @param string $module the module name
  * @return string
  */
-static function choose($m='system')
+static function choose($module = 'system')
 {
-	$p=SP.$m.'/lang/';if(!empty($_COOKIE['lang'])&&strlen($c=$_COOKIE['lang'])==2&&is_file($p.$c.EXT))return$c;foreach(self::accepted()as$c)if(is_file($p.$c.EXT))return$c;return config('language');
+	$p = SP . $module . '/lang/';
+	
+	// Has the user choosen a custom language?
+	if(!empty($_COOKIE['lang']) AND strlen($c = $_COOKIE['lang']) == 2 AND is_file($p . $c . EXT)) return $c;
+	
+	// Auto-detect the languages they want
+	foreach(self::accepted() as $c)
+	{
+		if(is_file($p . $c . EXT)) return $c;
+	}
+	
+	return config('language');
 }
 
 }

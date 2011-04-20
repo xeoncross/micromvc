@@ -16,12 +16,16 @@ class Validation
 
 // The array of errors (if any)
 public $errors = array();
+
 // The text to put before an error
 public $error_prefix = '<div class="form_error">';
+
 // The text to put after an error
 public $error_suffix = '</div>';
+
 // Should we add a token to each form to prevents CSFR? (requires Session class)
 public $token = TRUE;
+
 
 
 /**
@@ -32,7 +36,13 @@ public $token = TRUE;
  */
 public function run(array $fields)
 {
-	if($_POST){foreach($fields as$f=>$r){$r=explode('|',$r);if(!in_array('required',$r)&&!post($f))continue;$this->_rules($f,post($f),$r);$this->validate_token();}if(!$this->errors)return 1;}$this->create_token();
+	if($_POST){foreach($fields as$f=>$r){$r=explode('|',$r);
+if(!in_array('required',$r)&&!post($f))continue;
+$this->_rules($f,post($f),$r);
+$this->validate_token();
+}if(!$this->errors)return 1;
+}$this->create_token();
+
 }
 
 
@@ -46,7 +56,12 @@ public function run(array $fields)
  */
 protected function _rules($f, $d, array $rules)
 {
-	foreach($rules as$r){list($r,$p)=$this->_parse_rule($r);if(method_exists($this,$r))$o=$this->$r($f,$d,$p);else$o=$r($d);if($o===FALSE)break;if($o!==TRUE)$_POST[$f]=$o;}
+	foreach($rules as$r){list($r,$p)=$this->_parse_rule($r);
+if(method_exists($this,$r))$o=$this->$r($f,$d,$p);
+else$o=$r($d);
+if($o===FALSE)break;
+if($o!==TRUE)$_POST[$f]=$o;
+}
 }
 
 
@@ -58,7 +73,13 @@ protected function _rules($f, $d, array $rules)
  */
 protected function _parse_rule($rule)
 {
-	$r=$rule;$p=NULL;if(strpos($r,'[')!==FALSE){preg_match('/(\w+)\[(.*?)\]/i',$r,$m);$r=$m[1];$p=$m[2];}return array($r,$p);
+	$r=$rule;
+$p=NULL;
+if(strpos($r,'[')!==FALSE){preg_match('/(\w+)\[(.*?)\]/i',$r,$m);
+$r=$m[1];
+$p=$m[2];
+}return array($r,$p);
+
 }
 
 
@@ -72,6 +93,7 @@ protected function _parse_rule($rule)
 protected function _set_error($field, $name, array $params = array())
 {
 	$this->errors[$field]=vsprintf(lang('validation_'.$name),array_merge(array($field),$params));
+
 }
 
 
@@ -84,6 +106,7 @@ protected function _set_error($field, $name, array $params = array())
 public function set_error($field, $error)
 {
 	$this->errors[$field] = $error;
+
 }
 
 
@@ -94,7 +117,11 @@ public function set_error($field, $error)
  */
 public function display_errors($prefix = '', $suffix = '')
 {
-	if(!$this->errors)return;$h = '';foreach($this->errors as$e)$h.=($prefix?$prefix:$this->error_prefix).$e.($suffix?$suffix:$this->error_suffix)."\n\n";return $h;
+	if(!$this->errors)return;
+$h = '';
+foreach($this->errors as$e)$h.=($prefix?$prefix:$this->error_prefix).$e.($suffix?$suffix:$this->error_suffix)."\n\n";
+return $h;
+
 }
 
 
@@ -107,12 +134,14 @@ public function display_errors($prefix = '', $suffix = '')
  */
 public function error($field, $prefix = TRUE)
 {
-	if(isset($this->errors[$field])){if($prefix)return $this->error_prefix.$this->errors[$field].$this->error_suffix;return $this->errors[$field];}
+	if(isset($this->errors[$field])){if($prefix)return $this->error_prefix.$this->errors[$field].$this->error_suffix;
+return $this->errors[$field];
+}
 }
 
 
 /*
- *  Validation Methods
+ * Validation Methods
  */
 
 
@@ -125,7 +154,10 @@ public function error($field, $prefix = TRUE)
  */
 public function string($field, $data)
 {
-	if($data=trim(str($data)))return$data;$this->_set_error($field,'required');return FALSE;
+	if($data=trim(str($data)))return$data;
+$this->_set_error($field,'required');
+return FALSE;
+
 }
 
 
@@ -138,7 +170,10 @@ public function string($field, $data)
  */
 public function required($field, $data)
 {
-	if($data)return TRUE;$this->_set_error($field,'required');return FALSE;
+	if($data)return TRUE;
+$this->_set_error($field,'required');
+return FALSE;
+
 }
 
 
@@ -151,7 +186,10 @@ public function required($field, $data)
  */
 public function set($field, $data)
 {
-	if(isset($_POST[$field]))return TRUE;$this->_set_error($field,'set');return FALSE;
+	if(isset($_POST[$field]))return TRUE;
+$this->_set_error($field,'set');
+return FALSE;
+
 }
 
 
@@ -164,7 +202,10 @@ public function set($field, $data)
  */
 public function alpha($field, $word)
 {
-	if(preg_match("/^([a-z])+$/i",$word))return TRUE;$this->_set_error($field,'alpha');return FALSE;
+	if(preg_match("/^([a-z])+$/i",$word))return TRUE;
+$this->_set_error($field,'alpha');
+return FALSE;
+
 }
 
 
@@ -177,7 +218,10 @@ public function alpha($field, $word)
  */
 public function alpha_numeric($field, $data)
 {
-	if(preg_match("/^([a-z0-9])+$/i",$data))return TRUE;$this->_set_error($field,'alpha_numeric');return FALSE;
+	if(preg_match("/^([a-z0-9])+$/i",$data))return TRUE;
+$this->_set_error($field,'alpha_numeric');
+return FALSE;
+
 }
 
 
@@ -190,7 +234,10 @@ public function alpha_numeric($field, $data)
  */
 public function numeric($field, $number)
 {
-	if(is_numeric($number))return TRUE;$this->_set_error($field,'numeric');return FALSE;
+	if(is_numeric($number))return TRUE;
+$this->_set_error($field,'numeric');
+return FALSE;
+
 }
 
 
@@ -204,7 +251,10 @@ public function numeric($field, $number)
  */
 public function matches($field, $data, $field2)
 {
-	if (isset($_POST[$field2])&&$data===post($field2))return TRUE;$this->_set_error($field,'matches',array($field2));return FALSE;
+	if (isset($_POST[$field2])&&$data===post($field2))return TRUE;
+$this->_set_error($field,'matches',array($field2));
+return FALSE;
+
 }
 
 
@@ -218,7 +268,10 @@ public function matches($field, $data, $field2)
  */
 public function min_length($field, $data, $length)
 {
-	if(mb_strlen($data)>=$length)return TRUE;$this->_set_error($field,'min_length',array($length));return FALSE;
+	if(mb_strlen($data)>=$length)return TRUE;
+$this->_set_error($field,'min_length',array($length));
+return FALSE;
+
 }
 
 
@@ -232,7 +285,10 @@ public function min_length($field, $data, $length)
  */
 public function max_length($field, $data, $length)
 {
-	if(mb_strlen($data)<=$length)return TRUE;$this->_set_error($field,'max_length',array($length));return FALSE;
+	if(mb_strlen($data)<=$length)return TRUE;
+$this->_set_error($field,'max_length',array($length));
+return FALSE;
+
 }
 
 
@@ -246,7 +302,10 @@ public function max_length($field, $data, $length)
  */
 public function exact_length($field, $data, $length)
 {
-	if(mb_strlen($data)==$length)return TRUE;$this->_set_error($field,'exact_length',array($length));return FALSE;
+	if(mb_strlen($data)==$length)return TRUE;
+$this->_set_error($field,'exact_length',array($length));
+return FALSE;
+
 }
 
 
@@ -259,7 +318,10 @@ public function exact_length($field, $data, $length)
  */
 public function valid_email($field, $email)
 {
-	if(preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i',$email))return TRUE;$this->_set_error($field,'valid_email');return FALSE;
+	if(preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i',$email))return TRUE;
+$this->_set_error($field,'valid_email');
+return FALSE;
+
 }
 
 
@@ -273,7 +335,10 @@ public function valid_email($field, $email)
  */
 public function valid_base64($field, $data)
 {
-	if(!preg_match('/[^a-zA-Z0-9\/\+=]/',$data))return TRUE;$this->_set_error($field,'valid_base64');return FALSE;
+	if(!preg_match('/[^a-zA-Z0-9\/\+=]/',$data))return TRUE;
+$this->_set_error($field,'valid_base64');
+return FALSE;
+
 }
 
 
@@ -285,6 +350,7 @@ public function valid_base64($field, $data)
 public function create_token()
 {
 	if($this->token&&class_exists('session',0))Session::token();
+
 }
 
 
@@ -296,7 +362,11 @@ public function create_token()
  */
 public function validate_token()
 {
-	if(!$this->token||!class_exists('session',0))return TRUE;if(Session::token(post('token')))return TRUE;$this->_set_error('token','invalid_token');return FALSE;
+	if(!$this->token||!class_exists('session',0))return TRUE;
+if(Session::token(post('token')))return TRUE;
+$this->_set_error('token','invalid_token');
+return FALSE;
+
 }
 
 }

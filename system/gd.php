@@ -3,7 +3,7 @@
  * GD Image
  *
  * Class for intelligently cropping and resizing images keeping the subject in 
- * focus and preserving image transparency. Works with GIF, JPEG, and PNG. 
+ * focus and preserving image transparency . Works with GIF, JPEG, and PNG . 
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -15,54 +15,95 @@ class GD
 {
 
 /**
- * Create a JPEG thumbnail for the given png/gif/jpeg image and return the path to the new image.
+ * Create a JPEG thumbnail for the given png/gif/jpeg image and return the path to the new image . 
  * 
- * @param string $f the file path to the image
- * @param int $w the width
- * @param int $h the height
- * @param int $q the image quality
+ * @param string $file the file path to the image
+ * @param int $width the width
+ * @param int $height the height
+ * @param int $quality of image thumbnail
  * @return string
  */
-public static function thumbnail($f, $w = 80, $h = 80, $q = 80)
+public static function thumbnail($file, $width = 80, $height = 80, $quality = 80)
 {
-	$d=SP."uploads/thumbnails/$w-x-$h/";$n=basename($f).'.jpg';if(is_file($d.$n)OR!dir::usable($d)OR!is_file($f)OR!($i=self::open($f)))return;if(imagejpeg(self::resize($i,$w,$h),$d.$n,$q))return$d.$n;
+	if(! is_file($file)) return;
+	
+	$dir = SP . "uploads/thumbnails/$width-x-$height/";
+	$name = basename($file) . '.jpg';
+	
+	// If the thumbnail already exists, we can't write to the directory, or the image file is invalid
+	if(is_file($dir . $name) OR ! dir::usable($dir) OR ! ($image = self::open($file))) return;
+	
+	// Resize the image and save it as a compressed JPEG
+	if(imagejpeg(self::resize($image, $width, $height), $dir . $name, $quality))
+	{
+		return $dir . $n;
+	}
+
 }
 
 
 /**
- * Open a resource handle to a (png/gif/jpeg) image file for processing.
+ * Open a resource handle to a (png/gif/jpeg) image file for processing . 
  * 
- * @param string $f the file path to the image
+ * @param string $file the file path to the image
  * @return resource
  */
-public static function open($f)
+public static function open($file)
 {
-	if(is_file($f)&&($e=pathinfo($f,PATHINFO_EXTENSION))&&($x='imagecreatefrom'.($e=='jpg'?'jpeg':$e))&&($i=$x($f))&&is_resource($i))return$i;
+	if(! is_file($file)) return;
+	
+	$ext = pathinfo($file, PATHINFO_EXTENSION);
+	
+	// Invalid file type?
+	if( ! in_array($ext, array('jpg', 'jpeg', 'png', 'gif'))) return;
+	
+	// Open the file using the correct function
+	$function = 'imagecreatefrom'. ($ext == 'jpg' ? 'jpeg' : $ext);
+	
+	if($image = @$function($file))
+	{
+		return $image;
+	}
 }
 
 
 /**
- * Resize and crop the image to fix proportinally in the given dimensions.
+ * Resize and crop the image to fix proportinally in the given dimensions . 
  * 
- * @param resource $i the image resource handle
- * @param int $w the width
- * @param int $h the height
+ * @param resource $image the image resource handle
+ * @param int $width the width
+ * @param int $height the height
  * @return resource
  */
-public static function resize($i,$w,$h)
+public static function resize($image, $width, $height)
 {
-	$x=imagesx($i);$y=imagesy($i);$s=min($x/$w,$y/$h);$n=imagecreatetruecolor($w,$h);self::alpha($n);imagecopyresampled($n,$i,0,0,0,($y/4-($h/4)),$w,$h,$x-($x-($s*$w)),$y-($y-($s*$h)));return$n;
+	$x = imagesx($image);
+	$y = imagesy($image);
+	$small = min($x/$width, $y/$height);
+	
+	$new = imagecreatetruecolor($width, $height);
+	self::alpha($new);
+	
+	// Crop and resize image keeping the top center portion in focus
+	imagecopyresampled($new, $image, 0, 0, 0, ($y/4-($height/4)), $width, $height, $x-($x-($small*$width)), $y-($y-($small*$height)));
+	
+	// Copy and resize image from top left corner
+	//imagecopyresampled($new, $image, 0, 0, 0, 0, $width, $height, $x-($x-($small*$width)), $y-($y-($small*$height)));
+	
+	return $new;
 }
 
 
 /**
  * Preserve the alpha channel transparency in PNG images
  * 
- * @param resource $i the image resource handle
+ * @param resource $image the image resource handle
  */
-public static function alpha($i)
+public static function alpha($image)
 {
-	imagecolortransparent($i,imagecolorallocate($i,0,0,0));imagealphablending($i,false);imagesavealpha($i,true);
+	imagecolortransparent($image, imagecolorallocate($image, 0, 0, 0));
+	imagealphablending($image, false);
+	imagesavealpha($image, true);
 }
 
 
@@ -73,7 +114,7 @@ public static function alpha($i)
  */
 public static function header($ext)
 {
-	headers_sent()||header('Content-type: image/'.$ext);
+	headers_sent() OR header('Content-type: image/' . $ext);
 }
 
 }

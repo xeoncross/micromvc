@@ -6,7 +6,7 @@
  *
  * @package		MicroMVC
  * @author		David Pennington
- * @copyright	(c) 2010 MicroMVC Framework
+ * @copyright	(c) 2011 MicroMVC Framework
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
@@ -21,6 +21,7 @@ public $links = 2;
 public $key = '[[page]]';
 public $attributes = array('class' => 'pagination', 'id' => 'pagination');
 
+
 /**
  * Creates pagination links for the total number of pages
  *
@@ -32,7 +33,13 @@ public $attributes = array('class' => 'pagination', 'id' => 'pagination');
  */
 public function __construct($total, $uri, $current, $per_page = 10)
 {
-	$this->per_page=$per_page;$this->total=$t=ceil($total/$per_page);$c=int($current,1);$this->current=$c>$t?$t:$c;$this->uri=$uri;
+	$this->per_page = $per_page;
+	$this->total = ceil($total / $per_page);
+	$this->uri = $uri;
+	$current = int($current, 1);
+
+	// Current page cannot exceed the total (should we do this check..?)
+	$this->current = $current > $this->total ? $this->total : $current;
 }
 
 
@@ -43,7 +50,7 @@ public function __construct($total, $uri, $current, $per_page = 10)
  */
 public function __toString()
 {
-	return html::tag('div',$this->previous().$this->first().$this->links().$this->last().$this->next(),$this->attributes);
+	return html::tag('div', $this->previous() . $this->first() . $this->links() . $this->last() . $this->next(), $this->attributes);
 }
 
 
@@ -54,7 +61,10 @@ public function __toString()
  */
 public function previous()
 {
-	if($this->current>1)return html::link(str_replace($this->key,$this->current-1,$this->uri),lang('pagination_previous'));
+	if($this->current > 1)
+	{
+		return html::link(str_replace($this->key, $this->current-1, $this->uri), lang('pagination_previous'));
+	}
 }
 
 
@@ -65,7 +75,10 @@ public function previous()
  */
 public function first()
 {
-	if($this->current>$this->links+1)return html::link(str_replace($this->key,1,$this->uri),lang('pagination_first'));
+	if($this->current > $this->links + 1)
+	{
+		return html::link(str_replace($this->key, 1, $this->uri), lang('pagination_first'));
+	}
 }
 
 
@@ -76,7 +89,10 @@ public function first()
  */
 public function last()
 {
-	if($this->current+$this->links<$this->total)return html::link(str_replace($this->key,$this->total,$this->uri),lang('pagination_last'));
+	if($this->current + $this->links  < $this->total)
+	{
+		return html::link(str_replace($this->key, $this->total, $this->uri), lang('pagination_last'));
+	}
 }
 
 
@@ -87,7 +103,10 @@ public function last()
  */
 public function next()
 {
-	if($this->current<$this->total)return html::link(str_replace($this->key,$this->current+1,$this->uri),lang('pagination_next'));
+	if($this->current < $this->total)
+	{
+		return html::link(str_replace($this->key, $this->current+1, $this->uri), lang('pagination_next'));
+	}
 }
 
 
@@ -98,7 +117,23 @@ public function next()
  */
 public function links()
 {
-	$c=$this->current;$l=$this->links;$u=$this->uri;$t=$this->total;$s=(($c-$l)>0)?$c-$l:1;$e=(($c+$l)<$t)?$c+$l:$t;$h='';for($i=$s;$i<=$e;++$i){if($c==$i)$h.=html::tag('a',$i,array('class'=>'current'));else$h.=html::link(str_replace($this->key,$i,$u),$i);}return$h;
+	// Start and end must be valid integers
+	$start = (($this->current - $this->links) > 0) ? $this->current - $this->links : 1;
+	$end = (($this->current + $this->links) < $this->total) ? $this->current + $this->links : $this->total;
+	
+	$html = '';
+	for($i = $s; $i <= $e; ++$i)
+	{
+		if($c == $i)
+		{
+			$html .= html::tag('a', $i, array('class' => 'current'));
+		}
+		else
+		{
+			$html .= html::link(str_replace($this->key, $i, $this->uri), $i);
+		}
+	}
+	return $html;
 }
 
 }

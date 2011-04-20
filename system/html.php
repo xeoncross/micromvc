@@ -7,7 +7,7 @@
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc.com/license
+ * @license		http://micromvc . com/license
  ********************************** 80 Columns *********************************
  */
 class html
@@ -19,30 +19,42 @@ class html
  * @param $email the users email address
  * @param $size	the size of the image
  * @param $alt the alt text
+ * @param $type the default image type to show
  * @param $rating max image rating allowed
  * @return string
  */
-public static function gravatar($email = '', $size = 80, $alt = 'Gravatar', $rating = 'g')
+public static function gravatar($email = '', $size = 80, $alt = 'Gravatar', $type = 'wavatar', $rating = 'g')
 {
-	return '<img src="http://www.gravatar.com/avatar/'.md5($email)."?s=$size&d=wavatar&r=$rating\" alt=\"$alt\" />";
+	return '<img src = "http://www.gravatar.com/avatar/' . md5($email) . "?s=$size&d=$type&r=$rating\" alt = \"$alt\" />";
+
 }
 
 
 /**
- * Generates an obfuscated HTML version of an email address.
+ * Generates an obfuscated HTML version of an email address . 
  *
  * @param string $email address
  * @return string
  */
 public static function email($email)
 {
-	$s='';foreach(str_split($email)as$l){switch(rand(1,3)){case 1:$s.='&#'.ord($l).';';break;case 2:$s.='&#x'.dechex(ord($l)).';';break;case 3:$s.=$l;}}return$s;
+	$str = '';
+	foreach(str_split($email) as $char)
+	{
+		switch(rand(1, 3))
+		{
+			case 1: $s .= '&#' . ord($char) . ';'; break;
+			case 2: $s .= '&#x' . dechex(ord($char)) . ';'; break;
+			case 3: $s .= $char;
+		}
+	}
+	return $str;
 }
 
 
 /**
- * Convert a multidimensional array to an unfiltered HTML UL. You can
- * pass attributes such as id, class, or javascript.
+ * Convert a multidimensional array to an unfiltered HTML UL . You can
+ * pass attributes such as id, class, or javascript . 
  *
  * @param array $ul the array of elements
  * @param array $attributes the array of HTML attributes
@@ -50,20 +62,40 @@ public static function email($email)
  */
 static function ul_from_array(array $ul, array $attributes = array())
 {
-	$h='';foreach($ul as$k=>$v)if(is_array($v))$h.=self::tag('li',$k.self::ul_from_array($v));else$h.=self::tag('li',$v);return self::tag('ul',$h,$attributes);
+	$h = '';
+	foreach($ul as $k => $v)
+	{
+		if(is_array($v))
+		{
+			$h .= self::tag('li', $k . self::ul_from_array($v));
+		}
+		else
+		{
+			$h .= self::tag('li', $v);
+		}
+	}
+	return self::tag('ul', $h, $attributes);
 }
 
 
 /**
  * Compiles an array of HTML attributes into an attribute string and
- * HTML escape it to prevent malicious data.
+ * HTML escape it to prevent malicious data . 
  *
  * @param array $attributes the tag's attribute list
  * @return string
  */
 public static function attributes(array $attributes = array())
 {
-	if(!$attributes)return;asort($attributes);$h='';foreach($attributes as$k=>$v)$h.=" $k=\"".h($v).'"';return$h;
+	if(! $attributes)return;
+	
+	asort($attributes);
+	$h = '';
+	foreach($attributes as $k => $v)
+	{
+		$h .= " $k = \"" . h($v) . '"';
+	}
+	return $h;
 }
 
 
@@ -77,7 +109,7 @@ public static function attributes(array $attributes = array())
  */
 public static function tag($tag, $text = '', array $attributes = array())
 {
-	return"\n<$tag".self::attributes($attributes).($text===0?' />':">$text</$tag>");
+	return"\n<$tag" . self::attributes($attributes) . ($text === 0 ? ' />' : ">$text</$tag>");
 }
 
 
@@ -91,12 +123,13 @@ public static function tag($tag, $text = '', array $attributes = array())
  */
 public static function link($url, $text = '', array $attributes = array())
 {
-	return self::tag('a',$text,($attributes+array('href'=>site_url($url))));
+	return self::tag('a', $text, ($attributes+array('href' => site_url($url))));
+
 }
 
 
 /**
- * Auto creates a form select dropdown from the options given.
+ * Auto creates a form select dropdown from the options given . 
  *
  * @param string $name the select element name
  * @param array $options the select options
@@ -106,7 +139,20 @@ public static function link($url, $text = '', array $attributes = array())
  */
 public static function select($name, array $options = array(), $selected = NULL, array $attributes = array())
 {
-	$h='';foreach($options as$k=>$v){$a=array('value'=>$k);if($selected&&in_array($k,(array)$selected))$a['selected']='selected';$h.=self::tag('option',$v,$a);}return self::tag('select',$h,$attributes+array('name'=>$name));
+	$h = '';
+	foreach($options as $k => $v)
+	{
+		$a = array('value' => $k);
+		
+		// Is this element one of the selected options?
+		if($selected AND in_array($k, (array)$selected))
+		{
+			$a['selected'] = 'selected';
+		}
+		
+		$h .= self::tag('option', $v, $a);
+	}
+	return self::tag('select', $h, $attributes+array('name' => $name));
 }
 
 
@@ -120,7 +166,20 @@ public static function select($name, array $options = array(), $selected = NULL,
  */
 public static function datetime($ts = NULL, $name = 'datetime', $class = 'datetime')
 {
-	$ts=new Time($ts);$t=$ts->getArray($ts);$e[]=self::month_select($t['month'],$name);foreach(lang('time_units')as$k=>$v)$e[]=html::tag('input',0,array('name'=>"{$name}[$k]",'type'=>'text','value'=>isset($t[$k])?$t[$k]:0,'class'=>$k));return vsprintf(lang('html_datetime'),$e);
+	$ts = new Time($ts);
+	$t = $ts->getArray($ts);
+	$e[] = self::month_select($t['month'], $name);
+	foreach(lang('time_units')as $k => $v)
+	{
+		$options = array(
+			'name' => "{$name}[$k]",
+			'type' => 'text',
+			'value' => isset($t[$k]) ? $t[$k] : 0,
+			'class' => $k
+		);
+		$e[] = html::tag('input', 0, $options);
+	}
+	return vsprintf(lang('html_datetime'), $e);
 }
 
 
@@ -134,7 +193,7 @@ public static function datetime($ts = NULL, $name = 'datetime', $class = 'dateti
  */
 public static function month_select($month = 1, $name = 'datetime', $class = 'month')
 {
-	return html::select("{$name}[month]",lang('html_months'),$month,array('class'=>$class));
+	return html::select("{$name}[month]", lang('html_months'), $month, array('class' => $class));
 }
 
 }

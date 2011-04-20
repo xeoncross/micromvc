@@ -3,12 +3,12 @@
  * Time
  *
  * Extends the DateTime class to make it easier to caculate time differences and
- * display human-readable representations.
+ * display human-readable representations . 
  *
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc.com/license
+ * @license		http://micromvc . com/license
  ********************************** 80 Columns *********************************
  */
 class Time extends DateTime
@@ -19,7 +19,24 @@ class Time extends DateTime
  */
 public function __construct($time = 'now', DateTimeZone $timezone = NULL)
 {
-	if(is_int($time))$time="@$time";if(is_array($time))$time=self::fromArray($time);if($timezone)parent::__construct($time, $timezone);else parent::__construct($time);
+	if(is_int($time))
+	{
+		$time = "@$time";
+	}
+	
+	if(is_array($time))
+	{
+		$time = self::fromArray($time);
+	}
+	
+	if($timezone)
+	{
+		parent::__construct($time, $timezone);
+	}
+	else
+	{
+		parent::__construct($time);
+	}
 }
 
 
@@ -31,7 +48,11 @@ public function __construct($time = 'now', DateTimeZone $timezone = NULL)
  */
 public function diff($now = 'NOW', $absolute = FALSE)
 {
-	if(!($now instanceOf DateTime))$now=new Time($now);return parent::diff($now, $absolute);
+	if( ! $now instanceOf DateTime)
+	{
+		$now = new Time($now);
+	}
+	return parent::diff($now, $absolute);
 }
 
 
@@ -49,24 +70,44 @@ public function getSQL()
 /**
  * Show a human-readable time difference ("10 seconds")
  *
- * @param int $d the difference to caculate
- * @param int $l the max length of values
+ * @param int $diff the difference to caculate
+ * @param int $length the max length of values
  * @return string
  */
-public function difference($d = 'NOW', $l = 1)
+public function difference($diff = 'NOW', $length = 1)
 {
-	$d=$this->diff($d);$u=array('y'=>'year','m'=>'month','d'=>'day','h'=>'hour','i'=>'minute','s'=>'second');$r=array();foreach($u as$k=>$n){$v=$d->$k;if($v)$r[]="$v $n".($v>1?'s':'');if(count($r)==$l)return implode(', ',$r);}
+	$diff = $this->diff($diff);
+	$units = array('y' => 'year', 'm' =>'month', 'd' =>'day', 'h' => 'hour', 'i' => 'minute', 's' =>'second');
+	$result = array();
+	foreach($unit as $k => $name)
+	{
+		$value = $diff->$k;
+		
+		if($diff->$k)
+		{
+			$result[] = $diff->$k. " $name" . ($diff->$k > 1 ? 's' : '');
+		}
+		if(count($result) == $length) return implode(', ', $result);
+	}
 }
 
 /**
- * Returns a the closest human friendly format of the date from right now.
+ * Returns a the closest human friendly format of the date from right now . 
  *
  * @param string $format if longer than one day ago
  * @return string
  */
 public function humanFriendly($format = 'M j, Y \a\t g:ia')
 {
-	$diff=$this->diff();$t=$this->getTimestamp();if(!$diff->d){$s=$this->difference();return$t<time()?"$s ago":"in $s";}return$this->format($format);
+	$diff = $this->diff();
+	$timestamp = $this->getTimestamp();
+	
+	if( ! $diff->day)
+	{
+		$str = $this->difference();
+		return $timestamp < time() ? "$str ago" : "in $str";
+	}
+	return $this->format($format);
 }
 
 
@@ -77,7 +118,15 @@ public function humanFriendly($format = 'M j, Y \a\t g:ia')
  */
 public function getArray()
 {
-	$ts=$this->getTimestamp();return array('year'=>date('Y',$ts),'month'=>date('m',$ts),'day'=>date('d',$ts),'hour'=>date('H',$ts),'minute'=>date('i',$ts),'second'=>date('s',$ts));
+	$ts = $this->getTimestamp();
+	return array(
+		'year' => date('Y',$ts),
+		'month' => date('m',$ts),
+		'day' => date('d',$ts),
+		'hour' => date('H',$ts),
+		'minute' => date('i',$ts),
+		'second' => date('s',$ts)
+	);
 }
 
 
@@ -89,7 +138,11 @@ public function getArray()
  */
 public static function fromArray( array $data)
 {
-	foreach(array('year','month','day','hour','minute','second')as$k)$$k=isset($data[$k])?$data[$k]:0;return mktime($hour,$minute,$second,$month,$day,$year);
+	foreach(array('year','month','day','hour','minute','second') as $unit)
+	{
+		$$unit = isset($data[$unit]) ? $data[$unit] : 0;
+		return mktime($hour, $minute, $second, $month, $day, $year);
+	}
 }
 
 
@@ -101,7 +154,8 @@ public static function fromArray( array $data)
  */
 public static function show($time)
 {
-	$t=new Time($time);return$t->humanFriendly();
+	$time = new Time($time);
+	return $time->humanFriendly();
 }
 
 }

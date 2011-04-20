@@ -2,12 +2,12 @@
 /**
  * Cookie
  *
- * Provides a encryption wrapper around standard cookie handling functions.
+ * Provides a encryption wrapper around standard cookie handling functions . 
  *
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc.com/license
+ * @license		http://micromvc . com/license
  ********************************** 80 Columns *********************************
  */
 class cookie
@@ -17,26 +17,50 @@ class cookie
  * Decrypt and fetch cookie data
  *
  * @param string $key cookie name
- * @param array $c config settings
+ * @param array $config settings
  * @return mixed
  */
-public static function get($k,$c=NULL)
+public static function get($key, $config = NULL)
 {
-	$c=$c?:config('cookie');if(isset($_COOKIE[$k])&&($v=$_COOKIE[$k]))if($v=json_decode(Cipher::decrypt(base64_decode($v),$c['key'])))if($v[0]<$c['timeout'])return is_scalar($v[1])?$v[1]:(array)$v[1];
+	// Use default config settings if needed
+	$config = $config ?: config('cookie');
+	
+	if(isset($_COOKIE[$key])
+	{
+		// Decrypt cookie using cookie key
+		if($v = json_decode(Cipher::decrypt(base64_decode($_COOKIE[$key]), $config['key'])))
+		{
+			// Has the cookie expired?
+			if($v[0] < $config['timeout'])
+			{
+				return is_scalar($v[1])?$v[1]:(array)$v[1];
+			}
+		}
+	}
 }
 
 
 /**
- * Called before any output is sent to create an encrypted cookie with the given value.
+ * Called before any output is sent to create an encrypted cookie with the given value. 
  *
  * @param string $key cookie name
- * @param mixed $v the value to save
- * @param array $c config settings
+ * @param mixed $value to save
+ * @param array $config settings
  * return boolean
  */
-public static function set($k,$v,$c=NULL)
+public static function set($key, $value, $config = NULL)
 {
-	extract($c?:config('cookie'));empty($key)&&trigger_error(lang('cookie_no_key'));setcookie($k,($v?base64_encode(Cipher::encrypt(json_encode(array(time(),$v)),$key)):''),$expires,$path,$domain,$secure,$httponly);
+	// Use default config settings if needed
+	extract($config ?: config('cookie'));
+	
+	// You must supply a key!
+	empty($key) AND trigger_error(lang('cookie_no_key'));
+	
+	// If the cookie is being removed we want it left blank
+	$value = $value ? base64_encode(Cipher::encrypt(json_encode(array(time(), $value)), $key)) : '';
+	
+	// Save cookie to user agent
+	setcookie($cookie, $value, $expires, $path, $domain, $secure, $httponly);
 }
 
 }

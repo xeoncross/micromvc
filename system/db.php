@@ -26,6 +26,7 @@ public static $last_query = NULL;
 
 public static $i = '"';
 
+
 /**
  * Set the database type and save the config for later.
  * 
@@ -33,7 +34,14 @@ public static $i = '"';
  */
 public function __construct(array $config)
 {
-	$this->type=current(explode(':',$config['dns'],2));$this->config=$config;if($this->type=='mysql')static::$i='`';
+	// Auto-detect database type from DNS
+	$this->type = current(explode(':', $config['dns'], 2));
+	
+	// Save config for connection
+	$this->config = $config;
+	
+	// MySQL uses a non-standard column identifier
+	if($this->type == 'mysql') static::$i = '`';
 }
 
 
@@ -42,7 +50,16 @@ public function __construct(array $config)
  */
 public function connect()
 {
-	extract($this->config);$this->pdo=new PDO($dns,$username,$password,$params);$this->config=NULL;$this->pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+	extract($this->config);
+	
+	// Clear config for security reasons
+	$this->config = NULL;
+	
+	// Connect to PDO
+	$this->pdo = new PDO($dns, $username, $password, $params);
+	
+	// PDO should throw exceptions
+	$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }
 
 
@@ -54,12 +71,13 @@ public function connect()
  */
 public function quote($value)
 {
-	if(!$this->pdo)$this->connect();return $this->pdo->quote($value);
+	if( ! $this->pdo) $this->connect();
+	return $this->pdo->quote($value);
 }
 
 
 /**
- * Run a SQL query and return a single column (i.e. COUNT(*) queries).
+ * Run a SQL query and return a single column (i.e. COUNT(*) queries)
  *
  * @param string $sql query to run
  * @param array $params the prepared query params
@@ -68,7 +86,8 @@ public function quote($value)
  */
 public function column($sql, array $params = NULL, $column = 0)
 {
-	return($statement=$this->query($sql,$params))?$statement->fetchColumn($column):NULL;
+	// If the query succeeds, fetch the column
+	return ($statement = $this->query($sql, $params)) ? $statement->fetchColumn($column) : NULL;
 }
 
 
@@ -82,7 +101,14 @@ public function column($sql, array $params = NULL, $column = 0)
  */
 public function row($sql, array $params = NULL, $object = NULL)
 {
-	return(($statement=$this->query($sql,$params))?(($row=$statement->fetch(PDO::FETCH_OBJ))&&$object?new$object($row):$row):NULL);
+	if( ! $statement = $this->query($sql, $params)) return;
+	
+	$row = $statement->fetch(PDO::FETCH_OBJ);
+	
+	// If they want the row returned as a custom object
+	if($object) $row = new $object($row);
+		
+	return $row;
 }
 
 
@@ -97,8 +123,15 @@ public function row($sql, array $params = NULL, $object = NULL)
  */
 public function fetch($sql, array $params = NULL, $column = NULL)
 {
-	return(($statement=$this->query($sql,$params))?($column===NULL?$statement->fetchAll(PDO::FETCH_OBJ):$statement->fetchAll(PDO::FETCH_COLUMN,$column)):NULL);
+	if( ! $statement = $this->query($sql, $params)) return;
+	
+	// Return an array of records
+	if($column === NULL) return $statement->fetchAll(PDO::FETCH_OBJ);
+	
+	// Fetch a certain column from all rows
+	return $statement->fetchAll(PDO::FETCH_COLUMN , $column);
 }
+
 
 /**
  * Run a SQL query and return the statement object
@@ -109,20 +142,27 @@ public function fetch($sql, array $params = NULL, $column = NULL)
  */
 public function query($sql, array $params = NULL)
 {
-	benchmark();self::$last_query=$sql;$stmt=$this->_query($sql,$params);self::$queries[$this->type][]=(benchmark()+array(2=>$sql));return $stmt;
-}
+	benchmark();
+	
+	self::$last_query = $sql;
+	
+	// Connect if needed
+	if(!$this->pdo) $this->connect();
+	
+	if($params)
+	{
+		$statement = $this->pdo->prepare($sql);
+		$statement->execute($params);
+	}
+	else
+	{
+		$statement = $this->pdo->query($sql);
+	}
 
-
-/**
- * Run the actual SQL query and return the statement object
- *
- * @param string $sql query to run
- * @param array $params the prepared query params
- * @return PDOStatement
- */
-protected function _query($sql, array $params = null)
-{
-	if(!$this->pdo)$this->connect();if($params){$stmt=$this->pdo->prepare($sql);$stmt->execute($params);}else{$stmt=$this->pdo->query($sql);}return$stmt;
+	// Save query results by database type
+	self::$queries[$this->type][]=(benchmark() + array(2 => $sql));
+	
+	return $statement;
 }
 
 
@@ -135,20 +175,37 @@ protected function _query($sql, array $params = null)
  */
 public function delete($sql, array $params = NULL)
 {
-	return(($statement=$this->query($sql, $params))?$statement->rowCount():FALSE);
+	if($statement = $this->query($sql, $params))
+	{
+		return $statement->rowCount();
+	}
 }
 
 
 /**
- * Builds an INSERT statement using the values provided
+ * Creates and runs an INSERT statement using the values provided
  *
  * @param string $table the table name
  * @param array $data the column => value pairs
  * @return int
  */
-public function insert($table, $data)
+public function insert($table, array $data)
 {
-	$sql=$this->insert_sql($table,$data);if($this->type=='pgsql'){$s=$this->query($sql.'RETURNING *',array_values($data));return$s?$s->fetchColumn(0):0;}return$this->query($sql,array_values($data))?$this->pdo->lastInsertId():0;
+	$sql = $this->insert_sql($table, $data);
+	
+	// PostgreSQL does not return the ID by default
+	if($this->type == 'pgsql')
+	{
+		// Insert record and return the whole row (the "id" field may not exist)
+		if($statment = $this->query($sql.' RETURNING *', array_values($data)))
+		{
+			// The first column *should* be the ID
+			return $statement->fetchColumn(0);
+		}
+	}
+	
+	// Insert data and return the new row's ID
+	return $this->query($sql, array_values($data)) ? $this->pdo->lastInsertId() : NULL;
 }
 
 
@@ -158,9 +215,15 @@ public function insert($table, $data)
  * @param array $data row data
  * @return string
  */
-public function insert_sql($table,$data)
+public function insert_sql($table, $data)
 {
-	$i=static::$i;return"INSERT INTO $i$table$i ($i".implode("$i,$i",array_keys($data))."$i)VALUES(".rtrim(str_repeat('?,',count($data)),',').')';
+	$i = static::$i;
+	
+	// Column names come from the array keys
+	$columns = implode("$i, $i", array_keys($data));
+	
+	// Build prepared statement SQL
+	return "INSERT INTO $i$table$i ($i".$columns."$i) VALUES (" . rtrim(str_repeat('?, ', count($data)), ', ') . ')';
 }
 
 
@@ -175,24 +238,58 @@ public function insert_sql($table,$data)
  */
 public function update($table, $data, array $where = NULL)
 {
-	$i=static::$i;$q="UPDATE $i$table$i SET $i".implode("$i = ?,$i",array_keys($data))."$i = ? WHERE ";list($a,$b)=self::where($where);return(($stmt=$this->query($q.$a,array_merge(array_values($data),$b)))?$stmt->rowCount():NULL);
+	$i = static::$i;
+	
+	// Column names come from the array keys
+	$columns = implode("$i = ?, $i", array_keys($data));
+	
+	// Build prepared statement SQL
+	$sql = "UPDATE $i$table$i SET $i" . $columns . "$i = ? WHERE ";
+	
+	// Process WHERE conditions
+	list($where, $params) = self::where($where);
+	
+	// Append WHERE conditions to query and statement params
+	if($statement = $this->query($sql . $where, array_merge(array_values($data), $params)))
+	{
+		return $statement->rowCount();
+	}
 }
 
 
 /**
- * Create a basic, single-table SQL query
+ * Create a basic,  single-table SQL query
  *
- * @param string $c columns
- * @param string $t table
- * @param array $w array of where conditions
- * @param int $l limit
- * @param int $o offset
- * @param array $ord array of order by conditions
- * @return array of SQL + values
+ * @param string $columns
+ * @param string $table
+ * @param array $where array of conditions
+ * @param int $limit
+ * @param int $offset
+ * @param array $order array of order by conditions
+ * @return array
  */
-public function select($c, $t, $w = array(), $l = NULL, $o = 0, $ord = array())
+public function select($column, $table, $where = array(), $limit = NULL, $offset = 0, $order = array())
 {
-	$i=static::$i;$s="SELECT $c FROM $i$t$i";list($w,$v)=DB::where($w);if($w)$s.=" WHERE $w";return array($s.DB::order_by($ord).($l?($this->type!='pgsql'?" LIMIT $o,$l":" LIMIT $l OFFSET $o"):''),$v);
+	$i = static::$i;
+	
+	$sql = "SELECT $column FROM $i$table$i";
+	
+	// Process WHERE conditions
+	list($where, $params) = self::where($where);
+	
+	// If there are any conditions, append them
+	if($where) $sql .= " WHERE $where";
+	
+	// Append optional ORDER BY sorting
+	$sql .= DB::order_by($ord);
+	
+	if($limit)
+	{
+		// MySQL/SQLite use a different LIMIT syntax
+		$sql .= $this->type == 'pgsql' ? " LIMIT $limit OFFSET $offset" : " LIMIT $offset, $limit";
+	}
+	
+	return array($sql, $params);
 }
 
 
@@ -204,7 +301,30 @@ public function select($c, $t, $w = array(), $l = NULL, $o = 0, $ord = array())
  */
 public static function where(array $where = NULL)
 {
-	$i=static::$i;$a=$s=array();if($where){foreach($where as$c=>$v){if(is_int($c))$s[]=$v;else{$s[]="$i$c$i = ?";$a[]=$v;}}}return array(join(' AND ',$s),$a);
+	$a = $s = array();
+	
+	if($where)
+	{
+		$i = static::$i;
+		
+		foreach($where as $c => $v)
+		{
+			// Raw WHERE conditions are allowed array(0 => '"a" = NOW()')
+			if(is_int($c))
+			{
+				$s[] = $v;
+			}
+			else
+			{
+				// Column => Value
+				$s[] = "$i$c$i = ?";
+				$a[] = $v;
+			}
+		}
+	}
+	
+	// Return an array with the SQL string + params
+	return array(implode(' AND ', $s), $a);
 }
 
 
@@ -215,22 +335,50 @@ public static function where(array $where = NULL)
  */
 public static function order_by(array $fields = NULL)
 {
-	if($fields){$i=static::$i;$s=' ORDER BY ';foreach($fields as$k=>$v)$s.="$i$k$i $v, ";return substr($s, 0, -2);}
+	if($fields)
+	{
+		$i = static::$i;
+		
+		$sql = ' ORDER BY ';
+		
+		// Add each order clause
+		foreach($fields as $k => $v) $sql .= "$i$k$i $v, ";
+		
+		// Remove ending ", "
+		return substr($sql, 0, -2);
+	}
 }
 
 
 /**
  * Generate the SQL to join two tables
  *
- * @param string $t1 existing table name
- * @param string $t2 the table to join
- * @param boolean $f TRUE join the first table primary key to second table foreign key
- * @param string $j the join type (LEFT,RIGHT,INNER)
+ * @param string $table1 existing table name
+ * @param string $table2 the table to join
+ * @param boolean $foreign TRUE join the first table primary key to second table foreign key
+ * @param string $type the join type (LEFT, RIGHT, INNER)
  * @return string
  */
-public static function join($t1,$t2,$f=1,$j='LEFT')
+public static function join($table1, $table2, $foreign = TRUE, $type = 'LEFT')
 {
-	$i=static::$i;return" $j JOIN $t2 ON ".($f?"$id$t1$id.$i"."id$i = $id$t2$id.$id.{$t1}_id$i":"$i$t1$id.$i{$t2}_id$i = $i$t2$i.$i"."id$i");
+	$i = static::$i;
+	
+	$sql = " $type JOIN $t2 ON ";
+	
+	// Join table1 to table 2 foreign key
+	if($foreign)
+	{
+		$a = $table1;
+		$b = $table2;
+	}
+	else
+	{
+		// Join table1 foreign key to table2 primary key
+		$a = $table2;
+		$b = $table1;
+	}
+	
+	return "$i$a$i.{$i}id$i = $i$b$i.$i{$a}_id$i";
 }
 
 
@@ -242,7 +390,7 @@ public static function join($t1,$t2,$f=1,$j='LEFT')
  */
 public static function in(array $ids)
 {
-	return" in ('".implode("','",array_map('to_int',$ids))."')";
+	return " in ('".implode("', '", array_map('to_int', $ids)) . "')";
 }
 
 }

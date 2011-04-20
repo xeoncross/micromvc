@@ -3,12 +3,12 @@
  * cURL
  *
  * Provides a cURL wrapper for making remote requests such as submitting and 
- * retrieving data from web service APIs.
+ * retrieving data from web service APIs . 
  *
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc.com/license
+ * @license		http://micromvc . com/license
  ********************************** 80 Columns *********************************
  */
 class cURL
@@ -23,7 +23,8 @@ class cURL
  */
 public static function delete($url, array $params = array(), array $options = array())
 {
-	return self::request($url,$params,($options+array(CURLOPT_CUSTOMREQUEST=>'DELETE')));
+	return self::request($url, $params, ($options + array(CURLOPT_CUSTOMREQUEST = >'DELETE')));
+
 }
 
 
@@ -36,7 +37,13 @@ public static function delete($url, array $params = array(), array $options = ar
  */
 public static function get($url, array $params = array(), array $options = array())
 {
-	if ($params){$url.=((stripos($url,'?')!==false)?'&':'?').http_build_query($params,'','&');}return self::request($url,array(),$options);
+	if($params)
+	{
+		// Add GET params to URL
+		$url .= (stripos($url, '?') !== FALSE ? '&' : '?') . http_build_query($params, '', '&');
+	}
+	
+	return self::request($url, array(), $options);
 }
 
 
@@ -49,7 +56,7 @@ public static function get($url, array $params = array(), array $options = array
  */
 public static function post($url, array $params = array(), array $options = array())
 {
-	return self::request($url,$params,($options+array(CURLOPT_POST=>1)));
+	return self::request($url, $params, ($options + array(CURLOPT_POST => 1)));
 }
 
 
@@ -62,7 +69,25 @@ public static function post($url, array $params = array(), array $options = arra
  */
 protected static function request($url, array $params = array(), array $options = array())
 {
-	$ch=curl_init($url);self::setopt($ch,$params,$options);$o=new stdClass;$o->response=curl_exec($ch);$o->error_code=curl_errno($ch);$o->error=curl_error($ch);$o->info=curl_getinfo($ch);curl_close($ch);return$o;
+	$ch = curl_init($url);
+	
+	// Set the connection handle options
+	self::setopt($ch, $params, $options);
+	
+	// Create a response object
+	$o = new stdClass;
+	
+	// Fetch response
+	$o->response = curl_exec($ch);
+	
+	// Get additional request info
+	$o->error_code = curl_errno($ch);
+	$o->error = curl_error($ch);
+	$o->info = curl_getinfo($ch);
+	
+	curl_close($ch);
+	
+	return $o;
 }
 
 
@@ -75,7 +100,16 @@ protected static function request($url, array $params = array(), array $options 
  */
 protected static function setopt($ch, array $params = array(), array $options = array())
 {
-	curl_setopt_array($ch,($options+array(45=>1,42=>0,19913=>1,13=>10,10015=>http_build_query($params,'','&'))));
+	$defaults = array(
+		//CURLOPT_FAILONERROR => 1,	// Fail silently if the HTTP code > 400
+		CURLOPT_HEADER => 0,		// Do not include the response header
+		CURLOPT_RETURNTRANSFER => 1,// Return response instead of printing it
+		CURLOPT_TIMEOUT => 5,		// Number of seconds to allow cURL functions to execute
+		CURLOPT_POSTFIELDS => http_build_query($params, '', '&')
+	);
+	
+	// Connection options override defaults if given
+	curl_setopt_array($ch, $options + $defaults);
 }
 
 
@@ -86,7 +120,9 @@ protected static function setopt($ch, array $params = array(), array $options = 
  */
 public static function headers(array $headers = array())
 {
-	$h=array();foreach($headers as$k=>$v)$h[]="$k: $v";return$h;
+	$h = array();
+	foreach($headers as $k => $v) $h[] = "$k: $v";
+	return $h;
 }
 
 }

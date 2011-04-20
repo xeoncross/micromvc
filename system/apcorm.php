@@ -13,27 +13,27 @@
 class APCORM extends ORM
 {
 
-public static function cache_set($k,$v)
+public static function cache_set($key, $value)
 {
-	apc_store($k,$v,static::$cache);
+	apc_store($key, $value, static::$cache);
 }
 
 
-public static function cache_get($k)
+public static function cache_get($key)
 {
-	return apc_fetch($k);
+	return apc_fetch($key);
 }
 
 
-public static function cache_delete($k)
+public static function cache_delete($key)
 {
-	return apc_delete($k);
+	return apc_delete($key);
 }
 
 
-public static function cache_exists($k)
+public static function cache_exists($key)
 {
-	return apc_exists($k);
+	return apc_exists($key);
 }
 
 }

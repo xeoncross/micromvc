@@ -7,7 +7,7 @@
  * @package		MicroMVC
  * @author		David Pennington
  * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc.com/license
+ * @license		http://micromvc . com/license
  ********************************** 80 Columns *********************************
  */
 class dir
@@ -16,40 +16,63 @@ class dir
 /**
  * Create a recursive directory iterator object
  *
- * @param string $d the directory to load
- * @param boolean $r if recursive is TRUE then subfolders will be included.
+ * @param string $dir the directory to load
+ * @param boolean $recursive to include subfolders 
  * @return object
  */
-static function load($d,$r=FALSE)
+static function load($dir, $recursive = FALSE)
 {
-	$i = new RecursiveDirectoryIterator($d);return ($r?new RecursiveIteratorIterator($i,RecursiveIteratorIterator::SELF_FIRST):$i);
+	$i = new RecursiveDirectoryIterator($dir);
+	
+	if(! $recursive) return $i;
+	
+	return new RecursiveIteratorIterator($i, RecursiveIteratorIterator::SELF_FIRST);
 }
 
 
 /**
- * Create an array of all (or just one of) file/folders/link objects in a directory.
+ * Create an array of all (or just one of) file/folders/link objects in a directory. 
  *
- * @param string $d the directory to load
- * @param boolean $r if recursive is TRUE then subfolders will be included.
+ * @param string $dir the directory to load
+ * @param boolean $recursive to include subfolders 
  * @param string $only set to one of "file", "dir", or "link" to filter results
  * @return array
  */
-static function contents($d, $r = FALSE, $only = FALSE)
+static function contents($dir, $recursive = FALSE, $only = FALSE)
 {
-	$d=self::load($d,$r);if(!$only)return $d;$only='is'.$only;$r=array();foreach($d as$f)if($f->$only())$r[]=$f;return$r;
+	$dir = self::load($dir, $recursive);
+	
+	if(!$only) return $dir;
+	
+	$only = "is$only";
+	
+	$results = array();
+	
+	foreach($dir as $file)
+	{
+		if($file->$only()) $results[] = $file;
+	}
+	
+	return $results;
 }
 
 
 /**
- * Make sure that a directory exists and is writable by the current PHP process.
+ * Make sure that a directory exists and is writable by the current PHP process. 
  *
- * @param string $d the directory to load
+ * @param string $dir the directory to load
  * @param string $chmod
  * @return boolean
  */
-static function usable($d, $chmod = '0744')
+static function usable($dir, $chmod = '0744')
 {
-	if(!is_dir($d)&&!mkdir($d,$chmod,TRUE))return FALSE;if(!is_writable($d)&&!chmod($d,$chmod))return FALSE;return TRUE;
+	// If it doesn't exist, and can't be made
+	if(! is_dir($dir) AND ! mkdir($dir, $chmod, TRUE)) return FALSE;
+	
+	// If it isn't writable, and can't be made writable
+	if(! is_writable($dir) AND !chmod($dir, $chmod)) return FALSE;
+	
+	return TRUE;
 }
 
 }

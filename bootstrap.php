@@ -4,10 +4,10 @@
  *
  * This file contains all common system functions and View and Controller classes.
  *
- * @packageMicroMVC
- * @authorDavid Pennington
- * @copyright(c) 2010 MicroMVC Framework
- * @licensehttp://micromvc.com/license
+ * @package		MicroMVC
+ * @author		David Pennington
+ * @copyright	(c) 2011 MicroMVC Framework
+ * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
 
@@ -18,20 +18,27 @@
  */
 function benchmark()
 {
-	static$t,$m;$a=array((microtime(true)-$t),(memory_get_usage()-$m));$t=microtime(true);$m=memory_get_usage();return$a;
+	static $time, $memory;
+	$result = array((microtime(true) - $time), (memory_get_usage() - $memory));
+	$time = microtime(true);
+	$mmemory = memory_get_usage();
+	return $result;
 }
 
 
 /**
  * System registry object for storing global values
  *
- * @param string $k the object name
- * @param mixed $v the object value
+ * @param string $key the object name
+ * @param mixed $value the object value
  * @return mixed
  */
-function registry($k,$v=null)
+function registry($key, $value = null)
 {
-	static$o;return(func_num_args()>1?$o[$k]=$v:(isset($o[$k])?$o[$k]:NULL));
+	static $data;
+	
+	// We can't check $value here because they may be setting it to NULL
+	return (func_num_args() > 1? $data[$key] = $value : (isset($data[$key]) ? $data[$key] : NULL));
 }
 
 
@@ -39,11 +46,40 @@ function registry($k,$v=null)
  * Set a message to show to the user (error, warning, success, or message).
  *
  * @param string $type of message
- * @param string $v the message to store
+ * @param string $value the message to store
  */
-function message($type = NULL, $v = NULL)
+function message($type = NULL, $value = NULL)
 {
-	static$m=array();$h='';if($v)$m[$type][]=$v;elseif($type){if(isset($m[$type]))foreach($m[$type] as$v)$h.="<div class=\"$type\">$v</div>";}else foreach($m as$t=>$d)foreach($d as$v)$h.="<div class=\"$t\">$v</div>";return$h;
+	static $message = array();
+	
+	$h = '';
+	
+	if($value)
+	{
+		$message[$type][] = $value;
+	}
+	elseif($type)
+	{
+		if(isset($message[$type]))
+		{
+			foreach($message[$type] as $value)
+			{
+				$h .= "<div class = \"$type\">$value</div>";
+			}
+		}
+	}
+	else
+	{
+		foreach($message as $type => $data)
+		{
+			foreach($data as $value)
+			{
+				$h .= "<div class = \"$type\">$value</div>";
+			}
+		}
+	}
+	
+	return $h;
 }
 
 
@@ -54,35 +90,63 @@ function message($type = NULL, $v = NULL)
  * @param mixed $v the optional value to pass to each callback
  * @param mixed $callback the method or function to call - FALSE to remove all callbacks for event
  */
-function event($k, $v = NULL, $callback = NULL)
+function event($key, $value = NULL, $callback = NULL)
 {
-	static$e;if($callback!==NULL)if($callback)$e[$k][]=$callback;else unset($e[$k]);elseif(isset($e[$k]))foreach($e[$k]as$f)$v=call_user_func($f,$v);return$v;
+	static $events;
+	
+	// Adding or removing a callback?
+	if($callback !== NULL)
+	{
+		if($callback)
+		{
+			$events[$key][] = $callback;
+		}
+		else
+		{
+			unset($events[$key]);
+		}
+	}
+	elseif(isset($events[$key])) // Fire a callback
+	{
+		foreach($events[$key] as $function)
+		{
+			$value = call_user_func($function, $value);
+		}
+		return $value;
+	}
 }
 
 
 /**
  * Fetch a config value
  *
- * @param string $k the language key name
- * @param string $m the module name
+ * @param string $key the config key name
+ * @param string $module the module name
  * @return string
  */
-function config($k,$m='system')
+function config($key, $module = 'system')
 {
-	static $c;$c[$m]=empty($c[$m])?require(SP.($m!='system'?"$m/":'').'config'.EXT):$c[$m];return($k?$c[$m][$k]:$c[$m]);
+	static $c;
+	
+	if(empty($c[$module]))
+	{
+		$c[$module] = require(SP . ($module != 'system' ? "$module/" : '') . 'config' . EXT);
+	}
+	
+	return ($key ? $c[$module][$key] : $c[$module]);
 }
 
 
 /**
  * Fetch the language text for the given line.
  *
- * @param string $k the language key name
- * @param string $m the module name
+ * @param string $key the language key name
+ * @param string $module the module name
  * @return string
  */
-function lang($k,$m='system')
+function lang($key, $module = 'system')
 {
-	return lang::get($k,$m);
+	return lang::get($key, $module);
 }
 
 
@@ -94,9 +158,36 @@ function lang($k,$m='system')
  * @param mixed $d the default if the segment isn't found
  * @return string
  */
-function url($k = NULL, $d = NULL)
+function url($key = NULL, $default = NULL)
 {
-	static$s;if(!$s){foreach(array('REQUEST_URI','PATH_INFO','ORIG_PATH_INFO')as$v){preg_match('/^\/[\w\-~\/\.+%]{1,600}/',server($v),$p);if(!empty($p)){$s=explode('/',trim($p[0],'/'));break;}}}if($s)return($k!==NULL?(isset($s[$k])?$s[$k]:$d):implode('/',$s));
+	static $uri = NULL;
+	
+	if($uri === NULL)
+	{
+		foreach(array('REQUEST_URI', 'PATH_INFO', 'ORIG_PATH_INFO') as $v)
+		{
+			preg_match('/^\/[\w\-~\/\.+%]{1,600}/', server($v), $parts);
+			
+			if( ! empty($parts[0]))
+			{
+				$uri = explode('/', trim($parts[0], '/'));
+				break;
+			}
+		}
+		
+		// Still nothing? Then mark as empty for the next call
+		if($uri === NULL)
+		{
+			$uri = '';
+		}
+	}
+	
+	if($uri)
+	{
+		return($key !== NULL ? (isset($uri[$key]) ? $uri[$key] : $default) : implode('/', $uri));
+	}
+	
+	return $default;
 }
 
 
@@ -107,7 +198,8 @@ function url($k = NULL, $d = NULL)
  */
 function __autoload($class)
 {
-	require(mb_strtolower(SP.(strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
+	// System classes will *not* have an underscore
+	require (mb_strtolower(SP . (strpos($class, '_') === FALSE ? 'system/' : '') . str_replace('_', '/', $class . EXT)));
 }
 
 
@@ -120,20 +212,12 @@ function __autoload($class)
  */
 function dump()
 {
-	$s='';foreach(func_get_args()as$v){$s.='<pre>'.h($v===NULL?'NULL':(is_scalar($v)?$v:print_r($v,1)))."</pre>\n";}return$s;
-}
-
-
-/**
- * Safely get a value or return default if not set
- *
- * @param mixed $v value to get
- * @param mixed $d default if value is not set
- * @return mixed
- */
-function v(&$v, $d = NULL)
-{
-	return isset($v)?$v:$d;
+	$string = '';
+	foreach(func_get_args() as $value)
+	{
+		$string .= '<pre>' . h($value === NULL ? 'NULL' : (is_scalar($value) ? $value : print_r($value, TRUE))) . "</pre>\n";
+	}
+	return $string;
 }
 
 
@@ -146,9 +230,13 @@ function v(&$v, $d = NULL)
  * @param boolean $s true to require string type
  * @return mixed
  */
-function post($k, $d = NULL, $s = FALSE)
+function post($key, $default = NULL, $string = FALSE)
 {
-	if(isset($_POST[$k]))return$s?str($_POST[$k],$d):$_POST[$k];return$d;
+	if(isset($_POST[$key]))
+	{
+		return $string ? str($_POST[$key], $default) : $_POST[$key];
+	}
+	return $default;
 }
 
 
@@ -161,9 +249,13 @@ function post($k, $d = NULL, $s = FALSE)
  * @param boolean $s true to require string type
  * @return mixed
  */
-function get($k, $d = NULL, $s = FALSE)
+function get($key, $default = NULL, $string = FALSE)
 {
-	if(isset($_GET[$k]))return$s?str($_GET[$k],$d):$_GET[$k];return$d;
+	if(isset($_GET[$key]))
+	{
+		return $string ? str($_GET[$key], $default) : $_GET[$key];
+	}
+	return $default;
 }
 
 
@@ -177,7 +269,7 @@ function get($k, $d = NULL, $s = FALSE)
  */
 function server($k, $d = NULL)
 {
-	return isset($_SERVER[$k])?$_SERVER[$k]:$d;
+	return isset($_SERVER[$k]) ? $_SERVER[$k] : $d;
 }
 
 
@@ -191,7 +283,7 @@ function server($k, $d = NULL)
  */
 function session($k, $d = NULL)
 {
-	return isset($_SESSION[$k])?$_SESSION[$k]:$d;
+	return isset($_SESSION[$k]) ? $_SESSION[$k] : $d;
 }
 
 
@@ -202,7 +294,7 @@ function session($k, $d = NULL)
  */
 function token()
 {
-	return md5(str_shuffle(chr(mt_rand(32, 126)).uniqid().microtime(TRUE)));
+	return md5(str_shuffle(chr(mt_rand(32, 126)) . uniqid() . microtime(TRUE)));
 }
 
 
@@ -212,9 +304,22 @@ function token()
  * @param string $m the message to save
  * @return bool
  */
-function log_message($m)
+function log_message($message)
 {
-	if(!$fp=@fopen(SP.config('log_path').date('Y-m-d').'.log','a'))return 0;$m=date('H:i:s ').h(server('REMOTE_ADDR'))." $m\n";flock($fp,LOCK_EX);fwrite($fp,$m);flock($fp,LOCK_UN);fclose($fp);return 1;
+	if(! $fp = @fopen(SP . config('log_path') . date('Y-m-d') . '.log', 'a'))
+	{
+		return FALSE;
+	}
+	
+	// Append date and IP to log message
+	$message = date('H:i:s ') . h(server('REMOTE_ADDR')) . " $message\n";
+	
+	flock($fp, LOCK_EX);
+	fwrite($fp, $m);
+	flock($fp, LOCK_UN);
+	fclose($fp);
+	
+	return TRUE;
 }
 
 
@@ -225,9 +330,10 @@ function log_message($m)
  * @param int $c the HTTP status code
  * @param string $method either location or redirect
  */
-function redirect($u='',$c=302,$m='location')
+function redirect($uri = '', $code = 302, $method = 'location')
 {
-	$u=site_url($u);header($m=='refresh'?"Refresh:0;url=$u":"Location: $u",TRUE,$c);
+	$uri = site_url($uri);
+	header($method == 'refresh' ? "Refresh:0;url = $uri" : "Location: $uri", TRUE, $code);
 }
 
 
@@ -236,13 +342,25 @@ function redirect($u='',$c=302,$m='location')
  * If the value is not a valid numeric value then min will be returned.
  *
  * @param int $int the value to convert
- * @param int $default the default value to assign
  * @param int $min the lowest value allowed
+ * @param int $max the heighest value allowed
  * @return int|null
  */
 function int($int, $min = NULL, $max = NULL)
 {
-	$i=is_numeric($int)?(int)$int:$min;if($min!==NULL&&$i<$min)$i=$min;if($max!==NULL&&$i>$max)$i=$max;return$i;
+	$int = is_int($int) OR ctype_digit($int) ? (int) $int : $min;
+	
+	if($min !== NULL AND $int < $min)
+	{
+		$int = $min;
+	}
+	
+	if($max !== NULL AND $int > $max)
+	{
+		$int = $max;
+	}
+	
+	return $int;
 }
 
 
@@ -255,7 +373,7 @@ function int($int, $min = NULL, $max = NULL)
  */
 function str($str, $default = '')
 {
-	return(is_scalar($str)?(string)$str:$default);
+	return is_scalar($str) ? (string) $str : $default;
 }
 
 
@@ -267,7 +385,7 @@ function str($str, $default = '')
  */
 function site_url($uri = NULL)
 {
-	return (strpos($uri,'://')===FALSE?DOMAIN.'/':'').$uri;
+	return (strpos($uri, '://') === FALSE ? DOMAIN . '/' : '') . $uri;
 }
 
 
@@ -279,21 +397,9 @@ function site_url($uri = NULL)
  */
 function theme_url($uri = NULL)
 {
-	return site_url(config('theme').'/'. $uri);
+	return site_url(config('theme') . '/' . $uri);
 }
 
-
-/**
- * Return the full URL to a module view file
- *
- * @param string $uri
- * @return string
- *
-function module_url($uri, $module)
-{
-	return site_url("$module/view/$uri");
-}
-*/
 
 /**
  * Convert a string from one encoding to another encoding
@@ -304,9 +410,16 @@ function module_url($uri, $module)
  * @param string $from encoding that string is in
  * @return string
  */
-function encode($string,$to='UTF-8',$from='UTF-8')
+function encode($string, $to = 'UTF-8', $from = 'UTF-8')
 {
-	return$to==='UTF-8'&&is_ascii($string)?$string:@iconv($from,$to.'//TRANSLIT//IGNORE',$string);
+	// ASCII is already valid UTF-8
+	if($to == 'UTF-8' AND is_ascii($string))
+	{
+		return $string;
+	}
+	
+	// Convert the string
+	return @iconv($from, $to . '//TRANSLIT//IGNORE', $string);
 }
 
 
@@ -318,7 +431,7 @@ function encode($string,$to='UTF-8',$from='UTF-8')
  */
 function is_ascii($string)
 {
-	return!preg_match('/[^\x00-\x7F]/S',$string);
+	return!preg_match('/[^\x00-\x7F]/S', $string);
 }
 
 
@@ -330,7 +443,7 @@ function is_ascii($string)
  */
 function base64_url_encode($string = NULL)
 {
-	return strtr(base64_encode($string),'+/=','-_~');
+	return strtr(base64_encode($string), '+/=', '-_~');
 }
 
 
@@ -342,7 +455,7 @@ function base64_url_encode($string = NULL)
  */
 function base64_url_decode($string = NULL)
 {
-	return base64_decode(strtr($string,'-_~','+/='));
+	return base64_decode(strtr($string, '-_~', '+/='));
 }
 
 
@@ -354,35 +467,20 @@ function base64_url_decode($string = NULL)
  */
 function h($data)
 {
-	return htmlspecialchars($data,ENT_QUOTES,'utf-8');
+	return htmlspecialchars($data, ENT_QUOTES, 'utf-8');
 }
 
 
 /**
- * Checks that the given IP address is not a bad bot listed in the Http:BL
- * 
- * @see http://www.projecthoneypot.org/
- * @param string $ip address (IP4 only!)
- * @param string $key Http:BL API key
- * @param integer $threat_level bettween 0 and 255
- * @param integer $max_age number of days since last activity
- */
-function bad_bot($ip, $key, $threat_level = 20, $max_age = 30)
-{
-	if($ip=='127.0.0.1')return;$ip=implode('.',array_reverse(explode('.',$ip)));if($ip=gethostbyname("$key.$ip.dnsbl.httpbl.org")){$ip=explode('.',$ip);return$ip[0]==127&&$ip[3]&&$ip[2]>=$threat_level&&$ip[1]<=$max_age;}
-}
-
-
-/** USE TIME CLASS
  * Return a SQLite/MySQL/PostgreSQL datetime string
  * 
- * @param int $t timestamp
- *
-function sql_date($t = NULL)
+ * @param int $timestamp
+ */
+function sql_date($timestamp = NULL)
 {
-	return date('Y-m-d H:i:s',$t?$t:time());
+	return date('Y-m-d H:i:s', $timestamp ?: time());
 }
-*/
+
 
 /*
  * Core Classes
@@ -402,23 +500,43 @@ public $template = 'layout';
  */
 public function __construct()
 {
-	if(config('debug_mode')){set_error_handler(array('error','handler'));register_shutdown_function(array('error','fatal'));set_exception_handler(array('error','exception'));}
+	if(config('debug_mode'))
+	{
+		// When debugging, enable complex error handling
+		set_error_handler(array('error', 'handler'));
+		register_shutdown_function(array('error', 'fatal'));
+		set_exception_handler(array('error', 'exception'));
+	}
 }
+
 
 /**
  * Show a 404 error page
  */
 public function show_404()
 {
-	headers_sent()||header('HTTP/1.0 404 Page Not Found');$this->content=new View('404');
+	headers_sent() OR header('HTTP/1.0 404 Page Not Found');
+	$this->content = new View('404');
 }
+
 
 /**
  * Render the final layout template
  */
 public function render()
 {
-	headers_sent()||header('Content-Type: text/html; charset=utf-8');$l=new View($this->template);$l->set((array)$this);print$l;$l=0;if(config('debug_mode'))print new View('debug','system');
+	headers_sent() OR header('Content-Type: text/html; charset = utf-8');
+	
+	$layout = new View($this->template);
+	$layout->set((array) $this);
+	print $layout;
+	
+	$layout = NULL;
+	
+	if(config('debug_mode'))
+	{
+		print new View('debug', 'system');
+	}
 }
 
 }
@@ -431,26 +549,33 @@ public function render()
 class View
 {
 
+private $__view = NULL;
+
 /**
  * Returns a new view object for the given view.
  *
- * @param string $f the view file to load
- * @param string $m the module name (blank for current theme)
+ * @param string $file the view file to load
+ * @param string $module name (blank for current theme)
  */
-public function __construct($f, $m = NULL)
+public function __construct($file, $module = NULL)
 {
-	$this->__f=SP.($m?$m:config('theme'))."/view/".$f.EXT;
+	$this->__view = SP . ($module ? $module : config('theme')) . "/view/" . $file . EXT;
 }
+
 
 /**
  * Set an array of values
  *
- * @param array $a array of values
+ * @param array $array of values
  */
-public function set($a)
+public function set($array)
 {
-	foreach($a as$k=>$v)$this->$k=$v;
+	foreach($array as $k => $v)
+	{
+		$this->$k = $v;
+	}
 }
+
 
 /**
  * Return the view's HTML
@@ -458,7 +583,10 @@ public function set($a)
  */
 public function __toString()
 {
-	ob_start();extract((array)$this);require$__f;return ob_get_clean();
+	ob_start();
+	extract((array) $this);
+	require $this->__view;
+	return ob_get_clean();
 }
 
 }

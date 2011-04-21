@@ -2,6 +2,8 @@
 // MicroMVC unit test controller
 class Unittest_Controller_Index extends Controller
 {
+	//public function __construct(){}
+	
 	public function action()
 	{
 		// Run each test
@@ -27,7 +29,16 @@ class Unittest_Controller_Index extends Controller
 	// Override the default layout to use our custom unittest template
 	public function render()
 	{
-		headers_sent()||header('Content-Type: text/html; charset=utf-8');$l=new View('layout','unittest');$l->set((array)$this);print$l;$l=0;if(config('debug_mode'))print new View('debug','system');
+		headers_sent() OR header('Content-Type: text/html; charset=utf-8');
+		$view = new View('layout','unittest');
+		$view->set((array)$this);
+		print $view;
+		$view = 0;
+		
+		if(config('debug_mode'))
+		{
+			print new View('debug','system');
+		}
 	}
 	
 	
@@ -237,4 +248,21 @@ class Unittest_Controller_Index extends Controller
 		return TRUE;
 	}
 	
+	public function xml()
+	{
+		// Create object
+		$object = new StdClass;
+		$object->array = array('with','values');
+		$object->object = new StdClass;
+		$object->object->property = 'value';
+		
+		// Convert to SimpleXML
+		$xml = XML::from($object);
+		
+		// Expected output
+		$str = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<data><element>with</element>"
+			."<element>values</element><object><property>value</property></object></data>\n";
+		
+		return $xml->asXML() === $str;
+	}
 }

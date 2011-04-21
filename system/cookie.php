@@ -25,7 +25,7 @@ public static function get($key, $config = NULL)
 	// Use default config settings if needed
 	$config = $config ?: config('cookie');
 	
-	if(isset($_COOKIE[$key])
+	if(isset($_COOKIE[$key]))
 	{
 		// Decrypt cookie using cookie key
 		if($v = json_decode(Cipher::decrypt(base64_decode($_COOKIE[$key]), $config['key'])))
@@ -48,19 +48,19 @@ public static function get($key, $config = NULL)
  * @param array $config settings
  * return boolean
  */
-public static function set($key, $value, $config = NULL)
+public static function set($name, $value, $config = NULL)
 {
 	// Use default config settings if needed
 	extract($config ?: config('cookie'));
 	
 	// You must supply a key!
-	empty($key) AND trigger_error(lang('cookie_no_key'));
+	empty($name) AND trigger_error(lang('cookie_no_key'));
 	
 	// If the cookie is being removed we want it left blank
 	$value = $value ? base64_encode(Cipher::encrypt(json_encode(array(time(), $value)), $key)) : '';
 	
 	// Save cookie to user agent
-	setcookie($cookie, $value, $expires, $path, $domain, $secure, $httponly);
+	setcookie($name, $value, $expires, $path, $domain, $secure, $httponly);
 }
 
 }

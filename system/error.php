@@ -40,7 +40,7 @@ public static function handler($code, $error, $file = 0, $line = 0)
 	$view = new View('error', 'system');
 	$view->error = $error;
 	$view->title = lang($code);
-	print $v;
+	print $view;
 	
 	log_message("[$code] $error [$file] ($line)");
 	return TRUE;
@@ -90,7 +90,7 @@ public static function source($file, $number, $padding = 5)
 	foreach($lines as $i => $line)
 	{
 		$html .= '<b>' . sprintf('%' . strlen($number + $padding) . 'd', $i + 1) . '</b> '
-			. ($i + 1 == $number ? '<em>' . h($rline) . '</em>' : h($line));
+			. ($i + 1 == $number ? '<em>' . h($line) . '</em>' : h($line));
 	}
 	return $html;
 }

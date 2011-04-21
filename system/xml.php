@@ -2,36 +2,53 @@
 /**
  * XML
  *
- * Converts any variable type (arrays, objects, strings) to a SimpleXML object . 
+ * Converts any variable type (arrays, objects, strings) to a SimpleXML object.
  *
  * @package		MicroMVC
  * @author		David Pennington
- * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc . com/license
+ * @copyright	(c) 2011 MicroMVC Framework
+ * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
 class XML
 {
-
+	
 /**
  * Convert any given variable into a SimpleXML object
  *
- * @param mixed $o variable object to convert
- * @param string $r root element name
- * @param object $x xml object
- * @param string $u unknown element name for numeric keys
- * @param string $d XML doctype
+ * @param mixed $object variable object to convert
+ * @param string $root root element name
+ * @param object $xml xml object
+ * @param string $unknown element name for numeric keys
+ * @param string $doctype XML doctype
  */
-public static function from($o, $r = 'data', $x = NULL, $u = 'element', $d = "<?xml version = '1.0' encoding = 'utf-8'?>")
+public static function from($object, $root = 'data', $xml = NULL, $unknown = 'element', $doctype = "<?xml version = '1.0' encoding = 'utf-8'?>")
 {
-	is_null($x)&&$x = simplexml_load_string("$d<$r/>");
-foreach((array)$o as$k = >$v){is_numeric($k)&&$k = $u;
-if(is_scalar($v))$x->addChild($k, h($v));
-else{$v = (array)$v;
-$n = array_diff_key($v, array_keys(array_keys($v)))?$x->addChild($k):$x;
-to_xml($v, $k, $n);
-}}return$x;
-
+	if(is_null($xml))
+	{
+		$xml = simplexml_load_string("$doctype<$root/>");
+	}
+	
+	foreach((array) $object as $k => $v)
+	{
+		if(is_int($k))
+		{
+			$k = $unknown;
+		}
+		
+		if(is_scalar($v))
+		{
+			$xml->addChild($k, h($v));
+		}
+		else
+		{
+			$v = (array) $v;
+			$node = array_diff_key($v, array_keys(array_keys($v))) ? $xml->addChild($k) : $xml;
+			XML::from($v, $k, $node);
+		}
+	}
+	
+	return $xml;
 }
 
 }

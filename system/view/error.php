@@ -20,7 +20,7 @@ code.source {
 	padding: 10px;
 	border: 1px solid #bedbeb;
 }
-.highlight_line {background: #ffc;}
+.code.source em { background: #ffc; }
 </style>
 
 <div class="system_error">

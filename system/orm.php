@@ -151,9 +151,9 @@ public function __unset($k)
  */
 public function reload()
 {
-	$key = $this->k()
+	$key = $this->k();
 	$this->data = $this->changed = $this->related = array();
-	$this->loaded = 0;
+	$this->loaded = FALSE;
 	if(! $key) return;
 	$this->data[static::$key] = $key;
 	return $this->load();

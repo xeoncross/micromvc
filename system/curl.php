@@ -7,8 +7,8 @@
  *
  * @package		MicroMVC
  * @author		David Pennington
- * @copyright	(c) 2010 MicroMVC Framework
- * @license		http://micromvc . com/license
+ * @copyright	(c) 2011 MicroMVC Framework
+ * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
 class cURL
@@ -121,7 +121,10 @@ protected static function setopt($ch, array $params = array(), array $options = 
 public static function headers(array $headers = array())
 {
 	$h = array();
-	foreach($headers as $k => $v) $h[] = "$k: $v";
+	foreach($headers as $k => $v) 
+	{
+		$h[] = "$k: $v";
+	}
 	return $h;
 }
 

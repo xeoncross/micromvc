@@ -1,4 +1,4 @@
-<div style="margin: 60px 0;padding:2em;background:#ECF5FA;color:#000;clear:both;">
+<div style="margin: 60px 0; padding:2em; background:#ECF5FA; color:#000; clear:both;">
 
 <b>Memory Usage</b>
 <pre>

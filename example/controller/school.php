@@ -4,11 +4,8 @@ class Example_Controller_School extends Controller
 {
 	public function action()
 	{
-		// Load config settings
-		$config = config('database');
-		
 		// Load database
-		$db = new DB($config['default']);
+		$db = new DB(config('database'));
 		
 		// You can also save a copy of the object in the 
 		// registry in case something needs it later...
@@ -19,7 +16,7 @@ class Example_Controller_School extends Controller
 		
 		// You can over-ride this in certain models if
 		// needed allowing you to use multiple databases.
-		// Model_Name::$db = $otherdbobject;
+		// Model_Name::$db = $db_2;
 		
 		// New Dorm
 		$d = new Example_Model_Dorm();

@@ -21,24 +21,20 @@ function benchmark()
 	static $time, $memory;
 	$result = array((microtime(true) - $time), (memory_get_usage() - $memory));
 	$time = microtime(true);
-	$mmemory = memory_get_usage();
+	$memory = memory_get_usage();
 	return $result;
 }
 
 
 /**
- * System registry object for storing global values
+ * System registry for storing global objects and services
  *
- * @param string $key the object name
- * @param mixed $value the object value
- * @return mixed
+ * @return object
  */
-function registry($key, $value = null)
+function registry()
 {
-	static $data;
-	
-	// We can't check $value here because they may be setting it to NULL
-	return (func_num_args() > 1? $data[$key] = $value : (isset($data[$key]) ? $data[$key] : NULL));
+	static $service;
+	return $service ? $service : ($service = new Service);
 }
 
 
@@ -166,7 +162,7 @@ function url($key = NULL, $default = NULL)
 	{
 		foreach(array('REQUEST_URI', 'PATH_INFO', 'ORIG_PATH_INFO') as $v)
 		{
-			preg_match('/^\/[\w\-~\/\.+%]{1,600}/', server($v), $parts);
+			preg_match('/^\/[\w\-~=\/\.+%]{1,600}/', server($v), $parts);
 			
 			if( ! empty($parts[0]))
 			{
@@ -315,7 +311,7 @@ function log_message($message)
 	$message = date('H:i:s ') . h(server('REMOTE_ADDR')) . " $message\n";
 	
 	flock($fp, LOCK_EX);
-	fwrite($fp, $m);
+	fwrite($fp, $message);
 	flock($fp, LOCK_UN);
 	fclose($fp);
 	
@@ -385,7 +381,7 @@ function str($str, $default = '')
  */
 function site_url($uri = NULL)
 {
-	return (strpos($uri, '://') === FALSE ? DOMAIN . '/' : '') . $uri;
+	return (strpos($uri, '://') === FALSE ? DOMAIN . '/' : '') . ltrim($uri, '/');
 }
 
 
@@ -397,7 +393,7 @@ function site_url($uri = NULL)
  */
 function theme_url($uri = NULL)
 {
-	return site_url(config('theme') . '/' . $uri);
+	return site_url(config('theme') . '/' . ltrim($uri, '/'));
 }
 
 
@@ -481,114 +477,4 @@ function sql_date($timestamp = NULL)
 	return date('Y-m-d H:i:s', $timestamp ?: time());
 }
 
-
-/*
- * Core Classes
- */
-
-
-/**
- * Controller Class
- */
-class Controller
-{
-
-public $template = 'layout';
-
-/**
- * Override PHP's default error handling if in debug mode
- */
-public function __construct()
-{
-	if(config('debug_mode'))
-	{
-		// When debugging, enable complex error handling
-		set_error_handler(array('error', 'handler'));
-		register_shutdown_function(array('error', 'fatal'));
-		set_exception_handler(array('error', 'exception'));
-	}
-}
-
-
-/**
- * Show a 404 error page
- */
-public function show_404()
-{
-	headers_sent() OR header('HTTP/1.0 404 Page Not Found');
-	$this->content = new View('404');
-}
-
-
-/**
- * Render the final layout template
- */
-public function render()
-{
-	headers_sent() OR header('Content-Type: text/html; charset = utf-8');
-	
-	$layout = new View($this->template);
-	$layout->set((array) $this);
-	print $layout;
-	
-	$layout = NULL;
-	
-	if(config('debug_mode'))
-	{
-		print new View('debug', 'system');
-	}
-}
-
-}
-
-
-/**
- * View Class
- * @author http://github.com/tweetmvc/tweetmvc-app
- */
-class View
-{
-
-private $__view = NULL;
-
-/**
- * Returns a new view object for the given view.
- *
- * @param string $file the view file to load
- * @param string $module name (blank for current theme)
- */
-public function __construct($file, $module = NULL)
-{
-	$this->__view = SP . ($module ? $module : config('theme')) . "/view/" . $file . EXT;
-}
-
-
-/**
- * Set an array of values
- *
- * @param array $array of values
- */
-public function set($array)
-{
-	foreach($array as $k => $v)
-	{
-		$this->$k = $v;
-	}
-}
-
-
-/**
- * Return the view's HTML
- * @return string
- */
-public function __toString()
-{
-	ob_start();
-	extract((array) $this);
-	require $this->__view;
-	return ob_get_clean();
-}
-
-}
-
-// END
+// End

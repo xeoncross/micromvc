@@ -122,9 +122,9 @@ public function links()
 	$end = (($this->current + $this->links) < $this->total) ? $this->current + $this->links : $this->total;
 	
 	$html = '';
-	for($i = $s; $i <= $e; ++$i)
+	for($i = $start; $i <= $end; ++$i)
 	{
-		if($c == $i)
+		if($this->current == $i)
 		{
 			$html .= html::tag('a', $i, array('class' => 'current'));
 		}

@@ -79,7 +79,7 @@ public function difference($diff = 'NOW', $length = 1)
 	$diff = $this->diff($diff);
 	$units = array('y' => 'year', 'm' =>'month', 'd' =>'day', 'h' => 'hour', 'i' => 'minute', 's' =>'second');
 	$result = array();
-	foreach($unit as $k => $name)
+	foreach($units as $k => $name)
 	{
 		$value = $diff->$k;
 		
@@ -102,7 +102,7 @@ public function humanFriendly($format = 'M j, Y \a\t g:ia')
 	$diff = $this->diff();
 	$timestamp = $this->getTimestamp();
 	
-	if( ! $diff->day)
+	if( ! $diff->d)
 	{
 		$str = $this->difference();
 		return $timestamp < time() ? "$str ago" : "in $str";

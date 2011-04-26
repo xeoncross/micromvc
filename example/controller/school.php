@@ -2,6 +2,7 @@
 // Shows an example of using the ORM
 class Example_Controller_School extends Controller
 {
+
 	public function action()
 	{
 		// Load database
@@ -14,9 +15,9 @@ class Example_Controller_School extends Controller
 		// Set default database object for all models
 		ORM::$db = $db;
 		
-		// You can over-ride this in certain models if
-		// needed allowing you to use multiple databases.
-		// Model_Name::$db = $db_2;
+		// You can over-ride this in certain models if needed, 
+		// allowing you to use multiple databases.
+		// Model_Name::$db = new DB(config('other_database'));
 		
 		// New Dorm
 		$d = new Example_Model_Dorm();

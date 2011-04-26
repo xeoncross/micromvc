@@ -2,10 +2,10 @@
 
 class Example_Model_Dorm extends ORM
 {
-	public static $t = 'dorm';
-	public static $f = 'dorm_id';
+	public static $table = 'dorm';
+	public static $foreign_key = 'dorm_id';
 	
-	public static $h = array(
+	public static $has = array(
 		'students' => 'Example_Model_Student',
 	);
 	

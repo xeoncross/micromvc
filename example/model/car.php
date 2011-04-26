@@ -2,10 +2,10 @@
 
 class Example_Model_Car extends ORM
 {
-	public static $t = 'car';
-	public static $f = 'car_id';
+	public static $table = 'car';
+	public static $foreign_key = 'car_id';
 	
-	public static $b = array(
+	public static $belongs_to = array(
 		'student' => 'Example_Model_Student',
 	);
 	

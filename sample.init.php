@@ -28,3 +28,20 @@ iconv_set_encoding("internal_encoding", "UTF-8");
 // multibyte encoding
 mb_internal_encoding('UTF-8');
 
+/*
+// Set the database loading logic
+service()->db = function($name = 'database')
+{
+	// Load database
+	$db = new DB(config($name));
+	
+	// Set default ORM database connection
+	if(empty(ORM::$db))
+	{
+		ORM::$db = $db;
+	}
+	
+	return $db;
+}
+*/
+

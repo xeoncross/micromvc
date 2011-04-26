@@ -18,13 +18,14 @@ public $pdo = NULL;
 
 public $type = NULL;
 
+public $i = '"';
+
 protected $config = array();
 
 public static $queries = array();
 
 public static $last_query = NULL;
 
-public static $i = '"';
 
 
 /**
@@ -41,7 +42,7 @@ public function __construct(array $config)
 	$this->config = $config;
 	
 	// MySQL uses a non-standard column identifier
-	if($this->type == 'mysql') static::$i = '`';
+	if($this->type == 'mysql') $this->i = '`';
 }
 
 
@@ -217,7 +218,7 @@ public function insert($table, array $data)
  */
 public function insert_sql($table, $data)
 {
-	$i = static::$i;
+	$i = $this->i;
 	
 	// Column names come from the array keys
 	$columns = implode("$i, $i", array_keys($data));
@@ -238,7 +239,7 @@ public function insert_sql($table, $data)
  */
 public function update($table, $data, array $where = NULL)
 {
-	$i = static::$i;
+	$i = $this->i;
 	
 	// Column names come from the array keys
 	$columns = implode("$i = ?, $i", array_keys($data));
@@ -247,7 +248,7 @@ public function update($table, $data, array $where = NULL)
 	$sql = "UPDATE $i$table$i SET $i" . $columns . "$i = ? WHERE ";
 	
 	// Process WHERE conditions
-	list($where, $params) = self::where($where);
+	list($where, $params) = $this->where($where);
 	
 	// Append WHERE conditions to query and statement params
 	if($statement = $this->query($sql . $where, array_merge(array_values($data), $params)))
@@ -270,18 +271,18 @@ public function update($table, $data, array $where = NULL)
  */
 public function select($column, $table, $where = array(), $limit = NULL, $offset = 0, $order = array())
 {
-	$i = static::$i;
+	$i = $this->i;
 	
 	$sql = "SELECT $column FROM $i$table$i";
 	
 	// Process WHERE conditions
-	list($where, $params) = self::where($where);
+	list($where, $params) = $this->where($where);
 	
 	// If there are any conditions, append them
 	if($where) $sql .= " WHERE $where";
 	
 	// Append optional ORDER BY sorting
-	$sql .= DB::order_by($ord);
+	$sql .= DB::order_by($order);
 	
 	if($limit)
 	{
@@ -299,13 +300,13 @@ public function select($column, $table, $where = array(), $limit = NULL, $offset
  * @param array $where array of column => $value indexes
  * @return array
  */
-public static function where(array $where = NULL)
+public function where(array $where = NULL)
 {
 	$a = $s = array();
 	
 	if($where)
 	{
-		$i = static::$i;
+		$i = $this->i;
 		
 		foreach($where as $c => $v)
 		{
@@ -333,11 +334,11 @@ public static function where(array $where = NULL)
  * 
  * @param array $fields to order by
  */
-public static function order_by(array $fields = NULL)
+public function order_by(array $fields = NULL)
 {
 	if($fields)
 	{
-		$i = static::$i;
+		$i = $this->i;
 		
 		$sql = ' ORDER BY ';
 		
@@ -359,9 +360,9 @@ public static function order_by(array $fields = NULL)
  * @param string $type the join type (LEFT, RIGHT, INNER)
  * @return string
  */
-public static function join($table1, $table2, $foreign = TRUE, $type = 'LEFT')
+public function join($table1, $table2, $foreign = TRUE, $type = 'LEFT')
 {
-	$i = static::$i;
+	$i = $this->i;
 	
 	$sql = " $type JOIN $t2 ON ";
 	
@@ -388,7 +389,7 @@ public static function join($table1, $table2, $foreign = TRUE, $type = 'LEFT')
  * @param array $ids
  * @return string
  */
-public static function in(array $ids)
+public function in(array $ids)
 {
 	return " in ('".implode("', '", array_map('to_int', $ids)) . "')";
 }

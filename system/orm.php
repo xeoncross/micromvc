@@ -62,10 +62,9 @@ public function __construct($id = 0)
  *
  * @return int
  */
-public function k()
+public function key()
 {
 	return isset($this->data[static::$key])?$this->data[static::$key]:NULL;
-
 }
 
 
@@ -77,7 +76,6 @@ public function k()
 public function to_array()
 {
 	if($this->load()) return $this->data;
-
 }
 
 
@@ -121,7 +119,6 @@ public function __get($k)
 {
 	$this->load();
 	return array_key_exists($k, $this->data) ? $this->data[$k] : $this->related($k);
-
 }
 
 
@@ -151,7 +148,7 @@ public function __unset($k)
  */
 public function reload()
 {
-	$key = $this->k();
+	$key = $this->key();
 	$this->data = $this->changed = $this->related = array();
 	$this->loaded = FALSE;
 	if(! $key) return;
@@ -175,15 +172,38 @@ public function clear()
  *
  * @return boolean
  */
-public function load()
+public function load(array $where = NULL)
 {
-	if($this->loaded) return TRUE;
-	
 	$key = static::$key;
 	
-	if(empty($this->data[$key])) return FALSE;
+	if($where)
+	{
+		// Find the record primary key in the database
+		$id = self::select('column', static::$key, NULL, $where);
+		
+		if(empty($id))
+		{
+			$this->clear();
+			return FALSE;
+		}
+		
+		$this->data[$key] = $id;
+	}
+	else
+	{
+		// Did we already load this object?
+		if($this->loaded) return TRUE;
+		
+		if(empty($this->data[$key]))
+		{
+			$this->clear();
+			return FALSE;
+		}
+		
+		// Use the record primary key given in constructor
+		$id = $this->data[$key];
+	}
 	
-	$id = $this->data[$key];
 	
 	// First check the cache
 	if(!($row = static::cache_get(static::$table . $id)))
@@ -229,7 +249,7 @@ public function related($alias)
 		$model = static::$has[$alias];
 		
 		// Fetch the ID of the models row
-		$id = self::select('column', $model::$key, $model, array(static::$foreign_key => $this->k()));
+		$id = self::select('column', $model::$key, $model, array(static::$foreign_key => $this->key()));
 		
 		return $this->related[$alias] = new $model($id);
 	}
@@ -261,7 +281,7 @@ public function __call($alias, $args)
 	$args = $args + array(array(), 0, 0, array());
 	
 	// Set the foreign key WHERE condition
-	$args[0][static::$foreign_key] = $this->k();
+	$args[0][static::$foreign_key] = $this->key();
 	
 	// Is this a has one/many relation?
 	if(isset(static::$has[$alias]))
@@ -280,7 +300,7 @@ public function __call($alias, $args)
 	$table = key($model);
 	$model = current($model);
 	
-	$where = array(static::$foreign_key => $this->k()) + $args[0];
+	$where = array(static::$foreign_key => $this->key()) + $args[0];
 	
 	// Fetch an array of objects by the foreign key so we can load from memory
 	return self::objects($model::$foreign_key, $model, $table, $where, $args[1], $args[2], $args[3]);
@@ -338,7 +358,7 @@ public static function select($func, $column, $model = NULL, $where = array(), $
 	}
 	
 	// Generate select statement SQL
-	list($sql, $params) = DB::select(($column ? $column : 'COUNT(*)'), $model::$table, $where, $limit, $offset, $order);
+	list($sql, $params) = static::$db->select(($column ? $column : 'COUNT(*)'), $model::$table, $where, $limit, $offset, $order);
 	
 	return static::$db->$func($sql, $params, ($column == '*' ? NULL : 0));
 }
@@ -368,6 +388,33 @@ public static function fetch(array $where = NULL, $limit = 0, $offset = 0, array
 public static function count(array $where = NULL)
 {
 	return self::select('column', NULL, NULL, $where);
+}
+
+
+/**
+ * Return the result column of the row that matches the where condition.
+ * This can be used to get a rows primary key.
+ *
+ * @param array $where conditions
+ * @return int
+ */
+public static function column(array $where = NULL, $column = NULL)
+{
+	return self::select('column', $column ? $column : static::$key, NULL, $where);
+}
+
+
+/**
+ * Return the ORM object which matches the where condition
+ *
+ * @param array $where conditions
+ * @return int
+ */
+public static function row(array $where = NULL)
+{
+	$id = self::select('column', static::$key, NULL, $where);
+	$class = get_called_class();
+	return new $class($id);
 }
 
 
@@ -440,7 +487,7 @@ protected function update(array $data)
  */
 public function delete($id = NULL)
 {
-	$id = $id ?: $this->k();
+	$id = $id ?: $this->key();
 	
 	$count = 0;
 	
@@ -450,8 +497,10 @@ public function delete($id = NULL)
 		$count = $this->delete_relations();
 	}
 	
+	$table = static::$db->i . static::$table . static::$db->i;
+	
 	// Then remove this entity
-	$count += static::$db->delete('DELETE FROM ' . static::$table . ' WHERE ' . static::$key . ' = ?', array($id));
+	$count += static::$db->delete('DELETE FROM ' . $table . ' WHERE ' . static::$key . ' = ?', array($id));
 	
 	// Remove remaining traces
 	static::cache_delete(static::$table . $id);

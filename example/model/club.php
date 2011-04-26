@@ -2,14 +2,14 @@
 
 class Example_Model_Club extends ORM
 {
-	public static $t = 'club';
-	public static $f = 'club_id';
+	public static $table = 'club';
+	public static $foreign_key = 'club_id';
 	
-	public static $h = array(
+	public static $has = array(
 		'memberships' => 'Example_Model_Membership'
 	);
 	
-	public static $hmt = array(
+	public static $has_many_through = array(
 		'students' => array('Example_Model_Membership' => 'Example_Model_Student'),
 	);
 }

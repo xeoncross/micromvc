@@ -269,7 +269,7 @@ public function update($table, $data, array $where = NULL)
  * @param array $order array of order by conditions
  * @return array
  */
-public function select($column, $table, $where = array(), $limit = NULL, $offset = 0, $order = array())
+public function select($column, $table, $where = NULL, $limit = NULL, $offset = 0, $order = NULL)
 {
 	$i = $this->i;
 	
@@ -300,7 +300,7 @@ public function select($column, $table, $where = array(), $limit = NULL, $offset
  * @param array $where array of column => $value indexes
  * @return array
  */
-public function where(array $where = NULL)
+public function where($where = NULL)
 {
 	$a = $s = array();
 	
@@ -334,7 +334,7 @@ public function where(array $where = NULL)
  * 
  * @param array $fields to order by
  */
-public function order_by(array $fields = NULL)
+public function order_by($fields = NULL)
 {
 	if($fields)
 	{

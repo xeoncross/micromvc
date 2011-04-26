@@ -36,7 +36,7 @@ class Form extends View
  * @param string $view
  * @return string
  */
-public function __construct($validation = NULL, array $attributes = array(), $view = 'form')
+public function __construct($validation = NULL, array $attributes = NULL, $view = 'form')
 {
 	parent::__construct($view);
 	$this->set(array('attributes' => $attributes, 'validation' => $validation));
@@ -77,6 +77,10 @@ public function fields(array $fields)
  */
 public function __toString()
 {
+	if( ! $this->attributes)
+	{
+		$this->attributes = array();
+	}
 	return html::tag('form', parent::__toString(), $this->attributes + array('method' => 'post'));
 }
 

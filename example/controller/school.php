@@ -6,14 +6,31 @@ class Example_Controller_School extends Controller
 	public function action()
 	{
 		// Load database
-		$db = new DB(config('database'));
+		//$db = new DB(config('database'));
 		
 		// You can also save a copy of the object in the 
 		// registry in case something needs it later...
-		registry('db', $db);
+		//registry('db', $db);
 		
 		// Set default database object for all models
-		ORM::$db = $db;
+		//ORM::$db = $db;
+		
+		$this->load_database();
+		
+		//$student = new Example_Model_Student();
+		
+		//$pagination = new Pagination(NULL, NULL, NULL);
+		//$file = new Upload();
+		//$dir = new Dir();
+		//$form = new Form();
+		//$gd = new GD();
+		//$html = new HTML();
+		//registry();
+		//$time = new Time();
+		//$validation = new Validation();
+		
+		//$this->content = 'loaded_database and created student';
+		//return;
 		
 		// You can over-ride this in certain models if needed, 
 		// allowing you to use multiple databases.
@@ -69,6 +86,8 @@ class Example_Controller_School extends Controller
 			$club->load();
 			foreach($club->students() as $student)
 			{
+				//$student->load();
+				//$this->content .= print dump($student);
 				$this->content .= dump('Removing '. $student->name. ' and her records');
 				$student->delete(); // Remove their car, club membership, and them
 			}

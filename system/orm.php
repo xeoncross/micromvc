@@ -20,16 +20,16 @@ class ORM
 {
 
 // object data, related, changed, loaded, saved
-public $data = array(), $related = array(), $changed = array(), $loaded, $saved;
+public $data, $related, $changed, $loaded, $saved;
 
 public static $db;
 public static $table;
 public static $key = 'id';
 public static $foreign_key;
-public static $belongs_to = array();
-public static $has = array();				// Has one/many
-public static $has_many_through = array();	// Has many through
-public static $order_by = array();
+public static $belongs_to;
+public static $has;					// Has one/many
+public static $has_many_through;	// Has many through
+public static $order_by;
 public static $cache = 0;
 public static $cascade_delete = FALSE;
 
@@ -41,6 +41,8 @@ public static $cascade_delete = FALSE;
  */
 public function __construct($id = 0)
 {
+	$this->data = array();
+	
 	if(! $id) return;
 	
 	if(is_numeric($id))
@@ -82,12 +84,15 @@ public function to_array()
 /**
  * Set an array of values on this object
  *
- * @param string $a
- * @return self
+ * @param array $values to set
+ * @return object
  */
 public function set($values)
 {
-	foreach($values as $k => $v) $this->__set($k, $v);
+	foreach($values as $key => $value)
+	{
+		$this->__set($key, $value);
+	}
 	return $this;
 }
 
@@ -95,15 +100,15 @@ public function set($values)
 /**
  * Set a propery of this object
  *
- * @param string $k name
+ * @param string $key name
  * @param mixed $v value
  */
-public function __set($k, $v)
+public function __set($key, $value)
 {
-	if(!array_key_exists($k, $this->data) OR $this->data[$k] !== $v)
+	if(!array_key_exists($key, $this->data) OR $this->data[$key] !== $value)
 	{
-		$this->data[$k] = $v;
-		$this->changed[$k] = $k;
+		$this->data[$key] = $value;
+		$this->changed[$key] = $key;
 		$this->saved = 0;
 	}
 }
@@ -112,32 +117,33 @@ public function __set($k, $v)
 /**
  * Retive a property or 1-to-1 object relation
  *
- * @param string $k the column or relation name
+ * @param string $key the column or relation name
  * @return mixed
  */
-public function __get($k)
+public function __get($key)
 {
 	$this->load();
-	return array_key_exists($k, $this->data) ? $this->data[$k] : $this->related($k);
+	return array_key_exists($key, $this->data) ? $this->data[$key] : $this->related($key);
 }
 
 
 /**
  * @see isset()
  */
-public function __isset($k)
+public function __isset($key)
 {
-	if($this->load()) return (array_key_exists($k, $this->data) OR isset($this->related[$k]));
+	$this->load();
+	return array_key_exists($key, $this->data) OR isset($this->related[$key]);
 }
 
 
 /**
  * @see unset()
  */
-public function __unset($k)
+public function __unset($key)
 {
 	$this->load();
-	unset($this->data[$k], $this->changed[$k], $this->related[$k]);
+	unset($this->data[$key], $this->changed[$key], $this->related[$key]);
 }
 
 
@@ -163,7 +169,7 @@ public function reload()
 public function clear()
 {
 	$this->data = $this->changed = $this->related = array();
-	$this->loaded = $this->saved = 0;
+	$this->loaded = $this->saved = FALSE;
 }
 
 
@@ -319,7 +325,7 @@ public function __call($alias, $args)
  * @param array $order by conditions
  * @return array
  */
-public static function objects($column = 0, $class = 0, $model = 0, $where = 0, $limit = 0, $offset = 0, $order = array())
+public static function objects($column = NULL, $class = NULL, $model = NULL, $where = NULL, $limit = 0, $offset = 0, $order = NULL)
 {
 	if($rows = self::select('fetch', $column, $model, $where, $limit, $offset, $order))
 	{
@@ -345,10 +351,10 @@ public static function objects($column = 0, $class = 0, $model = 0, $where = 0, 
  * @param array $order by conditions
  * @return mixed
  */
-public static function select($func, $column, $model = NULL, $where = array(), $limit = 0, $offset = 0, $order = array())
+public static function select($func, $column, $model = NULL, $where = NULL, $limit = 0, $offset = 0, $order = NULL)
 {
 	$model = $model ?: get_called_class();
-	$order = $order + static::$order_by;
+	$order = ($order ?: array()) + (static::$order_by ?: array());
 	
 	// Count queries don't have offsets, limits, or order conditions
 	if($func != 'fetch')
@@ -372,7 +378,7 @@ public static function select($func, $column, $model = NULL, $where = array(), $
  * @param int $offset filter
  * @param array $order_by conditions
  */
-public static function fetch(array $where = NULL, $limit = 0, $offset = 0, array $order_by = array())
+public static function fetch(array $where = NULL, $limit = 0, $offset = 0, array $order_by = NULL)
 {
 	return self::objects(static::$key, 0, 0, $where, $limit, $offset, $order_by);
 

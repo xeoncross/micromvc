@@ -60,8 +60,13 @@ public static function email($email)
  * @param array $attributes the array of HTML attributes
  * @return string
  */
-static function ul_from_array(array $ul, array $attributes = array())
+static function ul_from_array(array $ul, array $attributes = NULL)
 {
+	if( ! $attributes)
+	{
+		$attributes = array();
+	}
+	
 	$h = '';
 	foreach($ul as $k => $v)
 	{
@@ -85,9 +90,9 @@ static function ul_from_array(array $ul, array $attributes = array())
  * @param array $attributes the tag's attribute list
  * @return string
  */
-public static function attributes(array $attributes = array())
+public static function attributes(array $attributes = NULL)
 {
-	if(! $attributes)return;
+	if( ! $attributes) return;
 	
 	asort($attributes);
 	$h = '';
@@ -107,8 +112,13 @@ public static function attributes(array $attributes = array())
  * @param array $attributes of additional tag settings
  * @return string
  */
-public static function tag($tag, $text = '', array $attributes = array())
+public static function tag($tag, $text = '', array $attributes = NULL)
 {
+	if( ! $attributes)
+	{
+		$attributes = array();
+	}
+	
 	return"\n<$tag" . self::attributes($attributes) . ($text === 0 ? ' />' : ">$text</$tag>");
 }
 
@@ -121,10 +131,14 @@ public static function tag($tag, $text = '', array $attributes = array())
  * @param array $attributes of additional tag settings
  * @return string
  */
-public static function link($url, $text = '', array $attributes = array())
+public static function link($url, $text = '', array $attributes = NULL)
 {
+	if( ! $attributes)
+	{
+		$attributes = array();
+	}
+	
 	return self::tag('a', $text, ($attributes+array('href' => site_url($url))));
-
 }
 
 
@@ -137,7 +151,7 @@ public static function link($url, $text = '', array $attributes = array())
  * @param array $attributes of additional tag settings
  * @return string
  */
-public static function select($name, array $options = array(), $selected = NULL, array $attributes = array())
+public static function select($name, array $options = array(), $selected = NULL, array $attributes = NULL)
 {
 	$h = '';
 	foreach($options as $k => $v)
@@ -152,6 +166,12 @@ public static function select($name, array $options = array(), $selected = NULL,
 		
 		$h .= self::tag('option', $v, $a);
 	}
+	
+	if( ! $attributes)
+	{
+		$attributes = array();
+	}
+	
 	return self::tag('select', $h, $attributes+array('name' => $name));
 }
 

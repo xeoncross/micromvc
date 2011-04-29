@@ -28,8 +28,8 @@ public static function parse($t, $d = TRUE)
 	$t = preg_split('/<code>( . +?)<\/code>/is', $t, -1, 2);
 $c = $s = '';
 foreach($t as$p)if($c = 1-$c){if($p = trim($p)){$p = preg_replace(array("/\r/", "/\n\n+/"), array('', "\n\n"), $p);
-$s . = tuh::text($p, $d);
-}}else$s . = tuh::code($p) . "\n\n";
+$s .= tuh::text($p, $d);
+}}else$s .= tuh::code($p) . "\n\n";
 return$s;
 
 }
@@ -44,8 +44,8 @@ public static function unparse($t, $d = TRUE)
 {
 	$t = preg_split('/<code>( . +?)<\/code>/is', $t, -1, 2);
 $c = $s = '';
-foreach($t as$p)if($c = 1-$c)$s . = str_replace(array('<p>', '</p>', '<br />'), '', ($d?tuh::unh($p):$p));
-else$s . = tuh::uncode($p);
+foreach($t as$p)if($c = 1-$c)$s .= str_replace(array('<p>', '</p>', '<br />'), '', ($d?tuh::unh($p):$p));
+else$s .= tuh::uncode($p);
 return$s;
 
 }
@@ -84,10 +84,10 @@ return(($a = array_diff($c[1], $o[1]))?'<' . join('><', $a) . '>':'') . $h . (($
 protected static function code($t)
 {
 	$s = $e = 0;
-if(strpos($t, '<?php') = = = FALSE){$s = 1;
+if(strpos($t, '<?php') === FALSE){$s = 1;
 $t = '<?php' . $t;
-}if(strpos($t, '?>') = = = FALSE){$e = 1;
-$t . = '?>';
+}if(strpos($t, '?>') === FALSE){$e = 1;
+$t .= '?>';
 }$t = highlight_string(trim($t), TRUE);
 if($s)$t = str_replace('&lt;
 ?php', '', $t);
@@ -103,7 +103,7 @@ protected static function text($t, $d = TRUE)
 foreach(explode("\n\n", $t)as$l){$l = tuh::quote(tuh::link($l));
 if($d)$l = tuh::decode(tuh::h($l));
 $l = tuh::close($l);
-$s . = (preg_match('/^<([a-z][a-z0-9]+)\b[^>]*> . *?<\/\1>$/is', $l)?$l:nl2br("<p>$l</p>")) . "\n\n";
+$s .= (preg_match('/^<([a-z][a-z0-9]+)\b[^>]*> . *?<\/\1>$/is', $l)?$l:nl2br("<p>$l</p>")) . "\n\n";
 }return$s;
 
 }

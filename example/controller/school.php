@@ -86,10 +86,16 @@ class Example_Controller_School extends Controller
 			$club->load();
 			foreach($club->students() as $student)
 			{
-				//$student->load();
-				//$this->content .= print dump($student);
-				$this->content .= dump('Removing '. $student->name. ' and her records');
-				$student->delete(); // Remove their car, club membership, and them
+				/*
+				 * This student may have already been removed
+				 */
+				if($student->load())
+				{
+					$this->content .= dump('Removing '. $student->name. ' and her records');
+					
+					// Remove their car, club membership, and them
+					$student->delete();
+				}
 			}
 			$club->delete();
 		}

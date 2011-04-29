@@ -344,7 +344,7 @@ function redirect($uri = '', $code = 302, $method = 'location')
  */
 function int($int, $min = NULL, $max = NULL)
 {
-	$int = is_int($int) OR ctype_digit($int) ? (int) $int : $min;
+	$int = (is_int($int) OR ctype_digit($int)) ? (int) $int : $min;
 	
 	if($min !== NULL AND $int < $min)
 	{

@@ -291,7 +291,7 @@ public function matches($field, $data, $field2)
 public function min_length($field, $data, $length)
 {
 	if(mb_strlen($data) >= $length) return TRUE;
-	$this->errors[$field] = sprintf(lang('validation_min_length'), $field);
+	$this->errors[$field] = sprintf(lang('validation_min_length'), $field, $length);
 	return FALSE;
 }
 
@@ -307,7 +307,7 @@ public function min_length($field, $data, $length)
 public function max_length($field, $data, $length)
 {
 	if(mb_strlen($data)<=$length)return TRUE;
-	$this->errors[$field] = sprintf(lang('validation_max_length'), $field);
+	$this->errors[$field] = sprintf(lang('validation_max_length'), $field, $length);
 	return FALSE;
 }
 

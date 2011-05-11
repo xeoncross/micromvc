@@ -32,9 +32,6 @@ require('bootstrap.php');
 //Is this an AJAX request?
 define('AJAX_REQUEST', 0);
 
-// What is the current domain?
-define('DOMAIN', (server('HTTPS') == 'on' ? 'https://':'http://') . h(server('SERVER_NAME') ? server('HTTP_HOST') : server('SERVER_NAME')));
-
 // Custom init script?
 if(config('init')) require('init.php');
 
@@ -48,11 +45,11 @@ $file = SP . str_replace(EXT, '', trim($argv[1], '/')) . EXT;
 if(!is_file($file)) die("Please enter a valid file path");
 
 // Require a valid, safe path
-if(!preg_match('/^[\w\-~\/\.+%]{1,600}/', $argv[1])) die("Invalid path given\n");
+if(!preg_match('/^[\w\-~\/\.+]{1,600}/', $argv[1])) die("Invalid path given\n");
 
 /**
  * Color output text for the CLI
- * 
+ *
  * @param string $text to color
  * @param string $color of text
  * @param string $background color
@@ -61,7 +58,7 @@ function colorize($text, $color, $bold = FALSE)
 {
 	// Standard CLI colors
 	$colors = array_flip(array(30 => 'gray', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white', 'black'));
-	
+
 	// Escape string with color information
 	return"\033[" . ($bold ? '1' : '0') . ';' . $colors[$color] . "m$text\033[0m";
 }

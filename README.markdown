@@ -8,12 +8,12 @@ On the other hand, MicroMVC is built with performance in mind. Easily one of the
 
 Unlike other MVC frameworks, MicroMVC is module based, which means that you can group related controllers, models, and views to help organize your projects better. It also means you can drop in modules built by other users.
 
-All classes methods are under 255 characters and fully documented. Most classes are under 5kb in size which makes reading the codebase very easy and quick. IDE's such as eclipse can pickup on the phpDoc comments to add instant auto-completion to your projects. In addition, full multi-byte string support is built into the system. No more problems with UTF-8, Big5, or Unicode when dealing with user submitted data. 
+All class methods are fully documented. Average class size is only 3kb which makes reading the codebase very easy and quick. IDE's such as eclipse or netbeans can pickup on the phpDoc comments to add instant auto-completion to your projects. In addition, full multi-byte string support is built into the system. No more problems with UTF-8, Big5, or Unicode when dealing with user submitted data. 
 
 ## Requirements</h3>
 
 * PHP 5.3+
-* Apache mod_rewrite (or similar for other servers)
+* Nginx 7.x (legacy support for Apache with mod_rewrite)
 * PDO if using the Database
 
 [MicroMVC](http://micromvc.com) is licensed under the Open Source MIT license, so you can use it for any personal or corporate projects totally free!</p>

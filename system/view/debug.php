@@ -11,7 +11,7 @@
 <pre><?php print round((microtime(true) - START_TIME), 5); ?> seconds</pre>
 
 <b>URL</b>
-<?php print dump(url()); ?>
+<?php print dump(URL::path()); ?>
 
 <?php if(class_exists('db', FALSE))
 {
@@ -23,13 +23,13 @@
 			print '<pre>'. highlight(wordwrap($data[2])."\n/* ".round(($data[0]*1000), 2).'ms - '. round($data[1]/1024,2).'kb'. ' */'). '</pre>';
 		}
 	}
-	
+
 	if(Error::$found)
 	{
 		print '<b>Last Query Run</b>';
 		print '<pre>'. highlight(DB::$last_query). '</pre>';
 	}
-	
+
 }
 
 
@@ -50,5 +50,8 @@ function highlight($string)
 <pre>
 <?php print implode("\n", $included_files); ?>
 </pre>
+
+<b>Server Info</b>
+<?php print dump($_SERVER); ?>
 
 </div>

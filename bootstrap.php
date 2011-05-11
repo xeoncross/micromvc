@@ -47,9 +47,9 @@ function registry()
 function message($type = NULL, $value = NULL)
 {
 	static $message = array();
-	
+
 	$h = '';
-	
+
 	if($value)
 	{
 		$message[$type][] = $value;
@@ -74,7 +74,7 @@ function message($type = NULL, $value = NULL)
 			}
 		}
 	}
-	
+
 	return $h;
 }
 
@@ -89,7 +89,7 @@ function message($type = NULL, $value = NULL)
 function event($key, $value = NULL, $callback = NULL)
 {
 	static $events;
-	
+
 	// Adding or removing a callback?
 	if($callback !== NULL)
 	{
@@ -123,12 +123,12 @@ function event($key, $value = NULL, $callback = NULL)
 function config($key, $module = 'system')
 {
 	static $c;
-	
+
 	if(empty($c[$module]))
 	{
 		$c[$module] = require(SP . ($module != 'system' ? "$module/" : '') . 'config' . EXT);
 	}
-	
+
 	return ($key ? $c[$module][$key] : $c[$module]);
 }
 
@@ -143,47 +143,6 @@ function config($key, $module = 'system')
 function lang($key, $module = 'system')
 {
 	return lang::get($key, $module);
-}
-
-
-/**
- * Returns the current URL path string (if valid)
- * PHP before 5.3.3 throws E_WARNING for bad uri in parse_url()
- *
- * @param int $k the key of URL segment to return
- * @param mixed $d the default if the segment isn't found
- * @return string
- */
-function url($key = NULL, $default = NULL)
-{
-	static $uri = NULL;
-	
-	if($uri === NULL)
-	{
-		foreach(array('REQUEST_URI', 'PATH_INFO', 'ORIG_PATH_INFO') as $v)
-		{
-			preg_match('/^\/[\w\-~=\/\.+%]{1,600}/', server($v), $parts);
-			
-			if( ! empty($parts[0]))
-			{
-				$uri = explode('/', trim($parts[0], '/'));
-				break;
-			}
-		}
-		
-		// Still nothing? Then mark as empty for the next call
-		if($uri === NULL)
-		{
-			$uri = '';
-		}
-	}
-	
-	if($uri)
-	{
-		return($key !== NULL ? (isset($uri[$key]) ? $uri[$key] : $default) : implode('/', $uri));
-	}
-	
-	return $default;
 }
 
 
@@ -306,15 +265,15 @@ function log_message($message)
 	{
 		return FALSE;
 	}
-	
+
 	// Append date and IP to log message
 	$message = date('H:i:s ') . h(server('REMOTE_ADDR')) . " $message\n";
-	
+
 	flock($fp, LOCK_EX);
 	fwrite($fp, $message);
 	flock($fp, LOCK_UN);
 	fclose($fp);
-	
+
 	return TRUE;
 }
 
@@ -345,17 +304,17 @@ function redirect($uri = '', $code = 302, $method = 'location')
 function int($int, $min = NULL, $max = NULL)
 {
 	$int = (is_int($int) OR ctype_digit($int)) ? (int) $int : $min;
-	
+
 	if($min !== NULL AND $int < $min)
 	{
 		$int = $min;
 	}
-	
+
 	if($max !== NULL AND $int > $max)
 	{
 		$int = $max;
 	}
-	
+
 	return $int;
 }
 
@@ -381,7 +340,7 @@ function str($str, $default = '')
  */
 function site_url($uri = NULL)
 {
-	return (strpos($uri, '://') === FALSE ? DOMAIN . '/' : '') . ltrim($uri, '/');
+	return (strpos($uri, '://') === FALSE ? URL::get() . config('site_url') : '') . ltrim($uri, '/');
 }
 
 
@@ -413,7 +372,7 @@ function encode($string, $to = 'UTF-8', $from = 'UTF-8')
 	{
 		return $string;
 	}
-	
+
 	// Convert the string
 	return @iconv($from, $to . '//TRANSLIT//IGNORE', $string);
 }
@@ -469,7 +428,7 @@ function h($data)
 
 /**
  * Return a SQLite/MySQL/PostgreSQL datetime string
- * 
+ *
  * @param int $timestamp
  */
 function sql_date($timestamp = NULL)

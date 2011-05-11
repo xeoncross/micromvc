@@ -30,31 +30,10 @@ define('WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 require('bootstrap.php');
 
 //Is this an AJAX request?
-define('AJAX_REQUEST',strtolower(server('HTTP_X_REQUESTED_WITH'))==='xmlhttprequest');
-
-// What is the current domain?
-define('DOMAIN', (server('HTTPS')=='on'?'https://':'http://').h(server('SERVER_NAME')?server('HTTP_HOST'):server('SERVER_NAME')));
+define('AJAX_REQUEST', strtolower(server('HTTP_X_REQUESTED_WITH')) === 'xmlhttprequest');
 
 // Custom init script?
 if(config('init')) require('init.php');
-
-// Get the current URL (defaulting to the index)
-$url = ((url() ? explode('/', url()) : array()) + explode('/', config('index')));
-
-// Get the controller and page
-list($module, $controller) = array_slice($url, 0, 2);
-$params = array_slice($url, 2);
-
-// Routes allow custom URL
-foreach(config('routes') as $regex => $path)
-{
-	if(preg_match("/^$regex/", url()))
-	{
-		list($module, $controller) = explode('/',$path);
-		$params = $url;
-		break;
-	}
-}
 
 // Register events
 foreach(config('events') as $event => $class)
@@ -62,22 +41,22 @@ foreach(config('events') as $event => $class)
 	event($event, '', $class);
 }
 
-// Disabled, non-word (unsafe), and missing controllers are not allowed
-if(in_array($module, config('disabled_modules')) OR preg_match('/\W/',$module.$controller) OR ! is_file(SP.$module.'/controller/'.$controller.'.php'))
-{
-	list($module, $controller) = explode('/', config('404'));
-}
+$route = new Route();
 
-event('pre_controller');
+// Parse the routes to find the correct controller
+list($params, $controller) = $route->parse(url::path(), config('routes'));
+
+// Any else before we start?
+event('pre_controller', $controller);
 
 // Load and run action
-$controller = $module. '_controller_'. $controller;
 $controller = new $controller();
 call_user_func_array(array($controller, 'action'), $params);
 
 // Render output
 $controller->render();
 
+// One last chance to do something
 event('post_controller', $controller);
 
 // End

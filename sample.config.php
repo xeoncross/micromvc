@@ -11,12 +11,6 @@
  ********************************** 80 Columns *********************************
  */
 
-// Default controller
-$config['index'] = 'example/index';
-
-// Default 404 controller
-$config['404'] = 'example/404';
-
 // Base site url
 $config['site_url'] = '/';
 
@@ -37,48 +31,60 @@ $config['language'] = 'en';
 
 /**
  * Database
- * 
+ *
  * This system uses PDO to connect to MySQL, SQLite, or PostgreSQL.
  * Visit http://us3.php.net/manual/en/pdo.drivers.php for more info.
  */
 $config['database'] = array(
-	'default' => array(
-		'dns' => "mysql:dbname=micromvc;host=127.0.0.1;port=3306",
-		'username' => 'root',
-		'password' => '',
-		'params' => array()
-	),
-);
-
-// Disabled modules
-$config['disabled_modules'] = array(
-	'unittest',
+	'dns' => "mysql:dbname=micromvc;host=127.0.0.1;port=3306",
+	'username' => 'root',
+	'password' => '',
+	'params' => array()
 );
 
 /**
  * URL Routing
- * 
- * Regex can also be used to define routes
+ *
+ * URLs are very important to the future usability of your site. Take
+ * time to think about your structure in a way that is meaningful. Place
+ * your most common page routes at the top for better performace.
+ *
+ * - Routes are matched from left-to-right.
+ * - Regex can also be used to define routes if enclosed in "/.../"
+ * - Each regex catch pattern (..) will be viewed as a parameter.
+ * - The remaning (unmached) URL path will be passed as parameters.
+ *
+ ** Example
+ *
+ * URL Path: /forum/topic/view/45/Hello-World
+ * Route: "forum/topic/view" => 'Forum_Controller_Forum_View'
+ * Result: $Forum_Controller_Forum_View->action('45', 'Hello-World');
+ *
  */
 $config['routes'] = array(
-	//'page/name' => 'error/404' // Or hide pages
+	''					=> 'Example_Controller_Index',
+	'404'				=> 'Example_Controller_404',
+	'example/school'	=> 'Example_Controller_School',
+	'example/form'		=> 'Example_Controller_Form',
+	'example/upload'	=> 'Example_Controller_Upload',
 );
 
 /**
  * System Events
  */
 $config['events'] = array(
-	//'post_controller' => 'Class::method',
+	//'pre_controller'	=> 'Class::method',
+	//'post_controller'	=> 'Class::method',
 );
 
 /**
  * Cookie Handling
- * 
+ *
  * To insure your cookies are secure, please choose a long, random key!
  * @link http://php.net/setcookie
  */
 $config['cookie'] = array(
-	'key' => 'key',
+	'key' => 'very-secret-key',
 	'timeout' => time()+(60*60*4), // Ignore submitted cookies older than 4 hours
 	'expires' => 0, // Expire on browser close
 	'path' => '/',
@@ -90,11 +96,11 @@ $config['cookie'] = array(
 
 /**
  * API Keys and Secrets
- * 
+ *
  * Insert you API keys and other secrets here.
  * Use for Akismet, ReCaptcha, Facebook, and more!
  */
 
-//$config['-----_api_key'] = '...';
+//$config['XXX_api_key'] = '...';
 
 return $config;

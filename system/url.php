@@ -55,6 +55,7 @@ class URL
 	 */
     public static function port($prefix = ':')
     {
+<<<<<<< HEAD
 		//$scheme = self::scheme();
 		$port = server('SERVER_PORT');
 
@@ -62,6 +63,12 @@ class URL
 		//if(($scheme == 'http' AND $port === '80') OR ($scheme == 'https' AND $port === '443'))
 
 		if($port === '80' OR $port === '443')
+=======
+		$scheme = self::scheme();
+		$port = server('SERVER_PORT');
+
+		if(($scheme == 'http' AND $port === '80') OR ($scheme == 'https' AND $port === '443'))
+>>>>>>> 26bf6cb0423fc077d7aa628fd09d88de06a1576b
 		{
 			return;
 		}

@@ -32,7 +32,7 @@ class URL
 	 */
     public static function scheme()
     {
-		return strtolower(server('HTTPS')) == 'off' ? 'http' : 'https';
+		return strtolower(server('HTTPS')) == 'on' ? 'https' : 'http';
     }
 
 
@@ -55,7 +55,6 @@ class URL
 	 */
     public static function port($prefix = ':')
     {
-<<<<<<< HEAD
 		//$scheme = self::scheme();
 		$port = server('SERVER_PORT');
 
@@ -63,12 +62,6 @@ class URL
 		//if(($scheme == 'http' AND $port === '80') OR ($scheme == 'https' AND $port === '443'))
 
 		if($port === '80' OR $port === '443')
-=======
-		$scheme = self::scheme();
-		$port = server('SERVER_PORT');
-
-		if(($scheme == 'http' AND $port === '80') OR ($scheme == 'https' AND $port === '443'))
->>>>>>> 26bf6cb0423fc077d7aa628fd09d88de06a1576b
 		{
 			return;
 		}
@@ -108,7 +101,7 @@ class URL
 	 * @param string $prefix for query string
 	 * @return string
 	 */
-    public static function query($prefix = '?')
+    public static function query_string($prefix = '?')
     {
 		return server('QUERY_STRING') ? $prefix . server('QUERY_STRING') : '';
     }

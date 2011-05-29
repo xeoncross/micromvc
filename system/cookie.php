@@ -2,7 +2,7 @@
 /**
  * Cookie
  *
- * Provides a encryption wrapper around standard cookie handling functions .
+ * Provides a encryption wrapper around standard cookie handling functions.
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -16,19 +16,19 @@ class cookie
 	/**
 	 * Decrypt and fetch cookie data
 	 *
-	 * @param string $key cookie name
+	 * @param string $name of cookie
 	 * @param array $config settings
 	 * @return mixed
 	 */
-	public static function get($key, $config = NULL)
+	public static function get($name, $config = NULL)
 	{
 		// Use default config settings if needed
 		$config = $config ?: config('cookie');
 
-		if(isset($_COOKIE[$key]))
+		if(isset($_COOKIE[$name]))
 		{
 			// Decrypt cookie using cookie key
-			if($v = json_decode(Cipher::decrypt(base64_decode($_COOKIE[$key]), $config['key'])))
+			if($v = json_decode(Cipher::decrypt(base64_decode($_COOKIE[$name]), $config['key'])))
 			{
 				// Has the cookie expired?
 				if($v[0] < $config['timeout'])
@@ -37,6 +37,8 @@ class cookie
 				}
 			}
 		}
+
+		return FALSE;
 	}
 
 

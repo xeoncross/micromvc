@@ -379,7 +379,7 @@ class Validation
 	 */
 	public function validate_token()
 	{
-		if(! $this->token OR ! class_exists('session', FALSE))
+		if( ! $this->token OR ! class_exists('session', FALSE))
 		{
 			return TRUE;
 		}

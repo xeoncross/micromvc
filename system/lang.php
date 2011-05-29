@@ -24,10 +24,10 @@ class Lang
 	 * @param string $lang the language ISO
 	 * @param string $m the module name
 	 */
-	static function load($lang, $m = 'system')
+	static function load($language, $m = 'system')
 	{
-		self::$lang[$m] = require(SP . "$m/lang/$lang" . EXT);
-
+		require(SP . "$m/lang/$language" . EXT);
+		self::$lang[$m] = $lang;
 	}
 
 

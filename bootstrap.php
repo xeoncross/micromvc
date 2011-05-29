@@ -126,7 +126,8 @@ function config($key, $module = 'system')
 
 	if(empty($c[$module]))
 	{
-		$c[$module] = require(SP . ($module != 'system' ? "$module/" : '') . 'config' . EXT);
+		require(SP . ($module != 'system' ? "$module/" : '') . 'config' . EXT);
+		$c[$module] = $config;
 	}
 
 	return ($key ? $c[$module][$key] : $c[$module]);
@@ -180,9 +181,9 @@ function dump()
  * Safely fetch a $_POST value, defaulting to the value provided if the key is
  * not found.
  *
- * @param string $k the key name
- * @param mixed $d the default value if key is not found
- * @param boolean $s true to require string type
+ * @param string $key name
+ * @param mixed $default value if key is not found
+ * @param boolean $string TRUE to require string type
  * @return mixed
  */
 function post($key, $default = NULL, $string = FALSE)
@@ -199,9 +200,9 @@ function post($key, $default = NULL, $string = FALSE)
  * Safely fetch a $_GET value, defaulting to the value provided if the key is
  * not found.
  *
- * @param string $k the key name
- * @param mixed $d the default value if key is not found
- * @param boolean $s true to require string type
+ * @param string $key name
+ * @param mixed $default value if key is not found
+ * @param boolean $string TRUE to require string type
  * @return mixed
  */
 function get($key, $default = NULL, $string = FALSE)
@@ -340,7 +341,7 @@ function str($str, $default = '')
  */
 function site_url($uri = NULL)
 {
-	return (strpos($uri, '://') === FALSE ? URL::get() . config('site_url') : '') . ltrim($uri, '/');
+	return (strpos($uri, '://') === FALSE ? URL::get() : '') . ltrim($uri, '/');
 }
 
 
@@ -386,12 +387,12 @@ function encode($string, $to = 'UTF-8', $from = 'UTF-8')
  */
 function is_ascii($string)
 {
-	return!preg_match('/[^\x00-\x7F]/S', $string);
+	return ! preg_match('/[^\x00-\x7F]/S', $string);
 }
 
 
 /**
- * Encode a string so it is safe to pass through the URI
+ * Encode a string so it is safe to pass through the URL
  *
  * @param string $string to encode
  * @return string
@@ -403,9 +404,9 @@ function base64_url_encode($string = NULL)
 
 
 /**
- * Decode a string passed through the URI
+ * Decode a string passed through the URL
  *
- * @param string $string to encode
+ * @param string $string to decode
  * @return string
  */
 function base64_url_decode($string = NULL)
@@ -417,12 +418,64 @@ function base64_url_decode($string = NULL)
 /**
  * Convert special characters to HTML safe entities.
  *
- * @param string $str the string to encode
+ * @param string $string to encode
  * @return string
  */
-function h($data)
+function h($string)
 {
-	return htmlspecialchars($data, ENT_QUOTES, 'utf-8');
+	return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
+}
+
+
+/**
+ * Filter a valid UTF-8 string so that it contains only words, numbers,
+ * dashes, underscores, periods, and spaces - all of which are safe
+ * characters to use in file names, URI, XML, JSON, and (X)HTML.
+ *
+ * @param string $string to clean
+ * @param bool $spaces TRUE to allow spaces
+ * @return string
+ */
+function sanitize($string, $spaces = TRUE)
+{
+	$search = array(
+		'/[^\w\-\. ]+/u',			// Remove non safe characters
+		'/\s\s+/',					// Remove extra whitespace
+		'/\.\.+/', '/--+/', '/__+/'	// Remove duplicate symbols
+	);
+
+	$string = preg_replace($search, array(' ', ' ', '.', '-', '_'), $string);
+
+	if( ! $spaces)
+	{
+		$string = preg_replace('/--+/', '-', str_replace(' ', '-', $string));
+	}
+
+	return trim($string, '-._ ');
+}
+
+
+/**
+ * Create a SEO friendly URL string from a valid UTF-8 string.
+ *
+ * @param string $string to filter
+ * @return string
+ */
+function sanitize_url($string)
+{
+	return urlencode(mb_strtolower(sanitize($string, FALSE)));
+}
+
+
+/**
+ * Filter a valid UTF-8 string to be file name safe.
+ *
+ * @param string $string to filter
+ * @return string
+ */
+function sanitize_filename($string)
+{
+	return sanitize($string, FALSE);
 }
 
 

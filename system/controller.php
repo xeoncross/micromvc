@@ -12,14 +12,19 @@
  */
 Abstract class Controller
 {
-
+	// Global view template
 	public $template = 'layout';
+
+	// URL path segment matched to route here
+	public $route = NULL;
 
 	/**
 	 * Set error handling and start session
 	 */
-	public function __construct()
+	public function __construct($route = NULL)
 	{
+		$this->route = $route;
+
 		Session::start();
 
 		if(config('debug_mode'))

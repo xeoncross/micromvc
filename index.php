@@ -44,13 +44,13 @@ foreach(config('events') as $event => $class)
 $route = new Route();
 
 // Parse the routes to find the correct controller
-list($params, $controller) = $route->parse(url::path(), config('routes'));
+list($params, $route, $controller) = $route->parse(url::path(), config('routes'));
 
 // Any else before we start?
 event('pre_controller', $controller);
 
 // Load and run action
-$controller = new $controller();
+$controller = new $controller($route);
 call_user_func_array(array($controller, 'action'), $params);
 
 // Render output

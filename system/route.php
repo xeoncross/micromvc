@@ -30,7 +30,7 @@ class Route
 		// Default homepage route
 		if($path === '')
 		{
-			return array(array(), $routes['']);
+			return array(array(), '', $routes['']);
 		}
 
 		foreach($routes as $route => $controller)
@@ -46,13 +46,13 @@ class Route
 					$params = explode('/', trim(mb_substr($path, mb_strlen($matches[0])), '/'));
 
 					// Add captured group back into params
-					array_shift($matches);
+					$complete = array_shift($matches);
 					foreach($matches as $match)
 					{
 						array_unshift($params, $match);
 					}
 
-					return array($params, $controller);
+					return array($params, $complete, $controller);
 				}
 			}
 			else
@@ -60,13 +60,13 @@ class Route
 				if(mb_substr($path, 0, strlen($route)) === $route)
 				{
 					$params = explode('/', trim(mb_substr($path, strlen($route)), '/'));
-					return array($params, $controller);
+					return array($params, $route, $controller);
 				}
 			}
 		}
 
 		// Controller not found
-		return array(array($path), $routes['404']);
+		return array(array($path), $path, $routes['404']);
 	}
 }
 

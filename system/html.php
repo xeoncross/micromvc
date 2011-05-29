@@ -25,7 +25,7 @@ class html
 	 */
 	public static function gravatar($email = '', $size = 80, $alt = 'Gravatar', $type = 'wavatar', $rating = 'g')
 	{
-		return '<img src = "http://www.gravatar.com/avatar/' . md5($email) . "?s=$size&d=$type&r=$rating\" alt = \"$alt\" />";
+		return '<img src="http://www.gravatar.com/avatar/' . md5($email) . "?s=$size&d=$type&r=$rating\" alt=\"$alt\" />";
 
 	}
 
@@ -53,8 +53,8 @@ class html
 
 
 	/**
-	 * Convert a multidimensional array to an unfiltered HTML UL . You can
-	 * pass attributes such as id, class, or javascript .
+	 * Convert a multidimensional array to an unfiltered HTML UL. You can
+	 * pass attributes such as id, class, or javascript.
 	 *
 	 * @param array $ul the array of elements
 	 * @param array $attributes the array of HTML attributes
@@ -98,7 +98,7 @@ class html
 		$h = '';
 		foreach($attributes as $k => $v)
 		{
-			$h .= " $k = \"" . h($v) . '"';
+			$h .= " $k=\"" . h($v) . '"';
 		}
 		return $h;
 	}

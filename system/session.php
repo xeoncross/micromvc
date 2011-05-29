@@ -42,7 +42,6 @@ class Session
 	public static function save($name = 'session')
 	{
 		return cookie::set($name, $_SESSION);
-
 	}
 
 
@@ -64,7 +63,7 @@ class Session
 	 */
 	public static function token($token = NULL)
 	{
-		if(empty($_SESSION)) return FALSE;
+		if( ! isset($_SESSION)) return FALSE;
 
 		// If a token is given, then lets match it
 		if($token !== NULL)

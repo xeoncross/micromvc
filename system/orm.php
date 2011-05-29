@@ -122,7 +122,7 @@ class ORM
 	 */
 	public function __get($key)
 	{
-		$this->load();
+		if($key !== static::$key) $this->load();
 		return array_key_exists($key, $this->data) ? $this->data[$key] : $this->related($key);
 	}
 

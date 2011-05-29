@@ -5,18 +5,18 @@ if(isset($validation) AND $error = $validation->error('token'))
 	print html::tag('div', $error, array('class'=>'form_error'));
 }
 
-print html::tag('input', 0, array('type'=>'hidden','value'=>session('token'),'name'=>'token'));
+print html::tag('input', 0, array('type' => 'hidden', 'value' => session('token'), 'name' => 'token'));
 
 
 foreach($fields as $field => $data)
 {
 	print "\n\n<div".(isset($data['div'])?html::attributes($data['div']):'').'>';
-	
+
 	if( ! isset($data['attributes']['type']) OR ! in_array($data['attributes']['type'], array('hidden','submit','reset','button')))
 	{
 		print html::tag('label', $data['label'], array('for'=>$field));
 	}
-	
+
 	if($data['type'] === 'select') // Select box
 	{
 		print html::select($field, $data['options'], $data['value'], $data['attributes']);
@@ -38,6 +38,6 @@ foreach($fields as $field => $data)
 	{
 		print html::tag('div', $error, array('class'=>'form_error'));
 	}
-	
+
 	print "\n</div>";
 }

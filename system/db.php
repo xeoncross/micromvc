@@ -27,7 +27,6 @@ class DB
 	public static $last_query = NULL;
 
 
-
 	/**
 	 * Set the database type and save the config for later.
 	 *
@@ -148,7 +147,7 @@ class DB
 		self::$last_query = $sql;
 
 		// Connect if needed
-		if(!$this->pdo) $this->connect();
+		if( ! $this->pdo) $this->connect();
 
 		if($params)
 		{
@@ -198,11 +197,13 @@ class DB
 		if($this->type == 'pgsql')
 		{
 			// Insert record and return the whole row (the "id" field may not exist)
-			if($statment = $this->query($sql.' RETURNING *', array_values($data)))
+			if($statement = $this->query($sql.' RETURNING *', array_values($data)))
 			{
 				// The first column *should* be the ID
 				return $statement->fetchColumn(0);
 			}
+
+			return;
 		}
 
 		// Insert data and return the new row's ID

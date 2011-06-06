@@ -1,3 +1,3 @@
 <?php
 
-return array('line' => 'ok');
+$lang = array('line' => 'ok');

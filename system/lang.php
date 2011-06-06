@@ -3,8 +3,8 @@
  * Langauge
  *
  * Autoloads the correct language file based on cookie, useragent, and available
- * module languages . The entire language system is based on country codes in ISO
- * 3166-1 alpha-2 .
+ * module languages. The entire language system is based on country codes in ISO
+ * 3166-1 alpha-2.
  *
  * @package		MicroMVC
  * @author		David Pennington
@@ -14,9 +14,7 @@
  */
 class Lang
 {
-
 	protected static $lang;
-
 
 	/**
 	 * Load a language file for the given module
@@ -24,10 +22,10 @@ class Lang
 	 * @param string $lang the language ISO
 	 * @param string $m the module name
 	 */
-	static function load($language, $m = 'system')
+	static function load($language, $module = 'system')
 	{
-		require(SP . "$m/lang/$language" . EXT);
-		self::$lang[$m] = $lang;
+		require(SP . "$module/lang/$language" . EXT);
+		self::$lang[$module] = $lang;
 	}
 
 
@@ -55,13 +53,13 @@ class Lang
 	 * @param string $module the module name
 	 * @return string
 	 */
-	static function get($k, $module = 'system')
+	static function get($key, $module = 'system')
 	{
 		if(empty(self::$lang[$module]))
 		{
 			self::load(self::choose($module), $module);
 		}
-		return self::$lang[$module][$k];
+		return self::$lang[$module][$key];
 	}
 
 

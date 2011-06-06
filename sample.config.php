@@ -36,9 +36,17 @@ $config['language'] = 'en';
  * Visit http://us3.php.net/manual/en/pdo.drivers.php for more info.
  */
 $config['database'] = array(
-	'dns' => "mysql:dbname=micromvc;host=127.0.0.1;port=3306",
+
+	// MySQL
+	'dns' => "mysql:host=127.0.0.1;port=3306;dbname=micromvc",
 	'username' => 'root',
 	'password' => '',
+
+	// PostgreSQL
+	//'dns' => "pgsql:host=localhost;port=5432;dbname=micromvc",
+	//'username' => 'postgres',
+	//'password' => '',
+
 	'params' => array()
 );
 
@@ -51,22 +59,31 @@ $config['database'] = array(
  *
  * - Routes are matched from left-to-right.
  * - Regex can also be used to define routes if enclosed in "/.../"
- * - Each regex catch pattern (..) will be viewed as a parameter.
+ * - Each regex catch pattern (...) will be viewed as a parameter.
  * - The remaning (unmached) URL path will be passed as parameters.
  *
- ** Example
+ ** Simple Example **
+ * URL Path:	/forum/topic/view/45/Hello-World
+ * Route:		"forum/topic/view" => 'Forum_Controller_Forum_View'
+ * Result:		$Forum_Controller_Forum_View->action('45', 'Hello-World');
  *
- * URL Path: /forum/topic/view/45/Hello-World
- * Route: "forum/topic/view" => 'Forum_Controller_Forum_View'
- * Result: $Forum_Controller_Forum_View->action('45', 'Hello-World');
- *
+ ** Regex Example **
+ * URL Path:	/John_Doe4/recent/comments/3
+ * Route:		"/^(\w+)/recent/comments/' => 'Comments_Controller_Recent'
+ * Result:		$Comments_Controller_Recent->action($username = 'John_Doe4', $page = 3)
  */
 $config['routes'] = array(
 	''					=> 'Example_Controller_Index',
 	'404'				=> 'Example_Controller_404',
+
+	// Example Module
 	'example/school'	=> 'Example_Controller_School',
 	'example/form'		=> 'Example_Controller_Form',
 	'example/upload'	=> 'Example_Controller_Upload',
+
+	// Unit Tests
+	'unittest'	=> 'Unittest_Controller_Index',
+
 );
 
 /**

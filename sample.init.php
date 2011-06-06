@@ -3,7 +3,7 @@
  * INIT
  *
  * This file contains initialization code run immediately after system setup.
- * Test for bad requests, spam IP's, check system state, or do other tasks that 
+ * Test for bad requests, spam IP's, check system state, or do other tasks that
  * might need to terminate the script before it wastes time loading.
  *
  * @package		MicroMVC
@@ -17,7 +17,7 @@
  * Set the server timezone
  * see: http://us3.php.net/manual/en/timezones.php
  */
-//date_default_timezone_set('GMT');
+date_default_timezone_set('UTC');
 
 // Default Locale
 setlocale(LC_ALL, 'en_US.utf-8');
@@ -34,13 +34,13 @@ service()->db = function($name = 'database')
 {
 	// Load database
 	$db = new DB(config($name));
-	
+
 	// Set default ORM database connection
 	if(empty(ORM::$db))
 	{
 		ORM::$db = $db;
 	}
-	
+
 	return $db;
 }
 */

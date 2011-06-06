@@ -197,7 +197,7 @@ class DB
 		if($this->type == 'pgsql')
 		{
 			// Insert record and return the whole row (the "id" field may not exist)
-			if($statement = $this->query($sql.' RETURNING *', array_values($data)))
+			if($statement = $this->query($sql.' RETURNING "id"', array_values($data)))
 			{
 				// The first column *should* be the ID
 				return $statement->fetchColumn(0);

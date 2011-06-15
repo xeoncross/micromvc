@@ -107,7 +107,7 @@ function url($k = NULL, $d = NULL)
  */
 function __autoload($class)
 {
-	require(mb_strtolower(SP.(strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
+	require(SP.mb_strtolower((strpos($class,'_')===FALSE?'system/':'').str_replace('_','/',$class.EXT)));
 }
 
 

@@ -3,6 +3,9 @@
 // Start database connection
 $db = new DB(config('database'));
 
+// Connect to databse server
+$db->connect();
+
 // Set name of migration object
 $migration = 'Migration_'. $db->type;
 

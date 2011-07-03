@@ -20,12 +20,15 @@ class DB
 
 	public $i = '"';
 
+	public $statements = array();
+
+	//public $cache_statements = FALSE;
+
 	protected $config = array();
 
 	public static $queries = array();
 
 	public static $last_query = NULL;
-
 
 	/**
 	 * Set the database type and save the config for later.
@@ -61,6 +64,33 @@ class DB
 		// PDO should throw exceptions
 		$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
+
+
+	/**
+	 * Start a transaction and enable the prepared statement cache
+	 *
+	public function beginTransaction()
+	{
+		if( ! $this->pdo) $this->connect();
+
+		$this->pdo->beginTransaction();
+
+		$this->cache_statements = TRUE;
+	}
+
+
+	/**
+	 * Start a transaction and enable the prepared statement cache
+	 *
+	public function beginTransaction()
+	{
+		if( ! $this->pdo) $this->connect();
+
+		$this->pdo->beginTransaction();
+
+		$this->cache_statements = TRUE;
+	}
+	*/
 
 
 	/**
@@ -140,7 +170,7 @@ class DB
 	 * @param array $params the prepared query params
 	 * @return PDOStatement
 	 */
-	public function query($sql, array $params = NULL)
+	public function query($sql, array $params = NULL, $cache_statement = FALSE)
 	{
 		benchmark();
 
@@ -149,15 +179,27 @@ class DB
 		// Connect if needed
 		if( ! $this->pdo) $this->connect();
 
-		if($params)
+		// Should we cached PDOStatements? (Best for batch inserts/updates)
+		if($cache_statement)
 		{
-			$statement = $this->pdo->prepare($sql);
-			$statement->execute($params);
+			$hash = md5($sql);
+
+			if(isset($this->statements[$hash]))
+			{
+				$statement = $this->statements[$hash];
+			}
+			else
+			{
+				$statement = $this->statements[$hash] = $this->pdo->prepare($sql);
+			}
 		}
 		else
 		{
-			$statement = $this->pdo->query($sql);
+			$statement = $this->pdo->prepare($sql);
 		}
+
+		$statement->execute($params);
+		//$statement = $this->pdo->query($sql);
 
 		// Save query results by database type
 		self::$queries[$this->type][]=(benchmark() + array(2 => $sql));
@@ -189,7 +231,7 @@ class DB
 	 * @param array $data the column => value pairs
 	 * @return int
 	 */
-	public function insert($table, array $data)
+	public function insert($table, array $data, $cache_statement = TRUE)
 	{
 		$sql = $this->insert_sql($table, $data);
 
@@ -207,7 +249,7 @@ class DB
 		}
 
 		// Insert data and return the new row's ID
-		return $this->query($sql, array_values($data)) ? $this->pdo->lastInsertId() : NULL;
+		return $this->query($sql, array_values($data), $cache_statement) ? $this->pdo->lastInsertId() : NULL;
 	}
 
 
@@ -238,7 +280,7 @@ class DB
 	 * @param array $data the column => value pairs
 	 * @return int
 	 */
-	public function update($table, $data, array $where = NULL)
+	public function update($table, $data, array $where = NULL, $cache_statement = TRUE)
 	{
 		$i = $this->i;
 
@@ -252,7 +294,7 @@ class DB
 		list($where, $params) = $this->where($where);
 
 		// Append WHERE conditions to query and statement params
-		if($statement = $this->query($sql . $where, array_merge(array_values($data), $params)))
+		if($statement = $this->query($sql . $where, array_merge(array_values($data), $params), $cache_statement))
 		{
 			return $statement->rowCount();
 		}

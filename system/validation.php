@@ -13,9 +13,11 @@
  */
 class Validation
 {
-
-	// The array of errors (if any)
 	public $errors = array();
+
+	public $data = array();
+
+	public $rules = array();
 
 	// The text to put before an error
 	public $error_prefix = '<div class="form_error">';
@@ -28,37 +30,45 @@ class Validation
 
 
 	/**
+	 * Create a validation object for this data using these rules
+	 */
+	public function __construct( & $data, $rules)
+	{
+		$this->fields = $fields;
+		$this->data = $data;
+	}
+
+
+	/**
 	 * Run the given post data through the field rules to ensure it is valid.
 	 *
 	 * @param array $fields and matching rules
 	 * @return boolean
 	 */
-	public function run(array $fields)
+	public function validates()
 	{
-		if(empty($_POST))
+		if(empty($this->data))
 		{
 			$this->create_token();
-
 			return FALSE;
 		}
 
 		// First, validate the token
 		$this->validate_token();
 
-		foreach($fields as $field => $rules)
+		foreach($this->rules as $field => $rules)
 		{
 			$rules = explode('|', $rules);
 
 			// Skip fields that are not required
-			if( ! in_array('required', $rules)  AND ! isset($_POST[$field])) continue;
+			if( ! in_array('required', $rules) AND ! isset($this->data[$field])) continue;
 
-			// Fetch the post data
-			$data = $_POST[$field];
+			$data = $this->data[$field];
 
-			//If the data is a non-empty string
-			if(is_string($data) AND $data)
+			// Auto-trim non-empty string
+			if($data AND is_string($data))
 			{
-				$data = trim($data); // Auto-trim
+				$data = trim($data);
 			}
 
 			foreach($rules as $rule)
@@ -93,17 +103,7 @@ class Validation
 
 				// Rules return boolean false on failure
 				if($result === FALSE) break;
-
-				// Rules return boolean true on success
-				if($result !== TRUE)
-				{
-					// All other rules return data
-					$data = $result;
-				}
 			}
-
-			// Commit any changes
-			$_POST[$field] = $data;
 		}
 
 		// If there were no problems
@@ -115,20 +115,31 @@ class Validation
 
 
 	/**
+	 * Return an array of values for the fields given
+	 *
+	 * @return array
+	 */
+	public function data()
+	{
+		if(empty($this->data)) return array();
+
+		// Excess data may be given so we only want values with keys in fields
+		return array_intersect_key($this->data, $this->fields);
+	}
+
+	/**
 	 * Print the errors from the form validation check
 	 *
 	 * @return string
 	 */
-	public function display_errors($prefix = '', $suffix = '')
+	public function display_errors()
 	{
 		if(empty($this->errors)) return;
 
 		$output = '';
 		foreach($this->errors as $error)
 		{
-			$output .= ($prefix ? $prefix : $this->error_prefix)
-					. $error
-					. ($suffix ? $suffix : $this->error_suffix). "\n";
+			$output .= $this->error_prefix . $error . $this->error_suffix . "\n";
 		}
 
 		return $output;
@@ -138,7 +149,7 @@ class Validation
 	/**
 	 * Return the error (if any) for a given field
 	 *
-	 * @param $field
+	 * @param $field to get error for
 	 * @param boolean $prefix TRUE to wrap error
 	 * @return string
 	 */
@@ -155,43 +166,61 @@ class Validation
 	}
 
 
-	/**
-	 * Set a validation error message
-	 *
-	 * @param string $field name of the form element
-	 * @param string $error to set
-	 */
-	public function set_error($field, $error)
-	{
-		$this->errors[$field] = $error;
-	}
-
-
 	/*
 	 * Validation Methods
 	 */
 
 
 	/**
-	 * String
+	 * Value is a string
 	 *
 	 * @param string $field name of the form element
-	 * @param mixed $word to validate
+	 * @param mixed $data to validate
 	 * @return boolean
 	 */
 	public function string($field, $data)
 	{
-		if($data = trim(str($data))) return $data;
-		$this->errors[$field] = sprintf(lang('validation_required'), $field);
+		if(is_string($data)) return TRUE;
+		$this->errors[$field] = sprintf(lang('validation_string'), $field);
 		return FALSE;
 	}
 
 
 	/**
-	 * Required (not empty)
+	 * Value is an array
 	 *
 	 * @param string $field name of the form element
-	 * @param mixed $word to validate
+	 * @param mixed $data to validate
+	 * @return boolean
+	 */
+	public function array($field, $data)
+	{
+		if(is_array($data)) return TRUE;
+		$this->errors[$field] = sprintf(lang('validation_array'), $field);
+		return FALSE;
+	}
+
+
+	/**
+	 * Contains only numeric characters
+	 *
+	 * @param string $field name of the form element
+	 * @param mixed $number to validate
+	 * @return boolean
+	 */
+	public function integer($field, $number)
+	{
+		if(ctype_digit($number)) return TRUE;
+		$this->errors[$field] = sprintf(lang('validation_integer'), $field);
+		return FALSE;
+	}
+
+
+	/**
+	 * Value is required (not empty)
+	 *
+	 * @param string $field name of the form element
+	 * @param mixed $data to validate
 	 * @return boolean
 	 */
 	public function required($field, $data)
@@ -203,63 +232,53 @@ class Validation
 
 
 	/**
-	 * Set (even if empty)
+	 * Must only contain english, alphabetical characters
 	 *
 	 * @param string $field name of the form element
 	 * @param mixed $word to validate
 	 * @return boolean
 	 */
-	public function set($field, $data)
+	public function alphabetical($field, $word)
 	{
-		if(isset($_POST[$field]))return TRUE;
-		$this->errors[$field] = sprintf(lang('validation_set'), $field);
+		if(preg_match("/^([a-z])+$/i",$word)) return TRUE;
+		$this->errors[$field] = sprintf(lang('validation_alphabetical'), $field);
 		return FALSE;
 	}
 
 
 	/**
-	 * Alphabetic
+	 * Must only contain word characters (A-Za-z0-9_).
 	 *
 	 * @param string $field name of the form element
 	 * @param mixed $word to validate
 	 * @return boolean
 	 */
-	public function alpha($field, $word)
+	public function word($field, $word)
 	{
-		if(preg_match("/^([a-z])+$/i",$word))return TRUE;
-		$this->errors[$field] = sprintf(lang('validation_alpha'), $field);
-		return FALSE;
+		if(preg_match("/\W/", $word))
+		{
+			$this->errors[$field] = sprintf(lang('validation_word'), $field);
+			return FALSE;
+		}
+		return TRUE;
 	}
 
 
 	/**
-	 * Alphabetic and Numeric
+	 * Plain text that contains no HTML/XML markup.
 	 *
 	 * @param string $field name of the form element
 	 * @param mixed $data to validate
 	 * @return boolean
 	 */
-	public function alpha_numeric($field, $data)
+	public function plaintext($field, $data)
 	{
-		if(preg_match("/^([a-z0-9])+$/i", $data)) return TRUE;
-		$this->errors[$field] = sprintf(lang('validation_alpha_numeric'), $field);
-		return FALSE;
-	}
-
-
-	/**
-	 * Numeric
-	 *
-	 * @param string $field name of the form element
-	 * @param mixed $number to validate
-	 * @return boolean
-	 */
-	public function numeric($field, $number)
-	{
-		//if(is_numeric($number)) return TRUE;
-		if(ctype_digit($number)) return TRUE;
-		$this->errors[$field] = sprintf(lang('validation_numeric'), $field);
-		return FALSE;
+		if(strrpos($string, '<') !== FALSE OR strrpos($string, '>') !== FALSE)
+		{
+			$this->errors[$field] = sprintf(lang('validation_plaintext'), $field);
+			return FALSE;
+		}
+		return TRUE;
 	}
 
 

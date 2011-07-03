@@ -6,3 +6,4 @@ Thumbs.db
 uploads/*
 config.php
 ignore
+backups/*

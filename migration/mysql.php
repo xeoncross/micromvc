@@ -13,35 +13,16 @@ class Migration_MySQL extends Migration_Base
 		// Build list of all tables
 		foreach($this->db->fetch('SHOW TABLES') as $row) $tables[] = current($row);
 
-		$results = array();
-
-		// Backup all data in this schema
-		foreach($this->tables as $table => $schema)
+		if($tables)
 		{
-			// Don't try to back it up if it doesn't exist
-			if( ! in_array($table, $tables))
-			{
-				// Report status to user
-				print 'Skipping '. colorize($table, 'yellow')."\n";
-				continue;
-			}
-
-			// Report status to user
-			print 'Backing up '. colorize($table, 'green')."\n";
-
-			// Fetch all records
-			$results[$table] = $this->db->fetch("SELECT * FROM `$table`");
+			$this->backup_tables($tables);
 		}
+	}
 
-		// Now save the data in a file
-		if($results)
-		{
-			$this->save_backup($results);
-		}
-		else
-		{
-			print colorize('Nothing to backup', 'yellow'). "\n\n";
-		}
+	// Drop database schema
+	public function drop_schema()
+	{
+		//
 	}
 
 	/**
@@ -71,7 +52,8 @@ class Migration_MySQL extends Migration_Base
 
 			// Defaults for columns
 			$defaults = array(
-				//'type' => 'primary|text|integer|boolean|decimal|datetime', REQUIRED!
+				//'type' => 'primary|string|integer|boolean|decimal|datetime', REQUIRED!
+				'type' => 'string',
 				'length' => NULL,
 				'index' => FALSE,
 				'null' => TRUE,

@@ -22,4 +22,4 @@ $migration->name = 'default';
 $migration->tables = config(NULL, 'migration');
 
 // Backup existing database table
-$migration->create_schema();
+$migration->backup_data();

@@ -7,13 +7,13 @@ abstract class Migration_Base
 	public $name;
 
 	// Backup all existing data
-	public function backup_data() { }
+	abstract public function backup_data();
 
 	// Drop database schema
-	//public function drop_schema() { }
+	abstract public function drop_schema();
 
 	// Create database schema
-	public function create_schema() { }
+	abstract public function create_schema();
 
 	// Insert backed-up data into new database schema
 	public function restore_data()
@@ -30,37 +30,69 @@ abstract class Migration_Base
 			return;
 		}
 
-		// Decode the JSON file
-		$tables = json_decode(file_get_contents($file));
+		$handle = fopen($file, "r");
 
-		if(empty($tables)) die(colorize('Cannot restore backup, invalid JSON data', 'red')."\n");
+		//if(empty($tables)) die(colorize('Cannot restore backup, invalid JSON data', 'red')."\n");
+		if( ! $handle) die(colorize('Cannot open backup file', 'red')."\n");
 
 		try
 		{
 			// Start transaction
 			$this->db->pdo->beginTransaction();
 
-			foreach($this->tables as $table => $columns)
-			{
-				// Has this table been removed from the schema?
-				if(!isset($tables->$table))
-				{
-					print colorize("$table does not exist in backup",'red')."\n";
+			$table = NULL;
+			$columns = array();
 
-					$tables->$table = NULL;
+			/*
+			while (!feof($handle))
+			{
+				$line = fread($handle, 8192);
+			*/
+			while (($line = fgets($handle)) !== false)
+			{
+				$line = rtrim($line);
+
+				// Table name
+				if($line{0} !== '{')
+				{
+					$table = $line;
+
+					// Has this table been removed from the schema?
+					if( ! isset($this->tables[$table]) )
+					{
+						print colorize("$table no longer exists in schema, ignoring",'yellow')."\n";
+						$table = NULL;
+					}
+					else
+					{
+						// Column list comes from new schema - not old backup
+						$columns = array_flip(array_keys($this->tables[$table]));
+						print colorize("Restoring $table...", 'green')."\n";
+					}
+
 					continue;
 				}
 
-				// Schema column list
-				$defaults = array_flip(array_keys($columns));
+				if( ! $table) continue; // Current table is being ignored
 
-				foreach($tables->$table as $row)
+				// Decode JSON row object
+				$line = (array) json_decode($line);
+
+				/*
+				 * Some databases (like PostgreSQL) cannot handle incorrect FALSE values.
+				 * For example, PostgreSQL CANNOT handle empty ("") values in integer columns.
+				 *
+				 * So, we will simply remove all empty values from the insert giving
+				 * them a default of NULL or EMPTY as the database decides.
+				 */
+				foreach($line as $key => $value)
 				{
-					// Insert row taking schema columns into account
-					$this->db->insert($table, array_intersect_key((array) $row, $defaults));
+					//if( ! $value AND $value !== NULL) unset($line[$key]);
+					if($value === '') unset($line[$key]);
 				}
 
-				print colorize("$table", 'green')." data has been restored\n";
+				// Insert row *only* taking schema columns into account
+				$this->db->insert($table, array_intersect_key((array) $line, $columns));
 			}
 
 			// Commit Transaction
@@ -73,30 +105,80 @@ abstract class Migration_Base
 			// Roolback changes (all or nothing)
 			$this->db->pdo->rollBack();
 
+			fclose($handle);
+
 			die(colorize($e->getMessage(), 'red')."\n");
 		}
 
+		fclose($handle);
 	}
 
 	// Path to backup files
-	public function backup_path()
+	protected function backup_path()
 	{
 		return SP. basename(__DIR__). '/backups/';
 	}
 
-	// Save backup data to file
-	public function save_backup($data)
+	// Backup all existing data
+	protected function backup_tables($tables)
 	{
+		if( ! $this->tables) die('No tables given');
+
 		// Build path to backup directory
-		$path =  $this->backup_path(). get_class($this). '.'. $this->name. '.'.date("Y.m.d_H:i").'.json';
+		$file =  $this->backup_path(). get_class($this). '.'. $this->name. '.'.date("Y.m.d_H:i").'.json';
 
-		// Save file
-		file_put_contents($path, json_encode($data));
+		// Open the backup file for writing and truncate it
+		$handle = fopen($file, 'w');
 
-		// Make this file the new masterbackup
-		copy($path, $this->backup_path().$this->name.'_current_backup.json');
+		// Does anything actually get backed-up?
+		$found = FALSE;
 
-		// Report status to user
-		print 'Backup saved to '. colorize($path, 'blue')."\n\n";
+		// Backup all data in this schema
+		foreach($this->tables as $table => $schema)
+		{
+			// Don't try to back it up if it doesn't exist
+			if( ! in_array($table, $tables))
+			{
+				// Report status to user
+				print 'Skipping '. colorize($table, 'yellow')."\n";
+				continue;
+			}
+
+			$found = TRUE;
+
+			// Start of new table
+			fwrite($handle, $table. "\n");
+
+			// Report status to user
+			print 'Backing up '. colorize($table, 'green')."\n";
+
+			// Fetch all records
+			$statement = $this->db->query('SELECT * FROM '. $this->db->i. $table. $this->db->i);
+
+			// We want named keys
+			$statement->setFetchMode(PDO::FETCH_ASSOC);
+
+			// Write each record one at a time to save memory
+			foreach($statement as $row)
+			{
+				fwrite($handle, json_encode($row)."\n");
+			}
+		}
+
+		// We're done here
+		fclose($handle);
+
+		if($found)
+		{
+			// Make this file the new masterbackup
+			copy($file, $this->backup_path() . $this->name . '_current_backup.json');
+
+			// Report status to user
+			print 'Backup saved to '. colorize($file, 'blue')."\n\n";
+		}
+		else
+		{
+			print colorize('Nothing to backup', 'yellow')."\n";
+		}
 	}
 }

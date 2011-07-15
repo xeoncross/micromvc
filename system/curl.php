@@ -23,7 +23,7 @@ class cURL
 	 */
 	public static function delete($url, array $params = array(), array $options = array())
 	{
-		return self::request($url, $params, ($options + array(CURLOPT_CUSTOMREQUEST = >'DELETE')));
+		return self::request($url, $params, ($options + array(CURLOPT_CUSTOMREQUEST => 'DELETE')));
 	}
 
 

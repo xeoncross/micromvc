@@ -154,8 +154,7 @@ function lang($key, $module = 'system')
  */
 function __autoload($class)
 {
-	// System classes will *not* have an underscore
-	require (mb_strtolower(SP . (strpos($class, '_') === FALSE ? 'system/' : '') . str_replace('_', '/', $class . EXT)));
+	require(SP . mb_strtolower((strpos($class, '_') === FALSE ? 'system/' : '') . str_replace('_', '/', $class . EXT)));
 }
 
 

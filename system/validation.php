@@ -17,7 +17,7 @@ class Validation
 
 	public $data = array();
 
-	public $rules = array();
+	public $fields = array();
 
 	// The text to put before an error
 	public $error_prefix = '<div class="form_error">';
@@ -32,7 +32,7 @@ class Validation
 	/**
 	 * Create a validation object for this data using these rules
 	 */
-	public function __construct( & $data, $rules)
+	public function __construct( & $data, $fields)
 	{
 		$this->fields = $fields;
 		$this->data = $data;
@@ -56,14 +56,20 @@ class Validation
 		// First, validate the token
 		$this->validate_token();
 
-		foreach($this->rules as $field => $rules)
+		foreach($this->fields as $field => $rules)
 		{
 			$rules = explode('|', $rules);
 
 			// Skip fields that are not required
-			if( ! in_array('required', $rules) AND ! isset($this->data[$field])) continue;
-
-			$data = $this->data[$field];
+			if( ! isset($this->data[$field]))
+			{
+				if( ! in_array('required', $rules)) continue;
+				$data = NULL;
+			}
+			else
+			{
+				$data = $this->data[$field];
+			}
 
 			// Auto-trim non-empty string
 			if($data AND is_string($data))
@@ -193,7 +199,7 @@ class Validation
 	 * @param mixed $data to validate
 	 * @return boolean
 	 */
-	public function array($field, $data)
+	public function is_array($field, $data)
 	{
 		if(is_array($data)) return TRUE;
 		$this->errors[$field] = sprintf(lang('validation_array'), $field);
@@ -240,8 +246,11 @@ class Validation
 	 */
 	public function alphabetical($field, $word)
 	{
-		if(preg_match("/^([a-z])+$/i",$word)) return TRUE;
-		$this->errors[$field] = sprintf(lang('validation_alphabetical'), $field);
+		if($this->string($field, $word))
+		{
+			if(preg_match("/^([a-z])+$/i",$word)) return TRUE;
+			$this->errors[$field] = sprintf(lang('validation_alphabetical'), $field);
+		}
 		return FALSE;
 	}
 
@@ -255,6 +264,7 @@ class Validation
 	 */
 	public function word($field, $word)
 	{
+		if( ! $this->string($field, $word)) return FALSE;
 		if(preg_match("/\W/", $word))
 		{
 			$this->errors[$field] = sprintf(lang('validation_word'), $field);
@@ -273,7 +283,8 @@ class Validation
 	 */
 	public function plaintext($field, $data)
 	{
-		if(strrpos($string, '<') !== FALSE OR strrpos($string, '>') !== FALSE)
+		if( ! $this->string($field, $data)) return FALSE;
+		if(strrpos($data, '<') !== FALSE OR strrpos($data, '>') !== FALSE)
 		{
 			$this->errors[$field] = sprintf(lang('validation_plaintext'), $field);
 			return FALSE;
@@ -292,7 +303,7 @@ class Validation
 	 */
 	public function matches($field, $data, $field2)
 	{
-		if (isset($_POST[$field2]) AND $data === $_POST[$field2]) return TRUE;
+		if (isset($this->data[$field2]) AND $data === $this->data[$field2]) return TRUE;
 		$this->errors[$field] = sprintf(lang('validation_matches'), $field, $field2);
 		return FALSE;
 	}
@@ -324,7 +335,7 @@ class Validation
 	 */
 	public function max_length($field, $data, $length)
 	{
-		if(mb_strlen($data)<=$length)return TRUE;
+		if(mb_strlen($data) <= $length) return TRUE;
 		$this->errors[$field] = sprintf(lang('validation_max_length'), $field, $length);
 		return FALSE;
 	}

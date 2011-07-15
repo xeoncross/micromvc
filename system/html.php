@@ -31,7 +31,7 @@ class html
 
 
 	/**
-	 * Generates an obfuscated HTML version of an email address .
+	 * Generates an obfuscated HTML version of an email address.
 	 *
 	 * @param string $email address
 	 * @return string
@@ -45,7 +45,7 @@ class html
 			{
 				case 1: $s .= '&#' . ord($char) . ';'; break;
 				case 2: $s .= '&#x' . dechex(ord($char)) . ';'; break;
-				case 3: $s .= $char;
+				case 3: $s .= '<span>'.$char.'</span>';
 			}
 		}
 		return $str;

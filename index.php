@@ -51,7 +51,15 @@ event('pre_controller', $controller);
 
 // Load and run action
 $controller = new $controller($route);
-call_user_func_array(array($controller, 'action'), $params);
+
+if($params)
+{
+	call_user_func_array(array($controller, 'action'), $params);
+}
+else
+{
+	$controller->action();
+}
 
 // Render output
 $controller->render();

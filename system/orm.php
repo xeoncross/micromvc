@@ -105,7 +105,7 @@ class ORM
 	 */
 	public function __set($key, $value)
 	{
-		if(!array_key_exists($key, $this->data) OR $this->data[$key] !== $value)
+		if( ! array_key_exists($key, $this->data) OR $this->data[$key] !== $value)
 		{
 			$this->data[$key] = $value;
 			$this->changed[$key] = $key;
@@ -122,7 +122,7 @@ class ORM
 	 */
 	public function __get($key)
 	{
-		if($key !== static::$key) $this->load();
+		if(isset($this->data[static::$key]) AND ! $this->loaded) $this->load();
 		return array_key_exists($key, $this->data) ? $this->data[$key] : $this->related($key);
 	}
 
@@ -132,7 +132,7 @@ class ORM
 	 */
 	public function __isset($key)
 	{
-		$this->load();
+		if(isset($this->data[static::$key]) AND ! $this->loaded) $this->load();
 		return array_key_exists($key, $this->data) OR isset($this->related[$key]);
 	}
 
@@ -142,7 +142,6 @@ class ORM
 	 */
 	public function __unset($key)
 	{
-		$this->load();
 		unset($this->data[$key], $this->changed[$key], $this->related[$key]);
 	}
 
@@ -202,7 +201,7 @@ class ORM
 
 			if(empty($this->data[$key]))
 			{
-				$this->clear();
+				//$this->clear();
 				return FALSE;
 			}
 

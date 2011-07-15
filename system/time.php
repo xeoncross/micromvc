@@ -19,14 +19,14 @@ class Time extends DateTime
 	 */
 	public function __construct($time = 'now', DateTimeZone $timezone = NULL)
 	{
-		if(is_int($time))
-		{
-			$time = "@$time";
-		}
-
 		if(is_array($time))
 		{
 			$time = self::fromArray($time);
+		}
+
+		if(is_int($time) OR ctype_digit($time))
+		{
+			$time = "@$time";
 		}
 
 		if($timezone)
@@ -136,13 +136,13 @@ class Time extends DateTime
 	 * @param array $data
 	 * @return int
 	 */
-	public static function fromArray( array $data)
+	public static function fromArray(array $data)
 	{
 		foreach(array('year','month','day','hour','minute','second') as $unit)
 		{
 			$$unit = isset($data[$unit]) ? $data[$unit] : 0;
-			return mktime($hour, $minute, $second, $month, $day, $year);
 		}
+		return mktime($hour, $minute, $second, $month, $day, $year);
 	}
 
 

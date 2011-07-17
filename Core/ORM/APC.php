@@ -10,9 +10,9 @@
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
-namespace Core;
+namespace Core\ORM;
 
-class APCORM extends ORM
+class APC extends \Core\ORM
 {
 
 	public static function cache_set($key, $value)

@@ -40,10 +40,14 @@ foreach(config('events') as $event => $class)
 	event($event, '', $class);
 }
 
-$route = new \Core\Route();
+// Load App routes config file
+$route = new \Core\Config('routes', 'App');
 
-// Parse the routes to find the correct controller
-list($params, $route, $controller) = $route->parse(\Core\URL::path(), config('routes'));
+// Load router while removing route config (to free memory)
+$route = new \Core\Route($route->array);
+
+// Parse the routes to find the correct controller while removing route object
+list($params, $route, $controller) = $route->parse(\Core\URL::path());
 
 // Any else before we start?
 event('pre_controller', $controller);

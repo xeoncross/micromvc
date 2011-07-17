@@ -30,7 +30,7 @@ function benchmark()
  * System registry for storing global objects and services
  *
  * @return object
- *
+ */
 function registry()
 {
 	static $service;
@@ -114,23 +114,25 @@ function event($key, $value = NULL, $callback = NULL)
 
 
 /**
- * Fetch a config value
+ * Fetch a config value from a module configuration file
  *
  * @param string $key the config key name
  * @param string $module the module name
- * @return string
+ * @return mixed
  */
 function config($key, $module = 'App')
 {
-	static $c;
+	static $config = array();
 
-	if(empty($c[$module]))
+	if(empty($config[$module]))
 	{
-		require(SP . $module . DIRECTORY_SEPARATOR . 'config' . EXT);
-		$c[$module] = $config;
+		$config[$module] = new \Core\Config('config', $module);
+		//require(SP . $module . DIRECTORY_SEPARATOR . 'config' . EXT);
+		//$c[$module] = $config;
 	}
 
-	return ($key ? $c[$module][$key] : $c[$module]);
+	//return ($key ? $c[$module][$key] : $c[$module]);
+	return ($key ? $config[$module]->$key : $config[$module]);
 }
 
 

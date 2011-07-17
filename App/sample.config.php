@@ -17,14 +17,8 @@ $config['site_url'] = '/';
 // Enable debug mode?
 $config['debug_mode'] = TRUE;
 
-// Current theme
-$config['theme'] = 'theme';
-
 // Load init file?
 $config['init'] = FALSE;
-
-// Path to log directory
-$config['log_path'] = 'system/log/';
 
 // Default language file
 $config['language'] = 'en';
@@ -36,17 +30,12 @@ $config['language'] = 'en';
  * Visit http://us3.php.net/manual/en/pdo.drivers.php for more info.
  */
 $config['database'] = array(
-
-	// MySQL
 	'dns' => "mysql:host=127.0.0.1;port=3306;dbname=micromvc",
 	'username' => 'root',
 	'password' => '',
-
-	// PostgreSQL
 	//'dns' => "pgsql:host=localhost;port=5432;dbname=micromvc",
 	//'username' => 'postgres',
-	//'password' => '',
-
+	//'password' => 'postgres',
 	'params' => array()
 );
 
@@ -73,17 +62,16 @@ $config['database'] = array(
  * Result:		$Comments_Controller_Recent->action($username = 'John_Doe4', $page = 3)
  */
 $config['routes'] = array(
-	''					=> 'Example_Controller_Index',
-	'404'				=> 'Example_Controller_404',
+	''					=> 'App\Controller\Index',
+	'404'				=> 'App\Controller\Page404',
 
 	// Example Module
-	'example/school'	=> 'Example_Controller_School',
-	'example/form'		=> 'Example_Controller_Form',
-	'example/upload'	=> 'Example_Controller_Upload',
+	'example/school'	=> 'Example\Controller\School',
+	'example/form'		=> 'Example\Controller\Form',
+	'example/upload'	=> 'Example\Controller\Upload',
 
 	// Unit Tests
-	'unittest'	=> 'Unittest_Controller_Index',
-
+	'unittest'	=> 'Unittest\Controller\Index',
 );
 
 /**
@@ -120,4 +108,3 @@ $config['cookie'] = array(
 
 //$config['XXX_api_key'] = '...';
 
-return $config;

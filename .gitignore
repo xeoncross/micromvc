@@ -3,7 +3,7 @@ Thumbs.db
 *~
 *.cache
 *.log
-uploads/*
+Uploads
 config.php
 ignore
-backups/*
+Backups

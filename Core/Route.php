@@ -14,6 +14,13 @@ namespace Core;
 
 class Route
 {
+	public $routes;
+
+	public function __construct(array $routes)
+	{
+		$this->routes = $routes;
+	}
+
 	/**
 	 * Parse the given URL path and return the correct controller and parameters.
 	 *
@@ -21,7 +28,7 @@ class Route
 	 * @param array $routes to test against
 	 * @return array
 	 */
-	public function parse($path, array $routes = NULL)
+	public function parse($path)
 	{
 		// If this is not a valid, safe path (more complex params belong in GET/POST)
 		if($path AND ! preg_match('/^[\w\-~\/\.]{1,400}$/', $path))
@@ -32,10 +39,10 @@ class Route
 		// Default homepage route
 		if($path === '')
 		{
-			return array(array(), '', $routes['']);
+			return array(array(), '', $this->routes['']);
 		}
 
-		foreach($routes as $route => $controller)
+		foreach($this->routes as $route => $controller)
 		{
 			if( ! $route) continue; // Skip homepage route
 
@@ -68,7 +75,7 @@ class Route
 		}
 
 		// Controller not found
-		return array(array($path), $path, $routes['404']);
+		return array(array($path), $path, $this->routes['404']);
 	}
 }
 

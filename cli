@@ -1,4 +1,4 @@
-<?php if(PHP_SAPI!=='cli')die();
+<?php if(PHP_SAPI !== 'cli') die();
 /**
  * CLI
  *
@@ -21,19 +21,19 @@ define('START_MEMORY_USAGE', memory_get_usage());
 define('EXT', '.php');
 
 // Absolute path to the system folder
-define('SP', realpath(dirname(__FILE__)). '/');
+define('SP', realpath(__DIR__). '/');
 
 // Are we using windows?
 define('WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 // Include bootstrap
-require('bootstrap.php');
+require(SP . 'common' . EXT);
 
 //Is this an AJAX request?
 define('AJAX_REQUEST', 0);
 
 // Custom init script?
-if(config('init')) require('init.php');
+if(config('init')) require(SP . 'init' . EXT);
 
 // Require a CLI path
 if(empty($argv[1])) die("Please enter a path to the CLI file.\nExample: " . colorize('php cli module/cli/file.php', 'blue') . "\n");
@@ -42,10 +42,10 @@ if(empty($argv[1])) die("Please enter a path to the CLI file.\nExample: " . colo
 $file = SP . str_replace(EXT, '', trim($argv[1], '/')) . EXT;
 
 // Does the file exist?
-if(!is_file($file)) die("Please enter a valid file path");
+if( ! is_file($file)) die("Please enter a valid file path\n");
 
 // Require a valid, safe path
-if(!preg_match('/^[\w\-~\/\.+]{1,600}/', $argv[1])) die("Invalid path given\n");
+if( ! preg_match('/^[\w\-~\/\.+]{1,600}/', $argv[1])) die("Invalid path given\n");
 
 /**
  * Color output text for the CLI

@@ -5,8 +5,8 @@
 	<title>MicroMVC PHP Framework</title>
 	<meta name="viewport" content="initial-scale=1.0, width=device-width, maximum-scale=1.0" />
 
-	<link rel="stylesheet" media="all" href="<?php print site_url('css/base.css'); ?>"/>
-	<link rel="stylesheet" media="all" href="<?php print site_url('css/style.css'); ?>"/>
+	<link rel="stylesheet" media="all" href="<?php print site_url('CSS/base.css'); ?>"/>
+	<link rel="stylesheet" media="all" href="<?php print site_url('CSS/style.css'); ?>"/>
 
 	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -40,11 +40,6 @@
 					<li><a href="/example/form">Form</a></li>
 					<li><a href="/example/upload">Upload</a></li>
 					<li><a href="/example/school">School</a></li>
-					<?php if( ! session('user_id')) { ?>
-						<li><a href="https://swiftlogin.com/login?url=<?php print site_url('/user/login/' . base64_encode(current_url())); ?>">Login</a></li>
-					<?php } else { ?>
-						<li><a href="<?php print site_url('/user/logout'); ?>">Logout</a></li>
-					<?php } ?>
 				</ul>
 			</nav>
 			</div>

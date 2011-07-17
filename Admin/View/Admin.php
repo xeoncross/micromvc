@@ -36,7 +36,7 @@ function CheckAll(fmobj) {
 
 </div>
 
-<form id="admin_form" action="<?php print $config['process_url']. '/'. base64_url_encode(URL::path() . URL::query_string()); ?>" method="post">
+<form id="admin_form" action="<?php print $config['process_url']. '/'. base64_url_encode(\Core\URL::path() . \Core\URL::query_string()); ?>" method="post">
 <input type="hidden" name="token" value="<?php print session('token'); ?>" />
 <table>
 	<thead>

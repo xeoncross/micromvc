@@ -70,7 +70,7 @@ abstract class Migration
 					$table = $line;
 
 					// Has this table been removed from the schema?
-					if( ! isset($this->tables[$table]) )
+					if( ! isset($this->tables->$table) )
 					{
 						print colorize("$table no longer exists in schema, ignoring",'yellow')."\n";
 						$table = NULL;
@@ -78,7 +78,7 @@ abstract class Migration
 					else
 					{
 						// Column list comes from new schema - not old backup
-						$columns = array_flip(array_keys($this->tables[$table]));
+						$columns = array_flip(array_keys($this->tables->$table));
 						print colorize("Restoring $table...", 'green')."\n";
 					}
 

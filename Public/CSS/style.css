@@ -66,21 +66,21 @@ form.formstyle .form_error
 }
 .message
 {
-    background: #F8FAFC url(../images/message.png) 20px center no-repeat;
+    background: #F8FAFC url(../Images/message.png) 20px center no-repeat;
     border-color: #B5D4FE;
 }
 .warning
 {
-    background: #fff6bf url(../images/warning.png) 20px center no-repeat;
+    background: #fff6bf url(../Images/warning.png) 20px center no-repeat;
     border-color: #ffd324;
 }
 .error
 {
-    background: #fde6e9 url(../images/error.png) 20px center no-repeat;
+    background: #fde6e9 url(../Images/error.png) 20px center no-repeat;
     border-color: #fb939f;
 }
 .success
 {
-    background: #EBFCE1 url(../images/success.png) 20px center no-repeat;
+    background: #EBFCE1 url(../Images/success.png) 20px center no-repeat;
     border-color: #B9DAA6;
 }

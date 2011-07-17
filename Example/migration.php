@@ -47,6 +47,7 @@ $config = array(
 		'created' => array('type' => 'datetime'),
 	),
 
+	/*
 	// User Table
 	'user' => array(
 		'id' => array('type' => 'primary'),
@@ -76,4 +77,5 @@ $config = array(
 		'role_id' => array('type' => 'integer', 'index' => TRUE),
 		'resource_id' => array('type' => 'integer', 'index' => TRUE),
 	),
+	*/
 );

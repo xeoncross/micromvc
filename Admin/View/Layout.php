@@ -5,9 +5,9 @@
 	<title>Administration Area - <?php print URL::domain(); ?></title>
 	<meta name="viewport" content="initial-scale=1.0, width=device-width, maximum-scale=1.0" />
 
-	<link rel="stylesheet" media="all" href="/admin/view/css/base.css"/>
-	<link rel="stylesheet" media="all" href="/admin/view/css/admin.css"/>
-	<link rel="stylesheet" media="all" href="/admin/view/css/style.css"/>
+	<link rel="stylesheet" media="all" href="<?php print site_url('/Admin/CSS/base.css'); ?>"/>
+	<link rel="stylesheet" media="all" href="<?php print site_url('/Admin/CSS/admin.css'); ?>"/>
+	<link rel="stylesheet" media="all" href="<?php print site_url('/Admin/CSS/style.css'); ?>"/>
 
 	<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -28,7 +28,7 @@
 <body>
 <div id="container">
 <div id="sidebar">
-	<h2><?php print URL::domain(); ?></h2>
+	<h2>Admin Area</h2>
 	<?php
 
 	// Recursively build a menu tree

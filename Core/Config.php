@@ -55,6 +55,7 @@ class Config implements \Iterator
     function valid()
     {
 		return isset($this->array[key($this->array)]);
+		//return TRUE;
     }
 
 }

@@ -19,7 +19,7 @@ $migration->db = $db;
 $migration->name = 'default';
 
 // Load table configuration
-$migration->tables = new \Core\Config('migration', 'App');
+$migration->tables = new \Core\Config('migration', 'Example');
 
 // Backup existing database table
 $migration->backup_data();

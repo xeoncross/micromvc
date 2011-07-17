@@ -11,7 +11,9 @@
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
-abstract class Admin_Controller extends Controller
+namespace Admin;
+
+abstract class Controller extends \Core\Controller
 {
 	public $template = 'layout';
 
@@ -23,7 +25,7 @@ abstract class Admin_Controller extends Controller
 	protected function admin($config = array(), $page)
 	{
 		// Setup defaults
-		$config = $config + config(NULL, 'admin');
+		$config = $config + config(NULL, 'Admin');
 		$config['admin_url'] = site_url($this->route);
 
 		$model = $config['model'];
@@ -42,9 +44,9 @@ abstract class Admin_Controller extends Controller
 		if($column AND in_array($column, $config['columns']))
 		{
 			// Get the correct database column identifier
-			$i = ORM::$db->i;
+			$i = \Core\ORM::$db->i;
 
-			$where = array($i.$column.$i.' LIKE '.ORM::$db->quote("%$term%"));
+			$where = array($i.$column.$i.' LIKE '. \Core\ORM::$db->quote("%$term%"));
 		}
 
 		// Valid?
@@ -60,7 +62,7 @@ abstract class Admin_Controller extends Controller
 		//If not found
 		if( ! $result)
 		{
-			$this->content = new View('no_rows','admin');
+			$this->content = new View('No_Rows', 'Admin');
 			$this->content->set($config);
 			return;
 		}
@@ -100,14 +102,14 @@ abstract class Admin_Controller extends Controller
 		$url = $this->route. '/[[page]]'. $query_string;
 
 		// Create the pagination
-		$this->pagination = new Pagination($count, $url, $page, $pp);
+		$this->pagination = new \Core\Pagination($count, $url, $page, $pp);
 
 		//Load the form view (and return it)
-		$view = new view('admin','admin');
+		$view = new \Core\View('Admin', 'Admin');
 		$view->set($data);
 
 		// Create new session token
-		Session::token();
+		\Core\Session::token();
 
 		$this->content = $view;
 	}
@@ -122,7 +124,7 @@ abstract class Admin_Controller extends Controller
 	protected function process($config = array(), $return_to = NULL)
 	{
 		// Setup defaults
-		$config = $config + config(NULL, 'admin');
+		$config = $config + config(NULL, 'Admin');
 
 		// If there is no page to return to - then go back to admin
 		if( ! $return_to)
@@ -131,7 +133,7 @@ abstract class Admin_Controller extends Controller
 		}
 
 		// Validate
-		if( ! Session::token(post('token')) OR ! post('ids') OR ! is_array(post('ids')) OR ! post('action') OR empty($config['actions'][post('action')]))
+		if( ! \Core\Session::token(post('token')) OR ! post('ids') OR ! is_array(post('ids')) OR ! post('action') OR empty($config['actions'][post('action')]))
 		{
 			redirect(base64_url_decode($return_to));
 			exit();
@@ -183,11 +185,11 @@ abstract class Admin_Controller extends Controller
 	 */
 	public function render()
 	{
-		Session::save();
+		\Core\Session::save();
 
 		headers_sent() OR header('Content-Type: text/html; charset = utf-8');
 
-		$layout = new View($this->template, 'admin');
+		$layout = new \Core\View($this->template, 'Admin');
 		$layout->set((array) $this);
 		$layout->menu = $this->load_menu();
 		print $layout;
@@ -196,14 +198,14 @@ abstract class Admin_Controller extends Controller
 
 		if(config('debug_mode'))
 		{
-			print new View('debug', 'system');
+			print new \Core\View('Debug', 'Core');
 		}
 	}
 
 	protected function load_menu()
 	{
 		// Fetch all the module directories
-		$modules = dir::contents(SP, FALSE, 'dir');
+		$modules = \Core\Directory::contents(SP, FALSE, 'dir');
 
 		$menu = array();
 		// Build the admin menu from all modules

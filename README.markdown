@@ -6,15 +6,16 @@ PHP is an **interpreted scripting language** and should not be expected to compi
 
 On the other hand, MicroMVC is built with performance in mind. Easily one of the fastest frameworks ever made among the slue of small PHP frameworks. While most frameworks take 2-6MB of RAM to make a simple database request - MicroMVC can do it in less than .5MB while still using the full ORM.
 
-Unlike some MVC frameworks, MicroMVC is module based, which means that you can group related controllers, models, and views to help organize your projects better. It also means you can drop in modules built by other users.
+MicroMVC is also fully PSR-0 compliant which means you can start using Symfony, Zend, Flurish, and other libraries right away!
 
 All class methods are fully documented. Average class size is only 4kb which makes reading the codebase very easy and quick. IDE's such as eclipse or netbeans can pickup on the phpDoc comments to add instant auto-completion to your projects. In addition, full multi-byte string support is built into the system.
 
 ## Requirements</h3>
 
 * PHP 5.3+
-* Nginx 7.x (legacy support for Apache with mod_rewrite)
+* Nginx 0.7.x (legacy support for Apache with mod_rewrite)
 * PDO if using the Database
+* mb_string, gettext, iconv, & SPL classes
 
 [MicroMVC](http://micromvc.com) is licensed under the Open Source MIT license, so you can use it for any personal or corporate projects totally free!</p>
 

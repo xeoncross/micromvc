@@ -5,20 +5,6 @@
 # 1and1.com users might need to un-comment this line
 #AddType x-mapp-php5 .php
 
-# Do not add an ending slash to directories (/)
-#DirectorySlash Off
-
-# Hide the following files from the world
-<FilesMatch "\.(htaccess|htpasswd|ini|php|log|sh|sql|cache)$">
-	Order Allow,Deny
-	Deny from all
-</FilesMatch>
-
-# Allow the index.php file
-<filesMatch "index\.php$">
-	allow from All
-</filesMatch>
-
 # Disable directory browsing
 Options All -Indexes
 
@@ -26,7 +12,7 @@ Options All -Indexes
 #IndexIgnore *
 
 # Set the default file for indexes
-DirectoryIndex index.php index.html 
+DirectoryIndex index.php index.html
 
 <IfModule mod_rewrite.c>
 
@@ -36,71 +22,6 @@ DirectoryIndex index.php index.html
 	# The RewriteBase of the system (change if you are using this sytem in a sub-folder).
 	RewriteBase /
 
-	# Hide svn and git folders/files
-	RedirectMatch 404 /\\.(svn|git)
-
-	# Force error messages to load site pages? (optional)
-	#ErrorDocument 400 /
-	#ErrorDocument 401 /
-	#ErrorDocument 403 /
-	#ErrorDocument 404 /
-	#ErrorDocument 500 /
-
-	#############################
-	# Search engine optimization (SEO)
-	#
-	# Allowing access to pages (and sites) gives rise to multiple ways to 
-	# reach a page - which is bad SEO! To prevent duplicate content issues
-	# the following rules attempt to correct this. May also require changes
-	# to the routes config in some cases.
-	#
-	# The following rules handle URI paths, slashes, and the WWW prefix.
-	# If you are hosting multiple sites then make sure you add them below.
-	#
-
-	# Enforce www
-	# If you have subdomains, you can add them to the list using the "|" (OR) regex operator
-	#RewriteCond %{HTTP_HOST} !^(www|subdomain) [NC]
-	#RewriteRule ^(.*)$ http://www.micromvc.com/$1 [L,R=301]
-
-	# Enforce NO www
-	#RewriteCond %{HTTP_HOST} ^www\.micromvc [NC]
-	#RewriteRule ^(.*)$ http://micromvc.com/$1 [L,R=301]
-
-	#############################
-	# Due to the routing system, the following URI all point to the index:
-	# /
-	# /welcome
-	# /welcome/
-	# /welcome/index
-	# /welcome/index/
-	# /index.php
-
-	# This rule will make sure they redirect to "/". Change "welcome" if
-	# your default controller is named something else.
-	#RewriteRule ^(welcome(/index)?|index(\.php)?)/?$ / [L,R=301]
-	#RewriteRule ^(.*)/index/?$ $1 [L,R=301]
-
-	#############################
-	# Force URI to end with or without trailing slashes. Enable one method below only.
-
-	# Method 1: Forces trailing slashes
-	#RewriteCond %{REQUEST_FILENAME} !-f
-	#RewriteCond %{REQUEST_URI} !/$
-	#RewriteRule ^(.+)$ $1/ [L,R=301]
-
-	# Method 2: Removes trailing slashes (recommended)
-	#RewriteCond %{REQUEST_FILENAME} !-d
-	#RewriteCond %{REQUEST_URI} /$
-	#RewriteRule ^(.+)/$ $1 [L,R=301]
-
-	#############################
-	# Hide all PHP files
-	#RewriteCond %{REQUEST_FILENAME} !index.php
-	#RewriteCond %{REQUEST_FILENAME} !-d
-	#RewriteRule (.*)\.php$ - [L,F]
-
-	#############################
 	# If the file/dir does not exist, route everything to index.php
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
@@ -110,7 +31,7 @@ DirectoryIndex index.php index.html
 	#############################
 	# Prevent Image hotlinking (must be blank refer or this site)
 	#RewriteCond %{HTTP_REFERER} !^$
-	#RewriteCond %{HTTP_REFERER} !^http://(micromvc|othersite) [NC] 
+	#RewriteCond %{HTTP_REFERER} !^http://(micromvc|othersite) [NC]
 	#RewriteRule .*\.(gif|jpg|png)$ [NC,F]
 
 	#############################

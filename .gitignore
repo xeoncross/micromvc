@@ -1,9 +1,19 @@
-.DS_Store
-Thumbs.db
+# Linux
+.*
+!.gitignore
 *~
+
+# OS X
+.DS_Store
+# Thumbnails
+._*
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# MicroMVC
 *.cache
 *.log
 Uploads
-config.php
-ignore
-Backups
+Storage

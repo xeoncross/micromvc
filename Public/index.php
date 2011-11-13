@@ -2,72 +2,37 @@
 /**
  * Index
  *
- * This file defines the MVC processing logic for the system
+ * This file defines the basic processing logic flow for the system
  *
  * @package		MicroMVC
  * @author		David Pennington
- * @copyright	(c) 2010 MicroMVC Framework
+ * @copyright	(c) 2011 MicroMVC Framework
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
-// System Start Time
-define('START_TIME', microtime(true));
-
-// System Start Memory
-define('START_MEMORY_USAGE', memory_get_usage());
-
-// Extension of all PHP files
-define('EXT', '.php');
-
-// Absolute path to the system folder
-define('SP', realpath(dirname(__DIR__)). DIRECTORY_SEPARATOR);
-
-// Are we using windows?
-define('WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 // Include bootstrap
-require(SP . 'common' . EXT);
+require('../Bootstrap.php');
 
-//Is this an AJAX request?
-define('AJAX_REQUEST', strtolower(getenv('HTTP_X_REQUESTED_WITH')) === 'xmlhttprequest');
-
-// Custom init script?
-if(config('init')) require(SP . 'init' . EXT);
-
-// Register events
-foreach(config('events') as $event => $class)
+try
 {
-	event($event, '', $class);
+	// Anything else before we start?
+	event('system.startup');
+
+	// Load controller dispatch passing URL routes
+	$dispatch = new \Core\Dispatch(config('Route')->routes);
+
+	// Run controller based on URL path and HTTP request method
+	$controller = $dispatch->controller(PATH, getenv('REQUEST_METHOD'));
+
+	// Send the controller response
+	$controller->send();
+
+	// One last chance to do something
+	event('system.shutdown', $controller);
+}
+catch (Exception $e)
+{
+	\Core\Error::exception($e);
 }
 
-// Load App routes config file
-$route = new \Core\Config('routes', 'App');
-
-// Load router while removing route config (to free memory)
-$route = new \Core\Route($route->array);
-
-// Parse the routes to find the correct controller while removing route object
-list($params, $route, $controller) = $route->parse(\Core\URL::path());
-
-// Any else before we start?
-event('pre_controller', $controller);
-
-// Load and run action
-$controller = new $controller($route);
-
-if($params)
-{
-	call_user_func_array(array($controller, 'action'), $params);
-}
-else
-{
-	$controller->action();
-}
-
-// Render output
-$controller->render();
-
-// One last chance to do something
-event('post_controller', $controller);
-
-// End

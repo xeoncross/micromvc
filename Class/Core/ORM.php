@@ -341,15 +341,15 @@ class ORM
 			throw new Exception ($alias . ' relation not found');
 		}
 
-		$model = static::$has_many_through[$alias];
+		$array = static::$has_many_through[$alias];
 
-		$foreign_key = key($model);
-		$model = current($model);
+		$foreign_key = key($array);
+		$model = current($array);
 
-		next($model);
+		next($array);
 
-		$foreign_key_2 = key($model);
-		$model_2 = current($model);
+		$foreign_key_2 = key($array);
+		$model_2 = current($array);
 
 		// Set the foreign key WHERE condition
 		$where = array($foreign_key => $this->key()) + $args[0];

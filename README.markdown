@@ -15,7 +15,13 @@ All class methods are fully documented. Average class size is only 4kb which mak
 * PHP 5.3+
 * Nginx 0.7.x (legacy support for Apache with mod_rewrite)
 * PDO if using the Database
-* mb_string, gettext, iconv, & SPL classes
+* mb_string, [gettext](http://php.net/gettext), [iconv](http://www.php.net/manual/en/book.iconv.php), [ICU INTL](http://php.net/manual/en/book.intl.php) & SPL classes
+
+If you have errors about missing classes make sure you have the required PHP extensions installed.
+
+Ubuntu/Debian:
+
+    $ sudo apt-get install php5-intl php5-mycrypt php-gettext
 
 [MicroMVC](http://micromvc.com) is licensed under the Open Source MIT license, so you can use it for any personal or corporate projects totally free!</p>
 

@@ -17,11 +17,13 @@ All class methods are fully documented. Average class size is only 4kb which mak
 * PDO if using the Database
 * mb_string, [gettext](http://php.net/gettext), [iconv](http://www.php.net/manual/en/book.iconv.php), [ICU INTL](http://php.net/manual/en/book.intl.php) & SPL classes
 
+## Where is the Locale Class?
+
 If you have errors about missing classes make sure you have the required PHP extensions installed.
 
-Ubuntu/Debian:
+Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mycrypt php-gettext`
 
-    $ sudo apt-get install php5-intl php5-mycrypt php-gettext
+## License
 
 [MicroMVC](http://micromvc.com) is licensed under the Open Source MIT license, so you can use it for any personal or corporate projects totally free!</p>
 

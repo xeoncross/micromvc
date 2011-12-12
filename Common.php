@@ -249,7 +249,7 @@ function site_url($path = NULL, array $params = NULL)
  * @param string $to encoding you want the string in
  * @param string $from encoding that string is in
  * @return string
- *
+ */
 function encode($string, $to = 'UTF-8', $from = 'UTF-8')
 {
 	// ASCII is already valid UTF-8
@@ -268,7 +268,7 @@ function encode($string, $to = 'UTF-8', $from = 'UTF-8')
  *
  * @param string $string to check
  * @return bool
- *
+ */
 function is_ascii($string)
 {
 	return ! preg_match('/[^\x00-\x7F]/S', $string);
@@ -319,7 +319,7 @@ function h($string)
  * @param string $string to clean
  * @param bool $spaces TRUE to allow spaces
  * @return string
- *
+ */
 function sanitize($string, $spaces = TRUE)
 {
 	$search = array(
@@ -344,7 +344,7 @@ function sanitize($string, $spaces = TRUE)
  *
  * @param string $string to filter
  * @return string
- *
+ */
 function sanitize_url($string)
 {
 	return urlencode(mb_strtolower(sanitize($string, FALSE)));
@@ -356,7 +356,7 @@ function sanitize_url($string)
  *
  * @param string $string to filter
  * @return string
- *
+ */
 function sanitize_filename($string)
 {
 	return sanitize($string, FALSE);
@@ -446,45 +446,6 @@ function directory_is_writable($dir, $chmod = 0755)
 
 
 /**
- * Convert any given variable into a SimpleXML object
- *
- * @param mixed $object variable object to convert
- * @param string $root root element name
- * @param object $xml xml object
- * @param string $unknown element name for numeric keys
- * @param string $doctype XML doctype
- *
-function to_xml($object, $root = 'data', $xml = NULL, $unknown = 'element', $doctype = "<?xml version = '1.0' encoding = 'utf-8'?>")
-{
-	if(is_null($xml))
-	{
-		$xml = simplexml_load_string("$doctype<$root/>");
-	}
-
-	foreach((array) $object as $k => $v)
-	{
-		if(is_int($k))
-		{
-			$k = $unknown;
-		}
-
-		if(is_scalar($v))
-		{
-			$xml->addChild($k, h($v));
-		}
-		else
-		{
-			$v = (array) $v;
-			$node = array_diff_key($v, array_keys(array_keys($v))) ? $xml->addChild($k) : $xml;
-			self::from($v, $k, $node);
-		}
-	}
-
-	return $xml;
-}
-
-
-/**
  * Return an IntlDateFormatter object using the current system locale
  *
  * @param string $locale string
@@ -492,7 +453,7 @@ function to_xml($object, $root = 'data', $xml = NULL, $unknown = 'element', $doc
  * @param integer $timetype IntlDateFormatter constant
  * @param string $timezone Time zone ID, default is system default
  * @return IntlDateFormatter
- *
+ */
 function __date($locale = NULL, $datetype = IntlDateFormatter::MEDIUM, $timetype = IntlDateFormatter::SHORT, $timezone = NULL)
 {
 	return new IntlDateFormatter($locale ?: setlocale(LC_ALL, 0), $datetype, $timetype, $timezone);
@@ -506,7 +467,7 @@ function __date($locale = NULL, $datetype = IntlDateFormatter::MEDIUM, $timetype
  * @param string $string to parse
  * @param array $params to insert
  * @return string
- *
+ */
 function __($string, array $params = NULL)
 {
 	return msgfmt_format_message(setlocale(LC_ALL, 0), $string, $params);

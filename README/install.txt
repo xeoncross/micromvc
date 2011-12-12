@@ -11,3 +11,15 @@ A CLI console is provided for using the migrations
 $ php CLI create
 
 The code is very well commented, please read it.
+
+--- Submodules ---
+
+This system relies on the https://github.com/Xeoncross/Micro submodule. After checking out a copy of the system, please run the following commands to pull the submodules.
+
+$ git submodule init
+$ git submodule update
+
+You can add additional libraries to the classes folder like so
+
+$ git submodule add git://github.com/[User]/[project].git Class/[project]
+

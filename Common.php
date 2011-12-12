@@ -86,7 +86,7 @@ function __autoload($className)
 	// Each namespace might have a custom path
 	$namespaces = config()->namespaces;
 
-	$className = explode('/', str_replace('\\', '/', ltrim($className, '\\'));
+	$className = explode('/', str_replace('\\', '/', ltrim($className, '\\')));
 	$fileName = str_replace('_', '/', array_pop($className));
 
 	// Is there a namespace left?

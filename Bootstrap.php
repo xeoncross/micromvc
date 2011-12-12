@@ -80,7 +80,3 @@ iconv_set_encoding("internal_encoding", "UTF-8");
 // multibyte encoding
 mb_internal_encoding('UTF-8');
 
-// Enable global error handling
-set_error_handler(array('\Core\Error', 'handler'));
-register_shutdown_function(array('\Core\Error', 'fatal'));
-

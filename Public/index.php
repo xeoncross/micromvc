@@ -20,7 +20,7 @@ try
 	event('system.startup');
 
 	// Load controller dispatch passing URL routes
-	$dispatch = new \Core\Dispatch(config('Route')->routes);
+	$dispatch = new \Micro\Dispatch(config('Route')->routes);
 
 	// Run controller based on URL path and HTTP request method
 	$controller = $dispatch->controller(PATH, getenv('REQUEST_METHOD'));
@@ -33,6 +33,6 @@ try
 }
 catch (Exception $e)
 {
-	\Core\Error::exception($e);
+	\Micro\Error::exception($e);
 }
 

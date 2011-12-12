@@ -24,9 +24,9 @@
 $config = array();
 
 $config['routes'] = array(
-	''					=> '\Controller\Index',
-	'404'				=> '\Controller\Page404',
-	'school'			=> '\Controller\School',
+	''					=> '\Example\Controller\Index',
+	'404'				=> '\Example\Controller\Page404',
+	'school'			=> '\Example\Controller\School',
 
 	// Example paths
 	//'example/path'		=> '\Controller\Example\Hander',

@@ -1,0 +1,3 @@
+[submodule "Class/Micro"]
+	path = Class/Micro
+	url = git://github.com/Xeoncross/Micro.git

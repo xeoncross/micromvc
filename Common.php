@@ -65,10 +65,8 @@ function config($file = 'Config', $clear = FALSE)
 
 	if(empty($configs[$file]))
 	{
-		//$configs[$file] = new \Core\Config($file);
 		require(SP . 'Config/' . $file . EXT);
 		$configs[$file] = (object) $config;
-		//print dump($configs);
 	}
 
 	return $configs[$file];
@@ -76,26 +74,41 @@ function config($file = 'Config', $clear = FALSE)
 
 
 /**
- * Automatically load the given class
+ * SplClassLoader implementation that implements the technical interoperability
+ * standards for PHP 5.3 namespaces and class names.
+ *
+ * http://groups.google.com/group/php-standards/web/final-proposal
  *
  * @param string $class name
  */
 function __autoload($className)
 {
-	$className = ltrim($className, '\\');
-	$fileName  = '';
-	$namespace = '';
+	// Each namespace might have a custom path
+	$namespaces = config()->namespaces;
 
-	if ($lastNsPos = strripos($className, '\\'))
+	$className = explode('/', str_replace('\\', '/', ltrim($className, '\\'));
+	$fileName = str_replace('_', '/', array_pop($className));
+
+	// Is there a namespace left?
+	if($className)
 	{
-		$namespace = substr($className, 0, $lastNsPos);
-		$className = substr($className, $lastNsPos + 1);
-		$fileName  = str_replace('\\', DS, $namespace) . DS;
+		$namespace = array_shift($className);
+
+		if(isset($namespaces[$namespace]))
+		{
+			$namespace = $namespaces[$namespace];
+		}
+
+		array_unshift($className, $namespace);
+
+		$fileName = join('/', $className) . '/' . $fileName;
+	}
+	else // Double-up the file name ('Micro' => 'Micro/Micro.php')
+	{
+		$fileName .= '/' . $fileName;
 	}
 
-	$fileName .= str_replace('_', DS, $className) . '.php';
-
-	require SP . 'Class/' . $fileName;
+	require SP . 'Class/' . $fileName . EXT;
 }
 
 
@@ -209,23 +222,9 @@ function redirect($url = NULL, $code = 302, $method = 'location')
 		$url = site_url($url);
 	}
 
-	//print dump($url);
-
 	header($method == 'refresh' ? "Refresh:0;url = $url" : "Location: $url", TRUE, $code);
 }
 
-
-/*
- * Return the full URL to a path on this site or another.
- *
- * @param string $uri may contain another sites TLD
- * @return string
- *
-function site_url($uri = NULL)
-{
-	return (strpos($uri, '://') === FALSE ? \Core\URL::get() : '') . ltrim($uri, '/');
-}
-*/
 
 /**
  * Return the full URL to a location on this site
@@ -243,17 +242,6 @@ function site_url($path = NULL, array $params = NULL)
 
 
 /**
- * Return the current URL with path and query params
- *
- * @return string
- *
-function current_url()
-{
-	return DOMAIN . getenv('REQUEST_URI');
-}
-*/
-
-/**
  * Convert a string from one encoding to another encoding
  * and remove invalid bytes sequences.
  *
@@ -261,7 +249,7 @@ function current_url()
  * @param string $to encoding you want the string in
  * @param string $from encoding that string is in
  * @return string
- */
+ *
 function encode($string, $to = 'UTF-8', $from = 'UTF-8')
 {
 	// ASCII is already valid UTF-8
@@ -280,7 +268,7 @@ function encode($string, $to = 'UTF-8', $from = 'UTF-8')
  *
  * @param string $string to check
  * @return bool
- */
+ *
 function is_ascii($string)
 {
 	return ! preg_match('/[^\x00-\x7F]/S', $string);
@@ -331,7 +319,7 @@ function h($string)
  * @param string $string to clean
  * @param bool $spaces TRUE to allow spaces
  * @return string
- */
+ *
 function sanitize($string, $spaces = TRUE)
 {
 	$search = array(
@@ -356,7 +344,7 @@ function sanitize($string, $spaces = TRUE)
  *
  * @param string $string to filter
  * @return string
- */
+ *
 function sanitize_url($string)
 {
 	return urlencode(mb_strtolower(sanitize($string, FALSE)));
@@ -368,7 +356,7 @@ function sanitize_url($string)
  *
  * @param string $string to filter
  * @return string
- */
+ *
 function sanitize_filename($string)
 {
 	return sanitize($string, FALSE);
@@ -465,7 +453,7 @@ function directory_is_writable($dir, $chmod = 0755)
  * @param object $xml xml object
  * @param string $unknown element name for numeric keys
  * @param string $doctype XML doctype
- */
+ *
 function to_xml($object, $root = 'data', $xml = NULL, $unknown = 'element', $doctype = "<?xml version = '1.0' encoding = 'utf-8'?>")
 {
 	if(is_null($xml))
@@ -504,7 +492,7 @@ function to_xml($object, $root = 'data', $xml = NULL, $unknown = 'element', $doc
  * @param integer $timetype IntlDateFormatter constant
  * @param string $timezone Time zone ID, default is system default
  * @return IntlDateFormatter
- */
+ *
 function __date($locale = NULL, $datetype = IntlDateFormatter::MEDIUM, $timetype = IntlDateFormatter::SHORT, $timezone = NULL)
 {
 	return new IntlDateFormatter($locale ?: setlocale(LC_ALL, 0), $datetype, $timetype, $timezone);
@@ -518,7 +506,7 @@ function __date($locale = NULL, $datetype = IntlDateFormatter::MEDIUM, $timetype
  * @param string $string to parse
  * @param array $params to insert
  * @return string
- */
+ *
 function __($string, array $params = NULL)
 {
 	return msgfmt_format_message(setlocale(LC_ALL, 0), $string, $params);

@@ -10,21 +10,42 @@ MicroMVC is also fully PSR-0 compliant which means you can start using Symfony, 
 
 All class methods are fully documented. Average class size is only 4kb which makes reading the codebase very easy and quick. IDE's such as eclipse or netbeans can pickup on the phpDoc comments to add instant auto-completion to your projects. In addition, full multi-byte string support is built into the system.
 
-## Requirements</h3>
+## Submodules
+
+This system is built to be used with *other PSR-0 compliant libraries*. These can be used easily by adding submodules to the `Class` directory and adding the correct "namespace" path to the `Config/Config.php` file. For example, to use [Zend Framework 2](https://github.com/zendframework/zf2) run the following commands.
+
+	$ git submodule add git://github.com/zendframework/zf2.git Class/Zend
+
+Then add the following configuration path to the `Config/Config.php` file so the system knows where to load the classes from.
+
+	$config['namespaces'] = array(
+		'Zend' => 'Zend/library/Zend/'
+	);
+
+
+This system relies on the [Xeoncross/Micro](https://github.com/Xeoncross/Micro) submodule. After checking out a copy of the system, please run the following commands to pull the submodules.
+
+	$ git submodule init
+	$ git submodule update
+
+You can add additional libraries as shown above.
+
+## Requirements
 
 * PHP 5.3+
 * Nginx 0.7.x (legacy support for Apache with mod_rewrite)
 * PDO if using the Database
-* mb_string, [gettext](http://php.net/gettext), [iconv](http://www.php.net/manual/en/book.iconv.php), [ICU INTL](http://php.net/manual/en/book.intl.php) & SPL classes
+* mb_string, gettext, iconv, & SPL classes
 
-## Where is the Locale Class?
 
-If you have errors about missing classes make sure you have the required PHP extensions installed.
+## License (MIT License)
 
-Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mycrypt php-gettext`
+Copyright (c) 2011 [David Pennington](http://xeoncross.com)
 
-## License
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-[MicroMVC](http://micromvc.com) is licensed under the Open Source MIT license, so you can use it for any personal or corporate projects totally free!</p>
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-Built by [David Pennington](http://xeoncross.com) of [Code2Design](http://code2design.com)
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+

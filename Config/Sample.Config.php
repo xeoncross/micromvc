@@ -66,6 +66,21 @@ $config['cookie'] = array(
 
 
 /**
+ * Namespaces
+ *
+ * The location of the submodule files relative to the `Class/` folder.
+ */
+$config['namespaces'] = array(
+	//'Zend' => 'Zend/library/Zend'
+	//'Boilerplate' => 'Boilerplate/library/Boilerplate',
+	//'Doctrine' => 'Doctrine/lib/Doctrine',
+	//'Symfony' => 'Symfony/src/Symfony',
+	//'Gaufrette' => 'Gaufrette/src/Gaufrette',
+	//'Goutte' => 'Goutte/src/Goutte'
+);
+
+
+/**
  * API Keys and Secrets
  *
  * Insert you API keys and other secrets here.

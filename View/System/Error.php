@@ -31,7 +31,7 @@ code.source {
 	<?php //print dump(debug_backtrace()); ?>
 
 	<?php
-	if($backtrace = \Core\Error::backtrace(1))
+	if($backtrace = \Micro\Error::backtrace(1))
 	{
 
 		foreach($backtrace as $id => $line)

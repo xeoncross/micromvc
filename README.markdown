@@ -21,7 +21,7 @@ All class methods are fully documented. Average class size is only 4kb which mak
 
 If you have errors about missing classes make sure you have the required PHP extensions installed.
 
-Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mycrypt php-gettext`
+Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mcrypt php-gettext`
 
 ## License
 

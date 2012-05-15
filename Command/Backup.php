@@ -1,7 +1,7 @@
 <?php
 
 // Start database connection
-$db = new \Core\DB(config('database'));
+$db = new \Core\Database(config()->database);
 
 // Connect to databse server
 $db->connect();
@@ -19,7 +19,7 @@ $migration->db = $db;
 $migration->name = 'default';
 
 // Load table configuration
-$migration->tables = \Core\Config::load_all('Migration');
+$migration->tables = config('Migration');
 
 // Backup existing database table
 $migration->backup_data();

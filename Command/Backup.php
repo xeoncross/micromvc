@@ -1,7 +1,7 @@
 <?php
 
 // Start database connection
-$db = new \Core\DB(config()->database);
+$db = new \Core\Database(config()->database);
 
 // Connect to databse server
 $db->connect();

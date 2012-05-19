@@ -315,7 +315,7 @@ class Validation
 	 */
 	protected function word_rule($data)
 	{
-		return preg_match("/\W/", $data);
+		return ! preg_match("/\W/", $data);
 	}
 
 

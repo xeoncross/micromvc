@@ -132,7 +132,11 @@ class MySQL extends \Core\Migration
 				}
 				else
 				{
-					$type = 'DATETIME';
+					$allowed_types = array( 'DATE', 'TIMESTAMP' );
+					if( in_array( strtoupper( $type ), $allowed_types ) )
+						$type = strtoupper( $type );
+					else
+						$type = 'DATETIME';
 				}
 
 				// Build Column Definition

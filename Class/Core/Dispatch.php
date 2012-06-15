@@ -33,14 +33,14 @@ class Dispatch
 		$request_methods = array('GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD');
 
 		// Look for a RESTful method, or try the default run()
-		if( ! in_array($method, $request_methods) OR ! method_exists($controller, $method))
+		if( in_array($method, $request_methods) AND ! method_exists($controller, $method))
 		{
-			if( ! method_exists($controller, 'run'))
-			{
-				throw new \Exception('Invalid Request Method.');
-			}
-
 			$method = 'run';
+		}
+		
+		if( ! method_exists($controller, $method))
+		{
+			throw new \Exception('Invalid Request Method.');
 		}
 
 		// Controller setup here

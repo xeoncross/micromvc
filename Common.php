@@ -130,7 +130,7 @@ function post($key, $default = NULL, $string = FALSE)
 {
 	if(isset($_POST[$key]))
 	{
-		return $string ? str($_POST[$key], $default) : $_POST[$key];
+		return $string ? (string)$_POST[$key] : $_POST[$key];
 	}
 	return $default;
 }
@@ -149,7 +149,7 @@ function get($key, $default = NULL, $string = FALSE)
 {
 	if(isset($_GET[$key]))
 	{
-		return $string ? str($_GET[$key], $default) : $_GET[$key];
+		return $string ? (string)$_GET[$key] : $_GET[$key];
 	}
 	return $default;
 }

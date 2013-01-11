@@ -51,7 +51,7 @@ code.source em {background: #ffc;}
 
 			// Print file, line, and source
 			print ' in '. $line['file']. ' ['. $line['line']. ']';
-			print '<code class="source">'. \Core\Error::source($line['file'], $line['line']). '</code>';
+			print '<code class="source">'. \Micro\Error::source($line['file'], $line['line']). '</code>';
 
 			if(isset($line['args']))
 			{

@@ -10,7 +10,7 @@
  */
 namespace Model;
 
-class Dorm extends \Core\ORM
+class Dorm extends \Micro\ORM
 {
 	public static $table = 'dorm';
 	public static $foreign_key = 'dorm_id';

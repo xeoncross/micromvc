@@ -10,7 +10,7 @@
  */
 namespace Model;
 
-class Membership extends \Core\ORM
+class Membership extends \Micro\ORM
 {
 	public static $table = 'membership';
 	public static $foreign_key = 'membership_id';

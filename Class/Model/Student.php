@@ -10,7 +10,7 @@
  */
 namespace Model;
 
-class Student extends \Core\ORM
+class Student extends \Micro\ORM
 {
 	public static $table = 'student';
 	public static $foreign_key = 'student_id';

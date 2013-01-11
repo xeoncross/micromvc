@@ -20,14 +20,14 @@
 <?php print dump(date_default_timezone_get()); ?>
 
 <?php
-if(class_exists('\Core\Database', FALSE))
+if(class_exists('\Micro\Database', FALSE))
 {
 	$highlight = function($string)
 	{
 		return str_replace(array("&lt;?php", "?&gt;"),'',substr(highlight_string('<?php '.$string.' ?>', TRUE),36));
 	};
 
-	foreach(\Core\Database::$queries as $type => $queries)
+	foreach(\Micro\Database::$queries as $type => $queries)
 	{
 		print '<b>'.$type.' ('. count($queries). ' queries)</b>';
 		foreach($queries as $data)
@@ -36,10 +36,10 @@ if(class_exists('\Core\Database', FALSE))
 		}
 	}
 
-	if(\Core\Error::$found)
+	if(\Micro\Error::$found)
 	{
 		print '<b>Last Query Run</b>';
-		print '<pre>'. $highlight(\Core\DataBase::$last_query). '</pre>';
+		print '<pre>'. $highlight(\Micro\DataBase::$last_query). '</pre>';
 	}
 }
 ?>

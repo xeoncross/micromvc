@@ -37,6 +37,8 @@ define('DOMAIN', (strtolower(getenv('HTTPS')) == 'on' ? 'https' : 'http') . '://
 // The current site path
 define('PATH', parse_url(getenv('REQUEST_URI'), PHP_URL_PATH));
 
+require(SP . 'vendor/autoload' . EXT);
+
 // Include common system functions
 require(SP . 'Common' . EXT);
 
@@ -81,6 +83,6 @@ iconv_set_encoding("internal_encoding", "UTF-8");
 mb_internal_encoding('UTF-8');
 
 // Enable global error handling
-set_error_handler(array('\Core\Error', 'handler'));
-register_shutdown_function(array('\Core\Error', 'fatal'));
+set_error_handler(array('\Micro\Error', 'handler'));
+register_shutdown_function(array('\Micro\Error', 'fatal'));
 

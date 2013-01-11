@@ -10,7 +10,7 @@
  */
 namespace Model;
 
-class Car extends \Core\ORM
+class Car extends \Micro\ORM
 {
 	public static $table = 'car';
 	public static $foreign_key = 'car_id';

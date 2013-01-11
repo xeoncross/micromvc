@@ -10,7 +10,7 @@
  * @license		http://micromvc.com/license
  ********************************** 80 Columns *********************************
  */
-abstract class MyController extends \Core\Controller
+abstract class MyController extends \Micro\Controller
 {
 	// Global view template
 	public $template = 'Layout';
@@ -22,7 +22,7 @@ abstract class MyController extends \Core\Controller
 	 */
 	public function initialize($method)
 	{
-		\Core\Session::start();
+		\Micro\Session::start();
 	}
 
 
@@ -32,12 +32,12 @@ abstract class MyController extends \Core\Controller
 	public function load_database($name = 'database')
 	{
 		// Load database
-		$db = new \Core\Database(config()->$name);
+		$db = new \Micro\Database(config()->$name);
 
 		// Set default ORM database connection
-		if(empty(\Core\ORM::$db))
+		if(empty(\Micro\ORM::$db))
 		{
-			\Core\ORM::$db = $db;
+			\Micro\ORM::$db = $db;
 		}
 
 		return $db;
@@ -50,7 +50,7 @@ abstract class MyController extends \Core\Controller
 	public function show_404()
 	{
 		headers_sent() OR header('HTTP/1.0 404 Page Not Found');
-		$this->content = new \Core\View('404');
+		$this->content = new \Micro\View('404');
 	}
 
 
@@ -59,11 +59,11 @@ abstract class MyController extends \Core\Controller
 	 */
 	public function send()
 	{
-		\Core\Session::save();
+		\Micro\Session::save();
 
 		headers_sent() OR header('Content-Type: text/html; charset=utf-8');
 
-		$layout = new \Core\View($this->template);
+		$layout = new \Micro\View($this->template);
 		$layout->set((array) $this);
 		print $layout;
 
@@ -71,7 +71,7 @@ abstract class MyController extends \Core\Controller
 
 		if(config()->debug_mode)
 		{
-			print new \Core\View('System/Debug');
+			print new \Micro\View('System/Debug');
 		}
 	}
 

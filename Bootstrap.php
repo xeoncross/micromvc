@@ -83,6 +83,6 @@ iconv_set_encoding("internal_encoding", "UTF-8");
 mb_internal_encoding('UTF-8');
 
 // Enable global error handling
-set_error_handler(array('\Core\Error', 'handler'));
-register_shutdown_function(array('\Core\Error', 'fatal'));
+set_error_handler(array('\Micro\Error', 'handler'));
+register_shutdown_function(array('\Micro\Error', 'fatal'));
 

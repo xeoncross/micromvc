@@ -97,10 +97,10 @@ class School extends \MyController
 		$this->content .= dump('Removed school objects');
 
 		// Load the view file
-		$this->content .= new \Core\View('School/Index');
+		$this->content .= new \Micro\View('School/Index');
 
 		// Load global theme sidebar
-		$this->sidebar = new \Core\View('Sidebar');
+		$this->sidebar = new \Micro\View('Sidebar');
 
 	}
 }

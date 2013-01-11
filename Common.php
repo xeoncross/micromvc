@@ -65,7 +65,7 @@ function config($file = 'Config', $clear = FALSE)
 
 	if(empty($configs[$file]))
 	{
-		//$configs[$file] = new \Core\Config($file);
+		//$configs[$file] = new \Micro\Config($file);
 		require(SP . 'Config/' . $file . EXT);
 		$configs[$file] = (object) $config;
 		//print dump($configs);
@@ -199,7 +199,7 @@ function redirect($url = NULL, $code = 302, $method = 'location')
  *
 function site_url($uri = NULL)
 {
-	return (strpos($uri, '://') === FALSE ? \Core\URL::get() : '') . ltrim($uri, '/');
+	return (strpos($uri, '://') === FALSE ? \Micro\URL::get() : '') . ltrim($uri, '/');
 }
 */
 

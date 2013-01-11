@@ -23,9 +23,9 @@ class Index extends \MyController
 		//ORM::$db = $this->db;
 
 		// Load the theme sidebar since we don't need the full page
-		$this->sidebar = new \Core\View('Sidebar');
+		$this->sidebar = new \Micro\View('Sidebar');
 
 		// Load the welcome view
-		$this->content = new \Core\View('Index/Index');
+		$this->content = new \Micro\View('Index/Index');
 	}
 }

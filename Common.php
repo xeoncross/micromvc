@@ -65,37 +65,13 @@ function config($file = 'Config', $clear = FALSE)
 
 	if(empty($configs[$file]))
 	{
-		//$configs[$file] = new \Core\Config($file);
+		//$configs[$file] = new \Micro\Config($file);
 		require(SP . 'Config/' . $file . EXT);
 		$configs[$file] = (object) $config;
 		//print dump($configs);
 	}
 
 	return $configs[$file];
-}
-
-
-/**
- * Automatically load the given class
- *
- * @param string $class name
- */
-function __autoload($className)
-{
-	$className = ltrim($className, '\\');
-	$fileName  = '';
-	$namespace = '';
-
-	if ($lastNsPos = strripos($className, '\\'))
-	{
-		$namespace = substr($className, 0, $lastNsPos);
-		$className = substr($className, $lastNsPos + 1);
-		$fileName  = str_replace('\\', DS, $namespace) . DS;
-	}
-
-	$fileName .= str_replace('_', DS, $className) . '.php';
-
-	require SP . 'Class/' . $fileName;
 }
 
 
@@ -223,7 +199,7 @@ function redirect($url = NULL, $code = 302, $method = 'location')
  *
 function site_url($uri = NULL)
 {
-	return (strpos($uri, '://') === FALSE ? \Core\URL::get() : '') . ltrim($uri, '/');
+	return (strpos($uri, '://') === FALSE ? \Micro\URL::get() : '') . ltrim($uri, '/');
 }
 */
 

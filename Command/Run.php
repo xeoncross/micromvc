@@ -1,13 +1,13 @@
 <?php
 
 // Start database connection
-$db = new \Core\Database(config()->database);
+$db = new \Micro\Database(config()->database);
 
 // Connect to databse server
 $db->connect();
 
 // Set name of migration object
-$migration = '\Core\Migration\\' . ($db->type == 'mysql' ? 'MySQL' : 'PGSQL');
+$migration = '\Micro\Migration\\' . ($db->type == 'mysql' ? 'MySQL' : 'PGSQL');
 
 // Create migration object
 $migration = new $migration;

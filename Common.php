@@ -76,30 +76,6 @@ function config($file = 'Config', $clear = FALSE)
 
 
 /**
- * Automatically load the given class
- *
- * @param string $class name
- */
-function __autoload($className)
-{
-	$className = ltrim($className, '\\');
-	$fileName  = '';
-	$namespace = '';
-
-	if ($lastNsPos = strripos($className, '\\'))
-	{
-		$namespace = substr($className, 0, $lastNsPos);
-		$className = substr($className, $lastNsPos + 1);
-		$fileName  = str_replace('\\', DS, $namespace) . DS;
-	}
-
-	$fileName .= str_replace('_', DS, $className) . '.php';
-
-	require SP . 'Class/' . $fileName;
-}
-
-
-/**
  * Return an HTML safe dump of the given variable(s) surrounded by "pre" tags.
  * You can pass any number of variables (of any type) to this function.
  *

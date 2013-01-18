@@ -15,7 +15,8 @@ Desktop.ini
 # MicroMVC
 *.cache
 *.log
-Uploads
-Storage
+Uploads/*
+Storage/*
+!Storage/Log
 vendor
 composer.lock

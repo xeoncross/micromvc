@@ -10,8 +10,19 @@ MicroMVC is also fully PSR-0 compliant which means you can start using Symfony, 
 
 All class methods are fully documented. Average class size is only 4kb which makes reading the codebase very easy and quick. IDE's such as eclipse or netbeans can pickup on the phpDoc comments to add instant auto-completion to your projects. In addition, full multi-byte string support is built into the system.
 
+## Composer
+
+> Warning: require(../vendor/autoload.php): failed to open stream: No such file or directory
+
+MicroMVC requires [Composer](http://getcomposer.org/) to work. Simply install composer and run composer inside the base MicroMVC directory. Composer will fetch the required PHP classes and install them inside the `vendor` directory (including the autoload.php).
+
+    $ composer install
+
+Installation guide for [Linux](http://getcomposer.org/doc/00-intro.md#installation-nix) and [Windows](http://getcomposer.org/doc/00-intro.md#installation-windows).
+
 ## Requirements</h3>
 
+* Composer
 * PHP 5.3+
 * Nginx 0.7.x (legacy support for Apache with mod_rewrite)
 * PDO if using the Database

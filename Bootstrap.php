@@ -42,6 +42,10 @@ require(SP . 'vendor/autoload' . EXT);
 // Include common system functions
 require(SP . 'Common' . EXT);
 
+\Micro\View::$directory = SP . 'View/';
+
+\Micro\Cookie::$settings = config()->cookie;
+
 // Register events
 foreach(config()->events as $event => $class)
 {

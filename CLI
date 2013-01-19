@@ -35,7 +35,7 @@ try
 }
 catch (Exception $e)
 {
-	\Core\Error::exception($e);
+	\Micro\Error::exception($e);
 }
 
 // End

@@ -64,15 +64,12 @@ abstract class MyController extends \Micro\Controller
 		headers_sent() OR header('Content-Type: text/html; charset=utf-8');
 
 		$layout = new \Micro\View($this->template);
+                
+                if(config()->debug_mode)
+                    $this->debug = new \Micro\View('System/Debug');
+                
 		$layout->set((array) $this);
 		print $layout;
-
-		$layout = NULL;
-
-		if(config()->debug_mode)
-		{
-			print new \Micro\View('System/Debug');
-		}
 	}
 
 }

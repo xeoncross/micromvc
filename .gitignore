@@ -20,4 +20,3 @@ Storage/*
 !Storage/Log
 vendor
 composer.lock
-/nbproject/private/

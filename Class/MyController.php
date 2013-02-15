@@ -65,8 +65,8 @@ abstract class MyController extends \Micro\Controller
 
 		$layout = new \Micro\View($this->template);
                 
-                if(config()->debug_mode)
-                    $this->debug = new \Micro\View('System/Debug');
+		if(config()->debug_mode)
+			$this->debug = new \Micro\View('System/Debug');
                 
 		$layout->set((array) $this);
 		print $layout;

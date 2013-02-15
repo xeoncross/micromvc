@@ -14,6 +14,12 @@
 // Include bootstrap
 require('../Bootstrap.php');
 
+//Define prefix URI sub-floder
+define('PREFIX_URI', NULL);
+
+//Replace uri path
+$path = str_ireplace(PREFIX_URI, '', PATH);
+
 try
 {
 	// Anything else before we start?
@@ -23,7 +29,7 @@ try
 	$dispatch = new \Micro\Dispatch(config('Route')->routes);
 
 	// Run controller based on URL path and HTTP request method
-	$controller = $dispatch->controller(PATH, getenv('REQUEST_METHOD'));
+	$controller = $dispatch->controller($path, getenv('REQUEST_METHOD'));
 
 	// Send the controller response
 	$controller->send();

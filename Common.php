@@ -66,7 +66,7 @@ function config($file = 'Config', $clear = FALSE)
 	if(empty($configs[$file]))
 	{
 		//$configs[$file] = new \Micro\Config($file);
-		require(SP . 'Config/' . $file . EXT);
+		require(SP . 'Config' . DS . $file . EXT);
 		$configs[$file] = (object) $config;
 		//print dump($configs);
 	}

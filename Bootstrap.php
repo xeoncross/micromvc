@@ -22,7 +22,7 @@ define('START_MEMORY_USAGE', memory_get_usage());
 define('EXT', '.php');
 
 // Directory separator (Unix-Style works on all OS)
-define('DS', '/');
+define('DS', DIRECTORY_SEPARATOR);
 
 // Absolute path to the system folder
 define('SP', realpath(__DIR__). DS);
@@ -37,7 +37,7 @@ define('DOMAIN', (strtolower(getenv('HTTPS')) == 'on' ? 'https' : 'http') . '://
 // The current site path
 define('PATH', parse_url(getenv('REQUEST_URI'), PHP_URL_PATH));
 
-require(SP . 'vendor/autoload' . EXT);
+require(SP . 'vendor' . DS . 'autoload' . EXT);
 
 // Include common system functions
 require(SP . 'Common' . EXT);

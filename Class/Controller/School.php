@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS `dorm` (
 CREATE TABLE IF NOT EXISTS `membership` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `club_id` int(11) DEFAULT NULL,
+  `student_id` INT(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `club_id` (`club_id`),
   KEY `student_id` (`student_id`)

@@ -18,6 +18,10 @@ define('START_TIME', microtime(true));
 // System Start Memory
 define('START_MEMORY_USAGE', memory_get_usage());
 
+if( ! class_exists('Locale', false)) {
+	die('You must install the <a href="http://php.net/manual/en/book.intl.php">PHP INTL</a> extension.');
+}
+
 // Extension of all PHP files
 define('EXT', '.php');
 

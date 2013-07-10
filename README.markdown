@@ -32,7 +32,8 @@ Installation guide for [Linux](http://getcomposer.org/doc/00-intro.md#installati
 
 If you have errors about missing classes make sure you have the required PHP extensions installed.
 
-Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mcrypt php-gettext`
+* Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mcrypt php-gettext`
+* Windows: uncomment `extension=php_intl.dll` in your php.ini
 
 ## License
 

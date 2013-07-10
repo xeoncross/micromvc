@@ -28,12 +28,12 @@ Installation guide for [Linux](http://getcomposer.org/doc/00-intro.md#installati
 * PDO if using the Database
 * mb_string, [gettext](http://php.net/gettext), [iconv](http://www.php.net/manual/en/book.iconv.php), [ICU INTL](http://php.net/manual/en/book.intl.php) & SPL classes
 
-## Where is the Locale Class?
+## How do I install the [PHP intl](http://php.net/manual/en/book.intl.php) extension?
 
-If you have errors about missing classes make sure you have the required PHP extensions installed.
+If you have errors about missing classes (like `Locale`) make sure you have the required PHP extensions installed.
 
 * Ubuntu/Debian: `$ sudo apt-get install php5-intl php5-mcrypt php-gettext`
-* Windows: uncomment `extension=php_intl.dll` in your php.ini
+* Windows: uncomment `extension=php_intl.dll`, `extension=php_mycrypt.dll`, and `extension=php_gettext.dll` in your php.ini
 
 ## License
 

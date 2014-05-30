@@ -325,7 +325,7 @@ class Database
 		$sql = ' ORDER BY ';
 
 		// Add each order clause
-		foreach($fields as $k => $v) $sql .= "$i$k$i $v, ";
+		foreach($fields as $k => $v) $sql .= "$i$v$i, ";
 
 		// Remove ending ", "
 		return substr($sql, 0, -2);

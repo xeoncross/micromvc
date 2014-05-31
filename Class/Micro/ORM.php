@@ -412,7 +412,7 @@ class ORM
 		// Generate select statement SQL
 		list($sql, $params) = static::$db->select(($column ? $column : 'COUNT(*)'), $model::$table, $where, $limit, $offset, $order);
 
-		return static::$db->$func($sql, $params, ($column == '*' OR strpos($columns, ',')) ? NULL : 0);
+		return static::$db->$func($sql, $params, ($column == '*' OR strpos($column, ',')) ? NULL : 0);
 	}
 
 

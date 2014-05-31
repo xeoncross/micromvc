@@ -397,20 +397,20 @@ class ORM
 	 * @param array $order by conditions
 	 * @return mixed
 	 */
-	public static function select($func, $column, $model = NULL, $where = NULL, $limit = 0, $offset = 0, $order = NULL)
+	public static function select($func, $column = 'COUNT(*)', $model = NULL, $where = NULL, $limit = 0, $offset = 0, $order = NULL)
 	{
 		$model = $model ?: get_called_class();
 		$order = ($order ?: array()) + (static::$order_by ?: array());
 
 		// Count queries don't have offsets, limits, or order conditions
-		if(!$column)
+		if($column == 'COUNT(*)')
 		{
 			$limit = $offset = 0;
 			$order = array();
 		}
 
 		// Generate select statement SQL
-		list($sql, $params) = static::$db->select(($column ? $column : 'COUNT(*)'), $model::$table, $where, $limit, $offset, $order);
+		list($sql, $params) = static::$db->select($column, $model::$table, $where, $limit, $offset, $order);
 
 		return static::$db->$func($sql, $params, ($column == '*' OR strpos($column, ',')) ? NULL : 0);
 	}

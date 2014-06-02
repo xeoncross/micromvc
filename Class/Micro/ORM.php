@@ -438,7 +438,7 @@ class ORM
 	 */
 	public static function count(array $where = NULL)
 	{
-		return self::select('column', NULL, NULL, $where);
+		return self::select('column', 'COUNT(*)', NULL, $where);
 	}
 
 

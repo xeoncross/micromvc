@@ -47,7 +47,7 @@ class ORM
 
 		if(! $id) return;
 
-		if(is_numeric($id))
+		if(is_scalar($id))
 		{
 			$this->data[static::$key] = $id;
 		}

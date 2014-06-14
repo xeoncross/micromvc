@@ -53,7 +53,7 @@ class ORM
 		}
 		else
 		{
-			$this->data = (array) $id;
+			$this->data = $this->changed = (array) $id;
 			$this->loaded = 1;
 		}
 
@@ -68,7 +68,7 @@ class ORM
 	 */
 	public function key()
 	{
-		return isset($this->data[static::$key])?$this->data[static::$key]:NULL;
+		return $this->data[static::$key]);
 	}
 
 
@@ -109,8 +109,8 @@ class ORM
 	{
 		if( ! array_key_exists($key, $this->data) OR $this->data[$key] !== $value)
 		{
+			$this->changed[$key] = $this->data[$key];
 			$this->data[$key] = $value;
-			$this->changed[$key] = $key;
 			$this->saved = 0;
 		}
 	}
@@ -479,7 +479,7 @@ class ORM
 		if( ! $this->changed) return $this;
 
 		$data = array();
-		foreach($this->changed as $column)
+		foreach(array_keys($this->changed) as $column)
 		{
 			$data[$column] = $this->data[$column];
 		}
@@ -502,7 +502,7 @@ class ORM
 	 * Insert the current object into the database table
 	 *
 	 * @param array $data to insert
-	 * @return int
+	 * @return mixed
 	 */
 	protected function insert(array $data)
 	{
@@ -522,10 +522,10 @@ class ORM
 	 */
 	protected function update(array $data)
 	{
-		$result = static::$db->update(static::$table, $data, array(static::$key => $this->data[static::$key]));
+		$result = static::$db->update(static::$table, $data, array(static::$key => $this->changed[static::$key]?:$this->data[static::$key]));
 
 		// Invalidate cache
-		static::cache_delete(static::$table . $this->data[static::$key]);
+		static::cache_delete(static::$table . $this->changed[static::$key]?:$this->data[static::$key]);
 
 		$this->saved = 1;
 		return $result;

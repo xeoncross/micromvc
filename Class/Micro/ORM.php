@@ -68,7 +68,8 @@ class ORM
 	 */
 	public function key()
 	{
-		return $this->data[static::$key]);
+		return isset($this->changed[static::$key])? $this->changed[static::$key] : 
+			isset($this->data[static::$key]) ? $this->data[static::$key] : NULL;
 	}
 
 

@@ -503,7 +503,7 @@ class ORM
 	 * Insert the current object into the database table
 	 *
 	 * @param array $data to insert
-	 * @return mixed
+	 * @return int
 	 */
 	protected function insert(array $data)
 	{

@@ -523,10 +523,10 @@ class ORM
 	 */
 	protected function update(array $data)
 	{
-		$result = static::$db->update(static::$table, $data, array(static::$key => $this->changed[static::$key]?:$this->data[static::$key]));
+		$result = static::$db->update(static::$table, $data, array(static::$key => $this->key()));
 
 		// Invalidate cache
-		static::cache_delete(static::$table . $this->changed[static::$key]?:$this->data[static::$key]);
+		static::cache_delete(static::$table . $this->key());
 
 		$this->saved = 1;
 		return $result;

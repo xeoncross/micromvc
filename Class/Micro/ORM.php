@@ -43,7 +43,7 @@ class ORM
 	 */
 	public function __construct($id = 0)
 	{
-		$this->data = array();
+		$this->data = array(static::$key => NULL);
 
 		if(! $id) return;
 

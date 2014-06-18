@@ -178,7 +178,7 @@ class Database
 		if($this->type == 'pgsql')
 		{
 			// Insert record and return the whole row (the "id" field may not exist)
-			if($statement = $this->query($sql.' RETURNING "id"', array_values($data)))
+			if($statement = $this->query($sql.' RETURNING "'.key($data).'"', array_values($data)))
 			{
 				// The first column *should* be the ID
 				return $statement->fetchColumn(0);
@@ -188,7 +188,7 @@ class Database
 		}
 
 		// Insert data and return the new row's ID
-		return $this->query($sql, array_values($data), $cache_statement) ? $this->c->lastInsertId() : NULL;
+		return $this->query($sql, array_values($data), $cache_statement) ? $this->c->lastInsertId(key($data)) : NULL;
 	}
 
 

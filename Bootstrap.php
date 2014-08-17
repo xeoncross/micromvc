@@ -36,7 +36,7 @@ define('AJAX_REQUEST', strtolower(getenv('HTTP_X_REQUESTED_WITH')) === 'xmlhttpr
 
 // The current TLD address, scheme, and port
 define('DOMAIN', (strtolower(getenv('HTTPS')) == 'on' ? 'https' : 'http') . '://'
-	. getenv('HTTP_HOST') . (($p = getenv('SERVER_PORT')) != 80 AND $p != 443 ? ":$p" : ''));
+	. getenv('HTTP_HOST'));
 
 // The current site path
 define('PATH', parse_url(getenv('REQUEST_URI'), PHP_URL_PATH));

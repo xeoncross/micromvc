@@ -18,7 +18,7 @@ MicroMVC requires [Composer](http://getcomposer.org/) to work. Simply install co
 
     $ composer install
 
-Installation guide for [Linux](http://getcomposer.org/doc/00-intro.md#installation-nix) and [Windows](http://getcomposer.org/doc/00-intro.md#installation-windows).
+Installation guide for [Linux / Unix / OSX](http://getcomposer.org/doc/00-intro.md#installation-nix) and [Windows](http://getcomposer.org/doc/00-intro.md#installation-windows).
 
 ## Requirements</h3>
 
